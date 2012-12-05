@@ -1,4 +1,4 @@
-﻿/*  SlapperAutoMapper v0.0.0.3 ( https://github.com/randyburden/SlapperAutoMapper )
+﻿/*  SlapperAutoMapper v0.0.0.4 ( https://github.com/randyburden/SlapperAutoMapper )
 
     MIT License:
    
@@ -48,7 +48,6 @@ namespace Slapper
         static AutoMapper()
         {
             Configuration.ApplyDefaultIdentifierConventions();
-            Configuration.IdentifierAttributeType = typeof ( Slapper.AutoMapper.Id );
         }
 
         #endregion Constructor
@@ -253,6 +252,11 @@ namespace Slapper
 
         public static class Configuration
         {
+            static Configuration()
+            {
+                Configuration.IdentifierAttributeType = typeof( Slapper.AutoMapper.Id );
+            }
+
             /// <summary>
             /// The attribute Type specifying that a field or property is an identifier.
             /// </summary>
