@@ -1,4 +1,4 @@
-﻿/*  SlapperAutoMapper v0.0.0.4 ( https://github.com/randyburden/SlapperAutoMapper )
+﻿/*  SlapperAutoMapper v0.0.0.4 ( https://github.com/randyburden/Slapper.AutoMapper )
 
     MIT License:
    
@@ -22,11 +22,12 @@
 
     Description:
     
-    SlapperAutoMapper provides auto-mapping to static type capabilities for ORMs.
+    Slapper.AutoMapper maps dynamic data to static types. Slap your ORM into submission!
     
-    SlapperAutoMapper is a mapping tool that allows the conversion of an IDictionary<string, object> to a
-    strongly typed object. Simply put, it allows you to convert dynamic data to strongly typed objects with 
-    ease and populating complex nested child objects in your object hierarchy comes free out of the box.
+    Slapper.AutoMapper is a single file mapping library that can convert dynamic data into static types 
+    and populate complex nested child objects.
+    It primarily converts C# dynamics and IDictionary<string, object> to strongly typed objects and supports
+    populating an entire object graph by using underscore notation to underscore into nested objects.
 */
 
 using System;
