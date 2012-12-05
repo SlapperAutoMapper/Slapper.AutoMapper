@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace Slapper.Tests
 {
     [TestFixture]
-    public class MapTests : TestBase
+    public class ComplexMapTests : TestBase
     {
         public class Customer
         {
@@ -47,21 +47,7 @@ namespace Slapper.Tests
 
                 public List<Order> Orders;
             }
-
-            public class PersonWithFields
-            {
-                public int Id;
-                public string FirstName;
-                public string LastName;
-            }
-
-            public class PersonWithProperties
-            {
-                public int Id { get; set; }
-                public string FirstName { get; set; }
-                public string LastName { get; set; }
-            }
-
+            
             public class CustomerWithOrdersList
             {
                 public int Id;
@@ -70,12 +56,12 @@ namespace Slapper.Tests
                 public List<Order> Orders;
             }
 
-            public class CustomerWithOrdersICollection
+            public class CustomerWithAnIEnumerableOrdersCollection
             {
                 public int Id;
                 public string FirstName;
                 public string LastName;
-                public ICollection<Order> Orders;
+                public IEnumerable<Order> Orders;
             }
 
             public class Order
@@ -97,56 +83,6 @@ namespace Slapper.Tests
                 public int Id;
                 public string ProductName;
             }
-        }
-
-        [Test]
-        public void Can_Map_Matching_Field_Names()
-        {
-            // Arrange
-            const int id = 1;
-            const string firstName = "Bob";
-            const string lastName = "Smith";
-
-            var dictionary = new Dictionary<string, object>
-                                 {
-                                     { "Id", id },
-                                     { "FirstName", firstName },
-                                     { "LastName", lastName }
-                                 };
-
-            // Act
-            var customer = Slapper.AutoMapper.Map<MapTestModels.PersonWithFields>( dictionary );
-            
-            // Assert
-            Assert.NotNull( customer );
-            Assert.That( customer.Id == id );
-            Assert.That( customer.FirstName == firstName );
-            Assert.That( customer.LastName == lastName );
-        }
-
-        [Test]
-        public void Can_Map_Matching_Property_Names()
-        {
-            // Arrange
-            const int id = 1;
-            const string firstName = "Bob";
-            const string lastName = "Smith";
-
-            var dictionary = new Dictionary<string, object>
-                                 {
-                                     { "Id", id },
-                                     { "FirstName", firstName },
-                                     { "LastName", lastName }
-                                 };
-
-            // Act
-            var customer = Slapper.AutoMapper.Map<MapTestModels.PersonWithProperties>( dictionary );
-            
-            // Assert
-            Assert.NotNull( customer );
-            Assert.That( customer.Id == id );
-            Assert.That( customer.FirstName == firstName );
-            Assert.That( customer.LastName == lastName );
         }
 
         [Test]
@@ -269,12 +205,12 @@ namespace Slapper.Tests
             var listOfDictionaries = new List<Dictionary<string, object>> { dictionary, dictionary2 };
 
             // Act
-            var customers = Slapper.AutoMapper.Map<MapTestModels.CustomerWithOrdersICollection>( listOfDictionaries );
+            var customers = Slapper.AutoMapper.Map<MapTestModels.CustomerWithAnIEnumerableOrdersCollection>( listOfDictionaries );
 
             var customer = customers.FirstOrDefault();
 
             // Assert
-            Assert.That( customer.Orders.Count == 2 );
+            Assert.That( customer.Orders.Count() == 2 );
         }
 
         [Test]
@@ -354,7 +290,7 @@ namespace Slapper.Tests
             var listOfDictionaries = new List<Dictionary<string, object>> { dictionary, dictionary2 };
 
             // Act
-            var customers = Slapper.AutoMapper.Map<MapTestModels.CustomerWithOrdersICollection>( listOfDictionaries );
+            var customers = Slapper.AutoMapper.Map<MapTestModels.CustomerWithAnIEnumerableOrdersCollection>( listOfDictionaries );
 
             // Assert
             Assert.That( customers.Count() == 2 );
@@ -380,10 +316,10 @@ namespace Slapper.Tests
                                  };
 
             // Act
-            var customer = Slapper.AutoMapper.Map<MapTestModels.CustomerWithOrdersICollection>( dictionary );
+            var customer = Slapper.AutoMapper.Map<MapTestModels.CustomerWithAnIEnumerableOrdersCollection>( dictionary );
             
             // Assert
-            Assert.That( customer.Orders.Count == 1 );
+            Assert.That( customer.Orders.Count() == 1 );
             Assert.That( customer.Orders.First().OrderDetails.Count == 1 );
             Assert.That( customer.Orders.First().OrderDetails.First().Product.ProductName == "Black Bookshelf" );
         }
@@ -429,77 +365,6 @@ namespace Slapper.Tests
 
             // We should only have one Order object and two OrderDetail objects
             Assert.That( customers.FirstOrDefault().Orders.FirstOrDefault().OrderDetails.Count == 2 );
-        }
-
-        [Test]
-        public void Can_Handle_Mapping_A_Single_Dynamic_Object()
-        {
-            // Arrange
-            dynamic dynamicCustomer = new ExpandoObject();
-            dynamicCustomer.Id = 1;
-            dynamicCustomer.FirstName = "Bob";
-            dynamicCustomer.LastName = "Smith";
-            dynamicCustomer.Orders_Id = 1;
-            dynamicCustomer.Orders_OrderTotal = 50.50m;
-
-            // Act
-            var customer = Slapper.AutoMapper.MapDynamic<MapTestModels.CustomerWithOrdersICollection>( dynamicCustomer ) as MapTestModels.CustomerWithOrdersICollection;
-
-            // Assert
-            Assert.NotNull( customer );
-            Assert.That( customer.Orders.Count == 1 );
-        }
-
-        [Test]
-        public void Can_Handle_Mapping_Nested_Members_Using_Dynamic()
-        {
-            // Arrange
-            var dynamicCustomers = new List<object>();
-
-            for ( int i = 0; i < 5; i++ )
-            {
-                dynamic customer = new ExpandoObject();
-                customer.Id = i;
-                customer.FirstName = "FirstName" + i;
-                customer.LastName = "LastName" + i;
-                customer.Orders_Id = i;
-                customer.Orders_OrderTotal = i + 0m;
-
-                dynamicCustomers.Add( customer );
-            }
-
-            // Act
-            var customers = Slapper.AutoMapper.MapDynamic<MapTestModels.CustomerWithOrdersICollection>( dynamicCustomers );
-
-            // Assert
-            Assert.That( customers.Count() == 5 );
-            Assert.That( customers.First().Orders.Count == 1 );
-        }
-
-        [Test]
-        public void Will_Throw_An_Exception_If_The_Type_Is_Not_Dynamic()
-        {
-            // Arrange
-            var someObject = new object();
-
-            // Act
-            TestDelegate test = () => Slapper.AutoMapper.MapDynamic<MapTestModels.CustomerWithOrdersICollection>( someObject );
-
-            // Assert
-            Assert.Throws<ArgumentException>( test );
-        }
-
-        [Test]
-        public void Will_Throw_An_Exception_If_The_List_Items_Are_Not_Dynamic()
-        {
-            // Arrange
-            var someObjectList = new List<object> { null };
-
-            // Act
-            TestDelegate test = () => Slapper.AutoMapper.MapDynamic<MapTestModels.CustomerWithOrdersICollection>( someObjectList );
-
-            // Assert
-            Assert.Throws<ArgumentException>( test );
         }
     }
 }

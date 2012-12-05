@@ -40,7 +40,7 @@ Yep, Slapper.AutoMapper stays true to its name and allows auto-mapping between d
 conventions to find a given classes identifier ( the property that gives the class uniqueness ). This allows Slapper to 
 figure out how to effectively group objects together so that you do not get duplicate results. You can even supply your 
 own conventions or manually specify the identifiers by either calling a simple API method or decorating your types with 
-an `[Slapper.AutoMapper.Id]` attribute.
+an attribute.
 
 And yes, multiple identifiers aka Composite Primary Keys are supported out of the box!
 
@@ -73,7 +73,7 @@ Now let the slapping commence! :)
 Usage - Mapping
 ===============
 
-###Simple Example Using Dictionary###
+###Simple Example Using a Dictionary###
 
 The following simple example maps a dictionary of property names and values to a Person class.
 
@@ -269,7 +269,7 @@ For example, if your Customer object has any of the following properties or fiel
 You can specify your own conventions very easily. The following example creates a convention of TypeName + _Id:
 
 ```csharp
-Slapper.AutoMapper.IdentifierConventions.Add( type => type.Name + "_Id" );
+Slapper.AutoMapper.Configuration.IdentifierConventions.Add( type => type.Name + "_Id" );
 ````
 
 ####Manually Specifying the Identifier(s)####
@@ -291,13 +291,21 @@ public class Customer
 	public string LastName;
 }
 
-Slapper.AutoMapper.AddIdentifiers( typeof( Customer ), new List<string> { "CustomerId", "CustomerType" } );
+Slapper.AutoMapper.Configuration.AddIdentifiers( typeof( Customer ), new List<string> { "CustomerId", "CustomerType" } );
 ````
 
 ####Attribute-based Identifiers####
 
-Slapper.AutoMapper also supports attribute-based identifiers. Simply decorate the identifiers on your class with
+Slapper.AutoMapper also supports attribute-based identifiers.
+
+By default, the library uses it's own Id attribute that allows you to simply decorate the identifiers on your class with
 a `[Slapper.AutoMapper.Id]` attribute.
+
+If you wish to use your own attribute instead of the default one, just set the Type to use on the following field:
+
+```csharp
+Slapper.AutoMapper.Configuration.IdentifierAttributeType = typeof( YourCustomAttribute );
+``` 
 
 The following example specifies two identifiers for the Customer object:
 

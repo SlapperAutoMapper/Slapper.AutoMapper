@@ -86,11 +86,11 @@ namespace Slapper.Tests
         {
             // Arrange
             var dictionary = new Dictionary<string, object>
-                                 {
-                                     { "Id", 1 },
-                                     { "FirstName", "Clark" },
-                                     { "LastName", "Kent" }
-                                 };
+                                    {
+                                        { "Id", 1 },
+                                        { "FirstName", "Clark" },
+                                        { "LastName", "Kent" }
+                                    };
 
             // Act
             var person = Slapper.AutoMapper.Map<Person>( dictionary );

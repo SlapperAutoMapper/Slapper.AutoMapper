@@ -61,9 +61,9 @@ namespace Slapper.Tests
             const string identifier = "FirstName";
 
             // Act
-            Slapper.AutoMapper.AddIdentifier( typeof( IdentifierTestModels.Customer ), identifier );
+            Slapper.AutoMapper.Configuration.AddIdentifier( typeof( IdentifierTestModels.Customer ), identifier );
 
-            var identifiers = Slapper.AutoMapper.TryToGetIdentifiers( typeof( IdentifierTestModels.Customer ) );
+            var identifiers = Slapper.AutoMapper.InternalHelpers.GetIdentifiers( typeof( IdentifierTestModels.Customer ) );
 
             // Assert
             Assert.That( identifiers.First() == identifier );
@@ -76,9 +76,9 @@ namespace Slapper.Tests
             var identifierList = new List<string> { "FirstName", "LastName" };
 
             // Act
-            Slapper.AutoMapper.AddIdentifiers( typeof( IdentifierTestModels.Customer ), identifierList );
+            Slapper.AutoMapper.Configuration.AddIdentifiers( typeof( IdentifierTestModels.Customer ), identifierList );
 
-            var identifiers = Slapper.AutoMapper.TryToGetIdentifiers( typeof( IdentifierTestModels.Customer ) );
+            var identifiers = Slapper.AutoMapper.InternalHelpers.GetIdentifiers( typeof( IdentifierTestModels.Customer ) );
 
             // Assert
             foreach ( var identifier in identifierList )
@@ -91,7 +91,7 @@ namespace Slapper.Tests
         public void Can_Use_Default_Conventions_To_Find_An_Identifier()
         {
             // Act
-            var identifiers = Slapper.AutoMapper.TryToGetIdentifiers( typeof( IdentifierTestModels.Customer ) );
+            var identifiers = Slapper.AutoMapper.InternalHelpers.GetIdentifiers( typeof( IdentifierTestModels.Customer ) );
 
             //Assert
             Assert.That( identifiers.First() == "Id" );
@@ -101,9 +101,9 @@ namespace Slapper.Tests
         public void Can_Use_A_Custom_Convention_To_Find_An_Identifier()
         {
             // Act
-            Slapper.AutoMapper.IdentifierConventions.Add( type => type.Name + "_Id" );
+            Slapper.AutoMapper.Configuration.IdentifierConventions.Add( type => type.Name + "_Id" );
 
-            var identifiers = Slapper.AutoMapper.TryToGetIdentifiers( typeof( IdentifierTestModels.Person ) );
+            var identifiers = Slapper.AutoMapper.InternalHelpers.GetIdentifiers( typeof( IdentifierTestModels.Person ) );
 
             //Assert
             Assert.That( identifiers.First() == "Person_Id" );
@@ -113,7 +113,7 @@ namespace Slapper.Tests
         public void Can_Find_An_Identifier_When_A_Field_Or_Property_Has_An_Id_Attribute()
         {
             // Act
-            var identifiers = Slapper.AutoMapper.TryToGetIdentifiers( typeof( IdentifierTestModels.CustomerWithIdAttribute ) );
+            var identifiers = Slapper.AutoMapper.InternalHelpers.GetIdentifiers( typeof( IdentifierTestModels.CustomerWithIdAttribute ) );
 
             //Assert
             Assert.That( identifiers.First() == "CustomerId" );
@@ -123,7 +123,7 @@ namespace Slapper.Tests
         public void Can_Find_Identifiers_When_Multiple_Fields_Or_Properties_Have_An_Id_Attribute()
         {
             // Act
-            var identifiers = Slapper.AutoMapper.TryToGetIdentifiers( typeof( IdentifierTestModels.CustomerWithMultipleIdAttributes ) );
+            var identifiers = Slapper.AutoMapper.InternalHelpers.GetIdentifiers( typeof( IdentifierTestModels.CustomerWithMultipleIdAttributes ) );
 
             //Assert
             Assert.That( identifiers.Contains( "CustomerId" ) && identifiers.Contains( "CustomerType" ) );
