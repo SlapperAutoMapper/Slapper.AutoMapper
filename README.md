@@ -1,0 +1,2 @@
+Slapper.AutoMapper
+==================
