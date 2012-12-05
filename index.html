@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Slapper.AutoMapper : Slapper.AutoMapper maps dynamic data to static types. Slap your ORM into submission!" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Slapper.AutoMapper</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/randyburden/Slapper.AutoMapper">View on GitHub</a>
+
+          <h1 id="project_title">Slapper.AutoMapper</h1>
+          <h2 id="project_tagline">Slapper.AutoMapper maps dynamic data to static types. Slap your ORM into submission!</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/randyburden/Slapper.AutoMapper/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/randyburden/Slapper.AutoMapper/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>Slapper.AutoMapper</h1>
+
+<p><em>Slap your ORM into submission.</em></p>
+
+<p>Slapper.AutoMapper maps dynamic data to static types.</p>
+
+<p>Project Homepage: <a href="http://randyburden.com/Slapper.AutoMapper/">http://randyburden.com/Slapper.AutoMapper/</a></p>
+
+<h3>What is it?</h3>
+
+<p>Slapper.AutoMapper is a single file mapping library that can convert dynamic data into static types and populate complex nested
+child objects.</p>
+
+<p>Another way of stating it is that it allows you to convert an <code>IDictionary&lt;string, object&gt;</code> to a strongly typed object. </p>
+
+<p>Why use an IDictionary? Because a C# dynamic can easily be cast to one allowing this library to be used in a variety of ways.</p>
+
+<p>Okay, so what... doesn't other ORMs do this?</p>
+
+<p>Answer: Yes and no but the philosophy of this project is much different. This small single file library is meant to be used as a 
+piece/lego block in a larger solution and puts a great emphasis on its ability to map to complex nested properties such as mapping 
+a Customer and it's list of Orders and it's list of OrderDetails.</p>
+
+<h3>Is this an ORM?</h3>
+
+<p>No, this is not an ORM in itself but can easily be extended to create one. This library can be thought of as a building 
+block of an ORM or used as an extension to an existing ORM or Micro-ORM.</p>
+
+<p>ORMs typically query the database and then map the data into objects. Slapper just handles the mapping part and essentially
+only has one input: a dictionary of property names and values.</p>
+
+<h3>What problems does this solve?</h3>
+
+<p>Simply put, it allows you to convert dynamic data into strongly typed objects with ease and populating complex nested child 
+objects in your object hierarchy comes free out of the box --something severely lacking in almost every Micro-ORM solution!</p>
+
+<h3>Auto mapping?</h3>
+
+<p>Yep, Slapper.AutoMapper stays true to its name and allows auto-mapping between dynamic data and static types by using
+conventions to find a given classes identifier ( the property that gives the class uniqueness ). This allows Slapper to 
+figure out how to effectively group objects together so that you do not get duplicate results. You can even supply your 
+own conventions or manually specify the identifiers by either calling a simple API method or decorating your types with 
+an <code>[Slapper.AutoMapper.Id]</code> attribute.</p>
+
+<p>And yes, multiple identifiers aka Composite Primary Keys are supported out of the box!</p>
+
+<h3>Some more ramblings...</h3>
+
+<p>Micro-ORMs have been springing up left and right but many of them are quite basic in their functionality. Many have also 
+been opting for either very basic mapping to strongly typed objects or skipping it completely and opting for a completely 
+dynamic solution.</p>
+
+<p>Dynamics are super cool and have their place but strongly typed objects have their place too and that is what this library 
+focuses on... converting dynamic data into strongly typed objects with strong support for populating nested child properties. </p>
+
+<h3>Target Audience</h3>
+
+<p>C# developers is a given but besides that, anyone looking to enhance an ORM or write their own would find that Slapper.AutoMapper
+can take care of a lot of the hard work or mapping back to strongly typed objects.</p>
+
+<p>Because Slapper.AutoMappers primary input is simply an Dictionary of property names and values, as long as you can get your data
+into that form, your good to go. One thing to note though is that the values must be the same data types as the strongly typed object
+you are wishing to create. Slapper.AutoMapper does not handle data type conversions, that is up to you the consumer to feed the proper
+data into the library.</p>
+
+<p>And that's it, feel free to explore the examples below and the unit tests and hack away. This library is licensed with the MIT license
+so feel free to re-use the code in your own projects any way you please. I only ask that you keep the license comment at the top of the
+file or any file that uses significant portions of this projects code for proper attribution.</p>
+
+<p>Now let the slapping commence! :)</p>
+
+<h1>Usage - Mapping</h1>
+
+<h3>Simple Example Using Dictionary</h3>
+
+<p>The following simple example maps a dictionary of property names and values to a Person class.</p>
+
+<div class="highlight"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Person</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">Id</span><span class="p">;</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">FirstName</span><span class="p">;</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">LastName</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="na">[Test]</span>
+<span class="k">public</span> <span class="k">void</span> <span class="nf">Can_Map_Matching_Field_Names_With_Ease</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="c1">// Arrange</span>
+    <span class="kt">var</span> <span class="n">dictionary</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="kt">object</span><span class="p">&gt;</span>
+                            <span class="p">{</span>
+                                <span class="p">{</span> <span class="s">"Id"</span><span class="p">,</span> <span class="m">1</span> <span class="p">},</span>
+                                <span class="p">{</span> <span class="s">"FirstName"</span><span class="p">,</span> <span class="s">"Clark"</span> <span class="p">},</span>
+                                <span class="p">{</span> <span class="s">"LastName"</span><span class="p">,</span> <span class="s">"Kent"</span> <span class="p">}</span>
+                            <span class="p">};</span>
+
+    <span class="c1">// Act</span>
+    <span class="kt">var</span> <span class="n">person</span> <span class="p">=</span> <span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">Map</span><span class="p">&lt;</span><span class="n">Person</span><span class="p">&gt;(</span> <span class="n">dictionary</span> <span class="p">);</span>
+
+    <span class="c1">// Assert</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">NotNull</span><span class="p">(</span> <span class="n">person</span> <span class="p">);</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">That</span><span class="p">(</span> <span class="n">person</span><span class="p">.</span><span class="n">Id</span> <span class="p">==</span> <span class="m">1</span> <span class="p">);</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">That</span><span class="p">(</span> <span class="n">person</span><span class="p">.</span><span class="n">FirstName</span> <span class="p">==</span> <span class="s">"Clark"</span> <span class="p">);</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">That</span><span class="p">(</span> <span class="n">person</span><span class="p">.</span><span class="n">LastName</span> <span class="p">==</span> <span class="s">"Kent"</span> <span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>Simple Example Using Dynamic</h3>
+
+<p>The following simple example maps a dynamic object to a Person class.</p>
+
+<p>When mapping dynamics use the <code>MapDynamic&lt;T&gt;()</code> method instead of the <code>Map&lt;T&gt;()</code> method.</p>
+
+<div class="highlight"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Person</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">Id</span><span class="p">;</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">FirstName</span><span class="p">;</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">LastName</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="na">[Test]</span>
+<span class="k">public</span> <span class="k">void</span> <span class="nf">Can_Map_Matching_Field_Names_Using_Dynamic</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="c1">// Arrange</span>
+    <span class="kt">dynamic</span> <span class="n">dynamicPerson</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ExpandoObject</span><span class="p">();</span>
+    <span class="n">dynamicPerson</span><span class="p">.</span><span class="n">Id</span> <span class="p">=</span> <span class="m">1</span><span class="p">;</span>
+    <span class="n">dynamicPerson</span><span class="p">.</span><span class="n">FirstName</span> <span class="p">=</span> <span class="s">"Clark"</span><span class="p">;</span>
+    <span class="n">dynamicPerson</span><span class="p">.</span><span class="n">LastName</span> <span class="p">=</span> <span class="s">"Kent"</span><span class="p">;</span>
+
+    <span class="c1">// Act</span>
+    <span class="kt">var</span> <span class="n">person</span> <span class="p">=</span> <span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">MapDynamic</span><span class="p">&lt;</span><span class="n">Person</span><span class="p">&gt;(</span> <span class="n">dynamicPerson</span> <span class="p">)</span> <span class="k">as</span> <span class="n">Person</span><span class="p">;</span>
+
+    <span class="c1">// Assert</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">NotNull</span><span class="p">(</span> <span class="n">person</span> <span class="p">);</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">That</span><span class="p">(</span> <span class="n">person</span><span class="p">.</span><span class="n">Id</span> <span class="p">==</span> <span class="m">1</span> <span class="p">);</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">That</span><span class="p">(</span> <span class="n">person</span><span class="p">.</span><span class="n">FirstName</span> <span class="p">==</span> <span class="s">"Clark"</span> <span class="p">);</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">That</span><span class="p">(</span> <span class="n">person</span><span class="p">.</span><span class="n">LastName</span> <span class="p">==</span> <span class="s">"Kent"</span> <span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>Mapping Nested Types Using a Dictionary</h3>
+
+<p>The following example maps a list of dictionaries of property names and values to a Customer class and using underscore notation ("_"), 
+Slapper.AutoMapper properly populates the nested child types. You can just as easily use a list of dynamics too.</p>
+
+<p>As an example, the following SQL would return similar results to what is in the dictionaries in the example below ( Note the use of SQL aliases ):</p>
+
+<div class="highlight"><pre><span class="k">SELECT</span>  <span class="k">c</span><span class="p">.</span><span class="n">CustomerId</span><span class="p">,</span>
+        <span class="k">c</span><span class="p">.</span><span class="n">FirstName</span><span class="p">,</span>
+        <span class="k">c</span><span class="p">.</span><span class="n">LastName</span><span class="p">,</span>
+        <span class="n">o</span><span class="p">.</span><span class="n">OrderId</span> <span class="k">AS</span> <span class="n">Orders_OrderId</span><span class="p">,</span>
+        <span class="n">o</span><span class="p">.</span><span class="n">OrderTotal</span> <span class="k">AS</span> <span class="n">Orders_OrderTotal</span><span class="p">,</span>
+        <span class="n">od</span><span class="p">.</span><span class="n">OrderDetailId</span> <span class="k">AS</span> <span class="n">Orders_OrderDetails_OrderId</span><span class="p">,</span>
+        <span class="n">od</span><span class="p">.</span><span class="n">OrderDetailId</span> <span class="k">AS</span> <span class="n">Orders_OrderDetails_OrderDetailId</span><span class="p">,</span>
+        <span class="n">od</span><span class="p">.</span><span class="n">OrderDetailTotal</span> <span class="k">AS</span> <span class="n">Orders_OrderDetails_OrderDetailTotal</span>
+<span class="k">FROM</span>    <span class="n">Customer</span> <span class="k">c</span>
+        <span class="k">JOIN</span> <span class="k">Order</span> <span class="n">o</span> <span class="k">ON</span> <span class="k">c</span><span class="p">.</span><span class="n">CustomerId</span> <span class="o">=</span> <span class="n">o</span><span class="p">.</span><span class="n">CustomerId</span>
+        <span class="k">JOIN</span> <span class="n">OrderDetail</span> <span class="n">od</span> <span class="k">ON</span> <span class="n">o</span><span class="p">.</span><span class="n">OrderId</span> <span class="o">=</span> <span class="n">od</span><span class="p">.</span><span class="n">OrderId</span>
+</pre></div>
+
+<p>This example is indicative of the results you would commonly encounter when querying a database and joining on an Orders
+and OrderDetails table --you would get back duplicate results in some fields. Notice how the CustomerId in both dictionaries
+are the same. Because of Slapper.AutoMapper's default conventions, it will identify the CustomerId field as being the 
+identifier ( or primary key so to speak ). This means that when it attempts to convert the second dictionary to a Customer 
+object, it will see that it has already created a Customer object with an CustomerId of 1 and will simply re-use the previous 
+instance resulting in only one Customer object being returned back. This is how Slapper.AutoMapper effectively groups results
+together and is the key to this libraries awesomeness.</p>
+
+<div class="highlight"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">CustomerId</span><span class="p">;</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">FirstName</span><span class="p">;</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">LastName</span><span class="p">;</span>
+    <span class="k">public</span> <span class="n">IList</span><span class="p">&lt;</span><span class="n">Order</span><span class="p">&gt;</span> <span class="n">Orders</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Order</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">OrderId</span><span class="p">;</span>
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="n">OrderTotal</span><span class="p">;</span>
+    <span class="k">public</span> <span class="n">IList</span><span class="p">&lt;</span><span class="n">OrderDetail</span><span class="p">&gt;</span> <span class="n">OrderDetails</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">OrderDetail</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">OrderDetailId</span><span class="p">;</span>
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="n">OrderDetailTotal</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="na">[Test]</span>
+<span class="k">public</span> <span class="k">void</span> <span class="nf">I_Can_Map_Nested_Types_And_Resolve_Duplicate_Entries_Properly</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="c1">// Arrange</span>
+    <span class="kt">var</span> <span class="n">dictionary</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="kt">object</span><span class="p">&gt;</span>
+                         <span class="p">{</span>
+                             <span class="p">{</span> <span class="s">"CustomerId"</span><span class="p">,</span> <span class="m">1</span> <span class="p">},</span>
+                             <span class="p">{</span> <span class="s">"FirstName"</span><span class="p">,</span> <span class="s">"Bob"</span> <span class="p">},</span>
+                             <span class="p">{</span> <span class="s">"LastName"</span><span class="p">,</span> <span class="s">"Smith"</span> <span class="p">},</span>
+                             <span class="p">{</span> <span class="s">"Orders_OrderId"</span><span class="p">,</span> <span class="m">1</span> <span class="p">},</span>
+                             <span class="p">{</span> <span class="s">"Orders_OrderTotal"</span><span class="p">,</span> <span class="m">50.50</span><span class="n">m</span> <span class="p">},</span>
+                             <span class="p">{</span> <span class="s">"Orders_OrderDetails_OrderDetailId"</span><span class="p">,</span> <span class="m">1</span> <span class="p">},</span>
+                             <span class="p">{</span> <span class="s">"Orders_OrderDetails_OrderDetailTotal"</span><span class="p">,</span> <span class="m">25.00</span><span class="n">m</span> <span class="p">}</span>
+                         <span class="p">};</span>
+
+    <span class="kt">var</span> <span class="n">dictionary2</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="kt">object</span><span class="p">&gt;</span>
+                         <span class="p">{</span>
+                             <span class="p">{</span> <span class="s">"CustomerId"</span><span class="p">,</span> <span class="m">1</span> <span class="p">},</span>
+                             <span class="p">{</span> <span class="s">"FirstName"</span><span class="p">,</span> <span class="s">"Bob"</span> <span class="p">},</span>
+                             <span class="p">{</span> <span class="s">"LastName"</span><span class="p">,</span> <span class="s">"Smith"</span> <span class="p">},</span>
+                             <span class="p">{</span> <span class="s">"Orders_OrderId"</span><span class="p">,</span> <span class="m">1</span> <span class="p">},</span>
+                             <span class="p">{</span> <span class="s">"Orders_OrderTotal"</span><span class="p">,</span> <span class="m">50.50</span><span class="n">m</span> <span class="p">},</span>
+                             <span class="p">{</span> <span class="s">"Orders_OrderDetails_OrderDetailId"</span><span class="p">,</span> <span class="m">2</span> <span class="p">},</span>
+                             <span class="p">{</span> <span class="s">"Orders_OrderDetails_OrderDetailTotal"</span><span class="p">,</span> <span class="m">25.50</span><span class="n">m</span> <span class="p">}</span>
+                         <span class="p">};</span>
+
+    <span class="kt">var</span> <span class="n">list</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">IDictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="kt">object</span><span class="p">&gt;&gt;</span> <span class="p">{</span> <span class="n">dictionary</span><span class="p">,</span> <span class="n">dictionary2</span> <span class="p">};</span>
+
+    <span class="c1">// Act</span>
+    <span class="kt">var</span> <span class="n">customers</span> <span class="p">=</span> <span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">Map</span><span class="p">&lt;</span><span class="n">Customer</span><span class="p">&gt;(</span> <span class="n">list</span> <span class="p">);</span>
+
+    <span class="c1">// Assert</span>
+
+    <span class="c1">// There should only be a single customer</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">That</span><span class="p">(</span> <span class="n">customers</span><span class="p">.</span><span class="n">Count</span><span class="p">()</span> <span class="p">==</span> <span class="m">1</span> <span class="p">);</span>
+
+    <span class="c1">// There should only be a single Order</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">That</span><span class="p">(</span> <span class="n">customers</span><span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">().</span><span class="n">Orders</span><span class="p">.</span><span class="n">Count</span> <span class="p">==</span> <span class="m">1</span> <span class="p">);</span>
+
+    <span class="c1">// There should be two OrderDetails</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">That</span><span class="p">(</span> <span class="n">customers</span><span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">().</span><span class="n">Orders</span><span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">().</span><span class="n">OrderDetails</span><span class="p">.</span><span class="n">Count</span> <span class="p">==</span> <span class="m">2</span> <span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+<h1>Usage - Auto Mapping and Identifiers</h1>
+
+<h3>Auto Mapping</h3>
+
+<p>Auto mapping allows Slapper to figure out how to effectively group objects together so that you do not get 
+duplicate results. Now internally, no actual grouping is happening but this is the easiest way to conceptualize
+how it works.</p>
+
+<p>For the curious, the actual implementation relies upon an instance cache implemented as a Dictionary where the key is the all of
+the identifier's hashes summed together and the value being the instance.</p>
+
+<p>So a classes identifier(s) play an important role in the ability of the mapper to effectively group objects together. If no
+identifiers are found, the mapper will still map the results to the requested type but there will be duplicates in the results.</p>
+
+<h4>Default Convention</h4>
+
+<p>Slapper.AutoMapper uses three different conventions in an attempt to locate/match a requested types
+identifier:</p>
+
+<ul>
+<li>Id</li>
+<li>TypeName + Id</li>
+<li>TypeName + Nbr</li>
+</ul><p>For example, if your Customer object has any of the following properties or fields, it will use it as the identifier:</p>
+
+<ul>
+<li>Id</li>
+<li>CustomerId</li>
+<li>CustomerNbr</li>
+</ul><h4>Creating Your Own Convention</h4>
+
+<p>You can specify your own conventions very easily. The following example creates a convention of TypeName + _Id:</p>
+
+<div class="highlight"><pre><span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">IdentifierConventions</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span> <span class="n">type</span> <span class="p">=&gt;</span> <span class="n">type</span><span class="p">.</span><span class="n">Name</span> <span class="p">+</span> <span class="s">"_Id"</span> <span class="p">);</span>
+</pre></div>
+
+<h4>Manually Specifying the Identifier(s)</h4>
+
+<p>Slapper allows you to manually specify a classes identifiers. 1 through N number of identifiers are supported.</p>
+
+<p>The following example specifies two identifiers for the Customer object by using the AddIdentifiers() method:</p>
+
+<div class="highlight"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">CustomerId</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">CustomerType</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">FirstName</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">LastName</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">AddIdentifiers</span><span class="p">(</span> <span class="k">typeof</span><span class="p">(</span> <span class="n">Customer</span> <span class="p">),</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="p">{</span> <span class="s">"CustomerId"</span><span class="p">,</span> <span class="s">"CustomerType"</span> <span class="p">}</span> <span class="p">);</span>
+</pre></div>
+
+<h4>Attribute-based Identifiers</h4>
+
+<p>Slapper.AutoMapper also supports attribute-based identifiers. Simply decorate the identifiers on your class with
+a <code>[Slapper.AutoMapper.Id]</code> attribute.</p>
+
+<p>The following example specifies two identifiers for the Customer object:</p>
+
+<div class="highlight"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span>
+<span class="p">{</span>
+<span class="na">    [Slapper.AutoMapper.Id]</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">CustomerId</span><span class="p">;</span>
+
+<span class="na">    [Slapper.AutoMapper.Id]</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">CustomerType</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">FirstName</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">LastName</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+<h1>Usage - Caching</h1>
+
+<h4>Caching Explained</h4>
+
+<p>Slapper.AutoMapper internally maintains a cache of every object it creates, referred to as the instance cache.
+This cache plays an important role in Slapper's ability to easily lookup existing objects and ultimately assists
+in the ability for Slapper.AutoMapper to populate complex nested types.</p>
+
+<p>Slapper.AutoMapper itself never removes an instance from this cache, so if you tell it to create 50,000 objects, 
+then there are going to be 50,000 objects in the cache for the lifetime of the current thread. </p>
+
+<p>The instance cache exists for the lifetime of the current thread and each of your application's threads will
+get it's own unique cache making use of this library thread safe.</p>
+
+<h4>Clearing the Cache</h4>
+
+<p>Slapper never clears the cache because we feel that it should be the consumer of this library that should have that 
+responsibility.</p>
+
+<p>If you would like to clear this cache, you can do so at any time like so:</p>
+
+<div class="highlight"><pre><span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">Cache</span><span class="p">.</span><span class="n">ClearInstanceCache</span><span class="p">();</span>
+</pre></div>
+
+<h3>License</h3>
+
+<p>MIT</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Slapper.AutoMapper maintained by <a href="https://github.com/randyburden">randyburden</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-36766254-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
