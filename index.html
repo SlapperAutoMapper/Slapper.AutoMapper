@@ -73,7 +73,7 @@ objects in your object hierarchy comes free out of the box --something severely 
 conventions to find a given classes identifier ( the property that gives the class uniqueness ). This allows Slapper to 
 figure out how to effectively group objects together so that you do not get duplicate results. You can even supply your 
 own conventions or manually specify the identifiers by either calling a simple API method or decorating your types with 
-an <code>[Slapper.AutoMapper.Id]</code> attribute.</p>
+an attribute.</p>
 
 <p>And yes, multiple identifiers aka Composite Primary Keys are supported out of the box!</p>
 
@@ -104,7 +104,7 @@ file or any file that uses significant portions of this projects code for proper
 
 <h1>Usage - Mapping</h1>
 
-<h3>Simple Example Using Dictionary</h3>
+<h3>Simple Example Using a Dictionary</h3>
 
 <p>The following simple example maps a dictionary of property names and values to a Person class.</p>
 
@@ -296,7 +296,7 @@ identifier:</p>
 
 <p>You can specify your own conventions very easily. The following example creates a convention of TypeName + _Id:</p>
 
-<div class="highlight"><pre><span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">IdentifierConventions</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span> <span class="n">type</span> <span class="p">=&gt;</span> <span class="n">type</span><span class="p">.</span><span class="n">Name</span> <span class="p">+</span> <span class="s">"_Id"</span> <span class="p">);</span>
+<div class="highlight"><pre><span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">Configuration</span><span class="p">.</span><span class="n">IdentifierConventions</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span> <span class="n">type</span> <span class="p">=&gt;</span> <span class="n">type</span><span class="p">.</span><span class="n">Name</span> <span class="p">+</span> <span class="s">"_Id"</span> <span class="p">);</span>
 </pre></div>
 
 <h4>Manually Specifying the Identifier(s)</h4>
@@ -316,13 +316,20 @@ identifier:</p>
     <span class="k">public</span> <span class="kt">string</span> <span class="n">LastName</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">AddIdentifiers</span><span class="p">(</span> <span class="k">typeof</span><span class="p">(</span> <span class="n">Customer</span> <span class="p">),</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="p">{</span> <span class="s">"CustomerId"</span><span class="p">,</span> <span class="s">"CustomerType"</span> <span class="p">}</span> <span class="p">);</span>
+<span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">Configuration</span><span class="p">.</span><span class="n">AddIdentifiers</span><span class="p">(</span> <span class="k">typeof</span><span class="p">(</span> <span class="n">Customer</span> <span class="p">),</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="p">{</span> <span class="s">"CustomerId"</span><span class="p">,</span> <span class="s">"CustomerType"</span> <span class="p">}</span> <span class="p">);</span>
 </pre></div>
 
 <h4>Attribute-based Identifiers</h4>
 
-<p>Slapper.AutoMapper also supports attribute-based identifiers. Simply decorate the identifiers on your class with
+<p>Slapper.AutoMapper also supports attribute-based identifiers.</p>
+
+<p>By default, the library uses it's own Id attribute that allows you to simply decorate the identifiers on your class with
 a <code>[Slapper.AutoMapper.Id]</code> attribute.</p>
+
+<p>If you wish to use your own attribute instead of the default one, just set the Type to use on the following field:</p>
+
+<div class="highlight"><pre><span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">Configuration</span><span class="p">.</span><span class="n">IdentifierAttributeType</span> <span class="p">=</span> <span class="k">typeof</span><span class="p">(</span> <span class="n">YourCustomAttribute</span> <span class="p">);</span>
+</pre></div>
 
 <p>The following example specifies two identifiers for the Customer object:</p>
 
