@@ -11,14 +11,16 @@ Project Homepage: http://randyburden.com/Slapper.AutoMapper/
 Slapper.AutoMapper is a single file mapping library that can convert dynamic data into static types and populate complex nested
 child objects.
 
-Another way of stating it is that it allows you to convert an `IDictionary<string, object>` to a strongly typed object. 
+It primarily converts C# dynamics and `IDictionary<string, object>` to strongly typed objects and supports
+populating an entire object graph by using underscore notation to underscore into nested objects.
 
-Why use an IDictionary? Because a C# dynamic can easily be cast to one allowing this library to be used in a variety of ways.
+Why use an IDictionary? Because a C# dynamic ( well really an ExpandoObject ) can easily be cast to one allowing 
+this library to be used in a variety of ways not only with dictionaries of property names and values but with dynamics as well.
 
 Okay, so what... doesn't other ORMs do this?
 
 Answer: Yes and no but the philosophy of this project is much different. This small single file library is meant to be used as a 
-piece/lego block in a larger solution and puts a great emphasis on its ability to map to complex nested properties such as mapping 
+building block in a larger solution and puts a great emphasis on its ability to map to complex nested properties such as mapping 
 a Customer and it's list of Orders and it's list of OrderDetails.
 
 ###Is this an ORM?###
@@ -55,12 +57,12 @@ focuses on... converting dynamic data into strongly typed objects with strong su
 
 ###Target Audience###
 
-C# developers is a given but besides that, anyone looking to enhance an ORM or write their own would find that Slapper.AutoMapper
-can take care of a lot of the hard work or mapping back to strongly typed objects.
+The target audience is C# developers looking to enhance an ORM or write their own. Slapper.AutoMapper
+can take care of a lot of the hard work of mapping back to strongly typed objects.
 
-Because Slapper.AutoMappers primary input is simply an Dictionary of property names and values, as long as you can get your data
-into that form, your good to go. One thing to note though is that the values must be the same data types as the strongly typed object
-you are wishing to create. Slapper.AutoMapper does not handle data type conversions, that is up to you the consumer to feed the proper
+Because Slapper.AutoMappers primary input is simply a dictionary of property names and values, as long as you can get your data
+into that form, you're good to go. One thing to note is that the values must be the same data types as the strongly typed object's properties/fields
+you are wishing to populate. Slapper.AutoMapper does not handle data type conversions, that is up to you the consumer to feed the proper
 data into the library.
 
 And that's it, feel free to explore the examples below and the unit tests and hack away. This library is licensed with the MIT license
@@ -245,10 +247,10 @@ Auto mapping allows Slapper to figure out how to effectively group objects toget
 duplicate results. Now internally, no actual grouping is happening but this is the easiest way to conceptualize
 how it works.
 
-For the curious, the actual implementation relies upon an instance cache implemented as a Dictionary where the key is the all of
-the identifier's hashes summed together and the value being the instance.
+*For the curious, the actual implementation relies upon an instance cache implemented as a Dictionary where the key is the all of
+the identifier's hashes summed together and the value being the instance.*
 
-So a classes identifier(s) play an important role in the ability of the mapper to effectively group objects together. If no
+A classes identifier(s) play an important role in the ability of the mapper to effectively group objects together. If no
 identifiers are found, the mapper will still map the results to the requested type but there will be duplicates in the results.
 
 
@@ -352,4 +354,32 @@ Slapper.AutoMapper.Cache.ClearInstanceCache();
 
 
 ###License###
-MIT
+
+MIT License:
+
+Copyright (c) 2012, Randy Burden ( http://randyburden.com )
+All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
+associated documentation files (the "Software"), to deal in the Software without restriction, including 
+without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the 
+following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial 
+portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT 
+LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN 
+NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+Description:
+
+Slapper.AutoMapper maps dynamic data to static types. Slap your ORM into submission!
+
+Slapper.AutoMapper is a single file mapping library that can convert dynamic data into static types 
+and populate complex nested child objects.
+It primarily converts C# dynamics and IDictionary<string, object> to strongly typed objects and supports
+populating an entire object graph by using underscore notation to underscore into nested objects.
