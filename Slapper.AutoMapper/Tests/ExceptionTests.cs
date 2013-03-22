@@ -30,7 +30,7 @@ namespace Slapper.Tests
         }
 
         [Test]
-        public void Will_Throw_An_Exception_If_The_List_Items_Are_Not_Dynamic()
+        public void Will_Not_Throw_An_Exception_If_The_List_Items_Are_Not_Dynamic()
         {
             // Arrange
             var someObjectList = new List<object> { null };
@@ -39,7 +39,21 @@ namespace Slapper.Tests
             TestDelegate test = () => Slapper.AutoMapper.MapDynamic<Person>( someObjectList );
 
             // Assert
-            Assert.Throws<ArgumentException>( test );
+            Assert.DoesNotThrow( test );
+        }
+
+        [Test]
+        public void Will_Return_An_Empty_List_Of_The_Requested_Type_When_Passed_An_Empty_List()
+        {
+            // Arrange
+            var someObjectList = new List<object>();
+
+            // Act
+            var list = Slapper.AutoMapper.MapDynamic<Person>( someObjectList );
+
+            // Assert
+            Assert.NotNull( list );
+            Assert.That( list.Count() == 0 );
         }
     }
 }

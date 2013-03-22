@@ -336,10 +336,16 @@ This cache plays an important role in Slapper's ability to easily lookup existin
 in the ability for Slapper.AutoMapper to populate complex nested types.
 
 Slapper.AutoMapper itself never removes an instance from this cache, so if you tell it to create 50,000 objects, 
-then there are going to be 50,000 objects in the cache for the lifetime of the current thread. 
+then there are going to be 50,000 objects in the cache for the lifetime of the current thread or Http context. 
 
 The instance cache exists for the lifetime of the current thread and each of your application's threads will
 get it's own unique cache making use of this library thread safe.
+
+####Cache Backing Store####
+
+The instance cache backing store will either make use of the HttpContext if one exists or the CallContext of the
+executing thread. The library makes use of reflection in order to persist the cache in the HttpContext when
+neccessary so that the library does not require a dependency on the System.Web library.
 
 ####Clearing the Cache###
 
@@ -357,7 +363,7 @@ Slapper.AutoMapper.Cache.ClearInstanceCache();
 
 MIT License:
 
-Copyright (c) 2012, Randy Burden ( http://randyburden.com )
+Copyright (c) 2013, Randy Burden ( http://randyburden.com )
 All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 

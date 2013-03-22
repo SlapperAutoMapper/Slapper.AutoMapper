@@ -68,7 +68,7 @@ namespace Slapper.Tests
 
             // Act
             var customers = Slapper.AutoMapper.Map<Customer>( list );
-
+            
             // Assert
 
             // There should only be a single customer

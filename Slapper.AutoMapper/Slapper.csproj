@@ -44,8 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SlapperAutoMapper.cs" />
+    <Compile Include="Slapper.AutoMapper.cs" />
     <Compile Include="Tests\CachingBehaviorTests.cs" />
+    <Compile Include="Tests\PerformanceTests.cs" />
     <Compile Include="Tests\SimpleMapTests.cs" />
     <Compile Include="Tests\ExceptionTests.cs" />
     <Compile Include="Tests\ParentMappingTests.cs" />
