@@ -31,6 +31,14 @@ namespace Slapper.Tests
             public decimal OrderDetailTotal;
         }
 
+        /// <summary>
+        /// Simple performance test mapping 50,000 objects.
+        /// </summary>
+        /// <remarks>
+        /// Historical Test Results
+        ///     v1.0.0.1: Mapped 50000 objects in 1755 ms.
+        ///     v1.0.0.2: Mapped 50000 objects in 1918 ms.
+        /// </remarks>
         [Test]
         public void Simple_Performance_Test()
         {
@@ -63,6 +71,14 @@ namespace Slapper.Tests
             Debug.WriteLine( "Mapped {0} objects in {1} ms.", iterations, stopwatch.ElapsedMilliseconds );
         }
 
+        /// <summary>
+        /// Complex performance test mapping 50,000 objects with with nested child objects.
+        /// </summary>
+        /// <remarks>
+        /// Historical Test Results
+        ///     v1.0.0.1: Mapped 50000 objects in 5913 ms.
+        ///     v1.0.0.2: Mapped 50000 objects in 5911 ms.
+        /// </remarks>
         [Test]
         public void Complex_Performance_Test()
         {

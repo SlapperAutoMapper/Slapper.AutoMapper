@@ -54,6 +54,7 @@
     <Compile Include="Tests\MapDynamicTests.cs" />
     <Compile Include="Tests\ComplexMapTests.cs" />
     <Compile Include="Tests\ReadMeTests.cs" />
+    <Compile Include="Tests\SimpleTypeConversionTests.cs" />
     <Compile Include="Tests\TestBase.cs" />
     <Compile Include="Tests\TestHelpers.cs" />
   </ItemGroup>

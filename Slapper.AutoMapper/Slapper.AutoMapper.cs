@@ -1,4 +1,4 @@
-﻿/*  Slapper.AutoMapper v1.0.0.0 ( https://github.com/randyburden/Slapper.AutoMapper )
+﻿/*  Slapper.AutoMapper v1.0.0.2 ( https://github.com/randyburden/Slapper.AutoMapper )
 
     MIT License:
    
@@ -76,8 +76,12 @@ namespace Slapper
         /// <typeparam name="T">Type to instantiate and automap to</typeparam>
         /// <param name="dynamicObject">Dynamic list of property names and values</param>
         /// <returns>List of type <typeparamref name="T"/></returns>
+        /// <exception cref="ArgumentException">Exception that is thrown when the <paramref name="dynamicObject"/> cannot be converted to an IDictionary of type string and object.</exception>
         public static T MapDynamic<T>( object dynamicObject )
         {
+            if ( dynamicObject == null ) 
+                return default( T );
+
             var dictionary = dynamicObject as IDictionary<string, object>;
 
             if ( dictionary == null )
@@ -97,8 +101,12 @@ namespace Slapper
         /// <typeparam name="T">Type to instantiate and automap to</typeparam>
         /// <param name="dynamicListOfProperties">Dynamic list of property names and values</param>
         /// <returns>List of type <typeparamref name="T"/></returns>
+        /// <exception cref="ArgumentException">Exception that is thrown when the <paramref name="dynamicListOfProperties"/> cannot be converted to an IDictionary of type string and object.</exception>
         public static IEnumerable<T> MapDynamic<T>( IEnumerable<object> dynamicListOfProperties )
         {
+            if ( dynamicListOfProperties == null ) 
+                return new List<T>();
+
             var dictionary = dynamicListOfProperties.Select( dynamicItem => dynamicItem as IDictionary<string, object> ).ToList();
 
             if ( dictionary == null )
@@ -262,7 +270,7 @@ namespace Slapper
             /// <summary>
             /// Current version of Slapper.AutoMapper
             /// </summary>
-            public static readonly Version Version = new Version( "1.0.0.0" );
+            public static readonly Version Version = new Version( "1.0.0.2" );
 
             /// <summary>
             /// The attribute Type specifying that a field or property is an identifier.
@@ -540,6 +548,8 @@ namespace Slapper
 
                 if ( fieldInfo != null )
                 {
+                    value = ConvertValuesTypeToMembersType( value, fieldInfo.Name, fieldInfo.FieldType, fieldInfo.DeclaringType );
+                    
                     fieldInfo.SetValue( obj, value );
                 }
                 else
@@ -548,9 +558,41 @@ namespace Slapper
 
                     if ( propertyInfo != null )
                     {
+                        value = ConvertValuesTypeToMembersType( value, propertyInfo.Name, propertyInfo.PropertyType, propertyInfo.DeclaringType );
+
                         propertyInfo.SetValue( obj, value, null );
                     }
                 }
+            }
+
+            /// <summary>
+            /// Converts the values type to the members type if needed.
+            /// </summary>
+            /// <param name="value">Object value.</param>
+            /// <param name="memberName">Member name.</param>
+            /// <param name="memberType">Member type.</param>
+            /// <param name="classType">Declarying class type.</param>
+            /// <returns>Value converted to the same type as the member type.</returns>
+            private static object ConvertValuesTypeToMembersType( object value, string memberName, Type memberType, Type classType )
+            {
+                var valueType = value.GetType();
+
+                if ( valueType != memberType && valueType.IsValueType )
+                {
+                    try
+                    {
+                        value = Convert.ChangeType( value, memberType );
+                    }
+                    catch ( Exception e )
+                    {
+                        string errorMessage = string.Format( "{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
+                            e.Message, value, valueType, memberName, memberType, classType );
+
+                        throw new Exception( errorMessage, e );
+                    }
+                }
+
+                return value;
             }
 
             /// <summary>
