@@ -22,10 +22,10 @@
 
     Description:
     
-    Slapper.AutoMapper maps dynamic data to static types. Slap your ORM into submission!
+    Slapper.AutoMapper maps dynamic data to static types. Slap your data into submission!
     
-    Slapper.AutoMapper is a single file mapping library that can convert dynamic data into static types 
-    and populate complex nested child objects.
+    Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a single file mapping library that can convert 
+    dynamic data into static types and populate complex nested child objects.
     It primarily converts C# dynamics and IDictionary<string, object> to strongly typed objects and supports
     populating an entire object graph by using underscore notation to underscore into nested objects.
 */
