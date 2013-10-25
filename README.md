@@ -1,6 +1,6 @@
 Slapper.AutoMapper
 =================
-*Slap your ORM into submission.*
+*Slap your data into submission.*
 
 Slapper.AutoMapper maps dynamic data to static types.
 

@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle( "Slapper" )]
-[assembly: AssemblyDescription( "" )]
+[assembly: AssemblyTitle( "Slapper.AutoMapper" )]
+[assembly: AssemblyDescription( "Slapper.AutoMapper is a mapping library that can convert dynamic data into static types and populate complex nested child objects." )]
 [assembly: AssemblyConfiguration( "" )]
-[assembly: AssemblyCompany( "Microsoft" )]
-[assembly: AssemblyProduct( "Slapper" )]
+[assembly: AssemblyCompany( "Randy Burden" )]
+[assembly: AssemblyProduct( "Slapper.AutoMapper" )]
 [assembly: AssemblyCopyright( "Copyright © Microsoft 2012" )]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion( "1.0.0.0" )]
-[assembly: AssemblyFileVersion( "1.0.0.0" )]
+[assembly: AssemblyVersion( "1.0.0.2" )]
+[assembly: AssemblyFileVersion( "1.0.0.2" )]
