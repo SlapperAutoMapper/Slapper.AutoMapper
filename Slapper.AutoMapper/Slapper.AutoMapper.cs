@@ -1,4 +1,4 @@
-﻿/*  Slapper.AutoMapper v1.0.0.2 ( https://github.com/randyburden/Slapper.AutoMapper )
+﻿/*  Slapper.AutoMapper v1.0.0.3 ( https://github.com/randyburden/Slapper.AutoMapper )
 
     MIT License:
    
@@ -270,7 +270,7 @@ namespace Slapper
             /// <summary>
             /// Current version of Slapper.AutoMapper
             /// </summary>
-            public static readonly Version Version = new Version( "1.0.0.2" );
+            public static readonly Version Version = new Version( "1.0.0.3" );
 
             /// <summary>
             /// The attribute Type specifying that a field or property is an identifier.
@@ -549,8 +549,18 @@ namespace Slapper
                 if ( fieldInfo != null )
                 {
                     value = ConvertValuesTypeToMembersType( value, fieldInfo.Name, fieldInfo.FieldType, fieldInfo.DeclaringType );
-                    
-                    fieldInfo.SetValue( obj, value );
+
+                    try
+                    {
+                        fieldInfo.SetValue( obj, value );
+                    }
+                    catch ( Exception e )
+                    {
+                        string errorMessage = string.Format( "{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
+                            e.Message, value, value.GetType(), fieldInfo.Name, fieldInfo.FieldType, fieldInfo.DeclaringType );
+
+                        throw new Exception( errorMessage, e );
+                    }
                 }
                 else
                 {
@@ -560,7 +570,17 @@ namespace Slapper
                     {
                         value = ConvertValuesTypeToMembersType( value, propertyInfo.Name, propertyInfo.PropertyType, propertyInfo.DeclaringType );
 
-                        propertyInfo.SetValue( obj, value, null );
+                        try
+                        {
+                            propertyInfo.SetValue( obj, value, null );
+                        }
+                        catch ( Exception e )
+                        {
+                            string errorMessage = string.Format( "{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
+                                e.Message, value, value.GetType(), propertyInfo.Name, propertyInfo.PropertyType, propertyInfo.DeclaringType );
+
+                            throw new Exception( errorMessage, e );
+                        }
                     }
                 }
             }
@@ -575,13 +595,23 @@ namespace Slapper
             /// <returns>Value converted to the same type as the member type.</returns>
             private static object ConvertValuesTypeToMembersType( object value, string memberName, Type memberType, Type classType )
             {
+                if ( value == null )
+                    return null;
+
                 var valueType = value.GetType();
 
                 if ( valueType != memberType && valueType.IsValueType )
                 {
                     try
                     {
-                        value = Convert.ChangeType( value, memberType );
+                        if ( memberType.IsEnum )
+                        {
+                            value = Enum.Parse( memberType, value.ToString() );
+                        }
+                        else
+                        {
+                            value = Convert.ChangeType( value, memberType );
+                        }
                     }
                     catch ( Exception e )
                     {

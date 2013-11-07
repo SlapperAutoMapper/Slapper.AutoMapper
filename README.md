@@ -6,10 +6,12 @@ Slapper.AutoMapper maps dynamic data to static types.
 
 Project Homepage: http://randyburden.com/Slapper.AutoMapper/
 
+Available on NuGet as well: http://www.nuget.org/packages/Slapper.AutoMapper/
+
 ###What is it?###
 
-Slapper.AutoMapper is a single file mapping library that can convert dynamic data into static types and populate complex nested
-child objects.
+Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a single file mapping library that can convert dynamic data into 
+static types and populate complex nested child objects.
 
 It primarily converts C# dynamics and `IDictionary<string, object>` to strongly typed objects and supports
 populating an entire object graph by using underscore notation to underscore into nested objects.
@@ -68,6 +70,8 @@ data into the library.
 And that's it, feel free to explore the examples below and the unit tests and hack away. This library is licensed with the MIT license
 so feel free to re-use the code in your own projects any way you please. I only ask that you keep the license comment at the top of the
 file or any file that uses significant portions of this projects code for proper attribution.
+
+Slapper.AutoMapper is also available on NuGet as a compiled dll if you prefer that. Check it out at: http://www.nuget.org/packages/Slapper.AutoMapper/
 
 Now let the slapping commence! :)
 
@@ -383,9 +387,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Description:
 
-Slapper.AutoMapper maps dynamic data to static types. Slap your ORM into submission!
+Slapper.AutoMapper maps dynamic data to static types. Slap your data into submission!
 
-Slapper.AutoMapper is a single file mapping library that can convert dynamic data into static types 
-and populate complex nested child objects.
+Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a single file mapping library that can convert 
+dynamic data into static types and populate complex nested child objects.
 It primarily converts C# dynamics and IDictionary<string, object> to strongly typed objects and supports
 populating an entire object graph by using underscore notation to underscore into nested objects.

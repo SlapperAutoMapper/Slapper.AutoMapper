@@ -38,6 +38,7 @@ namespace Slapper.Tests
         /// Historical Test Results
         ///     v1.0.0.1: Mapped 50000 objects in 1755 ms.
         ///     v1.0.0.2: Mapped 50000 objects in 1918 ms.
+        ///     v1.0.0.3: Mapped 50000 objects in 1819 ms.
         /// </remarks>
         [Test]
         public void Simple_Performance_Test()
@@ -78,6 +79,7 @@ namespace Slapper.Tests
         /// Historical Test Results
         ///     v1.0.0.1: Mapped 50000 objects in 5913 ms.
         ///     v1.0.0.2: Mapped 50000 objects in 5911 ms.
+        ///     v1.0.0.3: Mapped 50000 objects in 5327 ms.
         /// </remarks>
         [Test]
         public void Complex_Performance_Test()
