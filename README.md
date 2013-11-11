@@ -150,9 +150,14 @@ public void Can_Map_Matching_Field_Names_Using_Dynamic()
 ###Mapping Nested Types Using a Dictionary###
 
 The following example maps a list of dictionaries of property names and values to a Customer class and using underscore notation ("_"), 
-Slapper.AutoMapper properly populates the nested child types. You can just as easily use a list of dynamics too.
+Slapper.AutoMapper properly populates the nested child types. This is really what I would consider this libraries secret sauce.
+You can just as easily use a list of dynamics which is demonstrated below too which is what is typically returned back from Micro ORMs.
 
-As an example, the following SQL would return similar results to what is in the dictionaries in the example below ( Note the use of SQL aliases ):
+As an example, the following SQL would return similar results to what is in the dictionaries in the example below ( Note the use of SQL aliases ).
+
+*Now it may not seem immediately obvious but what we are really achieving here is something very interesting... we are effectively combining
+SQL and the mapping to C# objects at the same time by use of SQL aliases.*
+
 ```sql
 SELECT	c.CustomerId,
 		c.FirstName,
@@ -239,6 +244,45 @@ public void I_Can_Map_Nested_Types_And_Resolve_Duplicate_Entries_Properly()
 
 	// There should be two OrderDetails
 	Assert.That( customers.FirstOrDefault().Orders.FirstOrDefault().OrderDetails.Count == 2 );
+}
+
+[Test]
+public void I_Can_Map_Nested_Types_And_Resolve_Duplicate_Entries_Properly_Using_Dynamics()
+{
+    // Arrange
+    dynamic customer1 = new ExpandoObject();
+    customer1.CustomerId = 1;
+    customer1.FirstName = "Bob";
+    customer1.LastName = "Smith";
+    customer1.Orders_OrderId = 1;
+    customer1.Orders_OrderTotal = 50.50m;
+    customer1.Orders_OrderDetails_OrderDetailId = 1;
+    customer1.Orders_OrderDetails_OrderDetailTotal = 25.00m;
+
+    dynamic customer2 = new ExpandoObject();
+    customer2.CustomerId = 1;
+    customer2.FirstName = "Bob";
+    customer2.LastName = "Smith";
+    customer2.Orders_OrderId = 1;
+    customer2.Orders_OrderTotal = 50.50m;
+    customer2.Orders_OrderDetails_OrderDetailId = 2;
+    customer2.Orders_OrderDetails_OrderDetailTotal = 25.50m;
+
+    var customerList = new List<dynamic> { customer1, customer2 };
+
+    // Act
+    var customers = Slapper.AutoMapper.MapDynamic<Customer>( customerList );
+
+    // Assert
+
+    // There should only be a single customer
+    Assert.That( customers.Count() == 1 );
+
+    // There should only be a single Order
+    Assert.That( customers.FirstOrDefault().Orders.Count == 1 );
+
+    // There should be two OrderDetails
+    Assert.That( customers.FirstOrDefault().Orders.FirstOrDefault().OrderDetails.Count == 2 );
 }
 ```
 

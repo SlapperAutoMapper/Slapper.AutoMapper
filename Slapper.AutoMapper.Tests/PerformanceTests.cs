@@ -39,6 +39,7 @@ namespace Slapper.Tests
         ///     v1.0.0.1: Mapped 50000 objects in 1755 ms.
         ///     v1.0.0.2: Mapped 50000 objects in 1918 ms.
         ///     v1.0.0.3: Mapped 50000 objects in 1819 ms.
+        ///     v1.0.0.4: Mapped 50000 objects in 1683 ms.
         /// </remarks>
         [Test]
         public void Simple_Performance_Test()
@@ -69,7 +70,7 @@ namespace Slapper.Tests
             Assert.NotNull( customers );
             Assert.That( customers.Count() == iterations );
 
-            Debug.WriteLine( "Mapped {0} objects in {1} ms.", iterations, stopwatch.ElapsedMilliseconds );
+            Trace.WriteLine( string.Format( "Mapped {0} objects in {1} ms.", iterations, stopwatch.ElapsedMilliseconds ) );
         }
 
         /// <summary>
@@ -80,6 +81,7 @@ namespace Slapper.Tests
         ///     v1.0.0.1: Mapped 50000 objects in 5913 ms.
         ///     v1.0.0.2: Mapped 50000 objects in 5911 ms.
         ///     v1.0.0.3: Mapped 50000 objects in 5327 ms.
+        ///     v1.0.0.4: Mapped 50000 objects in 5349 ms.
         /// </remarks>
         [Test]
         public void Complex_Performance_Test()
@@ -116,7 +118,7 @@ namespace Slapper.Tests
             Assert.NotNull( customers );
             Assert.That( customers.Count() == iterations );
 
-            Debug.WriteLine( "Mapped {0} objects in {1} ms.", iterations, stopwatch.ElapsedMilliseconds );
+            Trace.WriteLine( string.Format( "Mapped {0} objects in {1} ms.", iterations, stopwatch.ElapsedMilliseconds ) );
         }
     }
 }

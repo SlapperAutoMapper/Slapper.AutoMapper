@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Slapper.Tests
 {
     [TestFixture]
-    class ExceptionTests : TestBase
+    public class ExceptionTests : TestBase
     {
         public class Person
         {

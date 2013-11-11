@@ -2,7 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 
-// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming, RedundantNameQualifier
 namespace Slapper.Tests
 {
     [TestFixture]

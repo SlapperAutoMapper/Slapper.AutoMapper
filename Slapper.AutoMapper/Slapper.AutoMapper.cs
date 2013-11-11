@@ -1,4 +1,4 @@
-﻿/*  Slapper.AutoMapper v1.0.0.3 ( https://github.com/randyburden/Slapper.AutoMapper )
+﻿/*  Slapper.AutoMapper v1.0.0.4 ( https://github.com/randyburden/Slapper.AutoMapper )
 
     MIT License:
    
@@ -175,6 +175,9 @@ namespace Slapper
 
         #region Cache
 
+        /// <summary>
+        /// Contains the methods and members responsible for this libraries caching concerns.
+        /// </summary>
         public static class Cache
         {
             /// <summary>
@@ -192,6 +195,12 @@ namespace Slapper
             /// </summary>
             public class TypeMap
             {
+                /// <summary>
+                /// Creates a new <see cref="TypeMap"/>.
+                /// </summary>
+                /// <param name="type">Type to map.</param>
+                /// <param name="identifiers">The <paramref name="type"/>s identifiers.</param>
+                /// <param name="propertiesAndFields">The <paramref name="type"/>s properties and fields.</param>
                 public TypeMap( Type type, IEnumerable<string> identifiers, Dictionary<string, object> propertiesAndFields )
                 {
                     Type = type;
@@ -260,17 +269,22 @@ namespace Slapper
 
         #region Configuration
 
+        /// <summary>
+        /// Contains the methods and members responsible for this libraries configuration concerns.
+        /// </summary>
         public static class Configuration
         {
             static Configuration()
             {
                 IdentifierAttributeType = typeof( Id );
+                
+                ApplyDefaultTypeConverters();
             }
 
             /// <summary>
-            /// Current version of Slapper.AutoMapper
+            /// Current version of Slapper.AutoMapper.
             /// </summary>
-            public static readonly Version Version = new Version( "1.0.0.3" );
+            public static readonly Version Version = new Version( "1.0.0.4" );
 
             /// <summary>
             /// The attribute Type specifying that a field or property is an identifier.
@@ -290,13 +304,28 @@ namespace Slapper
             public static readonly List<ApplyIdentifierConvention> IdentifierConventions = new List<ApplyIdentifierConvention>();
 
             /// <summary>
-            /// Applies default conventions for finding identifiers
+            /// Type converters used to convert values from one type to another.
+            /// </summary>
+            public static readonly List<ITypeConverter> TypeConverters = new List<ITypeConverter>();
+
+            /// <summary>
+            /// Applies default conventions for finding identifiers.
             /// </summary>
             public static void ApplyDefaultIdentifierConventions()
             {
                 IdentifierConventions.Add( type => "Id" );
                 IdentifierConventions.Add( type => type.Name + "Id" );
                 IdentifierConventions.Add( type => type.Name + "Nbr" );
+            }
+
+            /// <summary>
+            /// Applies the default ITypeConverters for converting values to different types.
+            /// </summary>
+            public static void ApplyDefaultTypeConverters()
+            {
+                TypeConverters.Add( new GuidConverter() );
+                TypeConverters.Add( new EnumConverter() );
+                TypeConverters.Add( new ValueTypeConverter() );
             }
 
             /// <summary>
@@ -322,38 +351,253 @@ namespace Slapper
 
                 typeMap.Identifiers = identifiers;
             }
+
+            /// <summary>
+            /// Defines methods that can convert values from one type to another. 
+            /// </summary>
+            public interface ITypeConverter
+            {
+                /// <summary>
+                /// Converts the given value to the requested type.
+                /// </summary>
+                /// <param name="value">Value to convert.</param>
+                /// <param name="type">Type the value is to be converted to.</param>
+                /// <returns>Converted value.</returns>
+                object Convert( object value, Type type );
+
+                /// <summary>
+                /// Indicates whether it can convert the given value to the requested type.
+                /// </summary>
+                /// <param name="value">Value to convert.</param>
+                /// <param name="type">Type the value needs to be converted to.</param>
+                /// <returns>Boolean response.</returns>
+                bool CanConvert( object value, Type type );
+
+                /// <summary>
+                /// Order to execute an <see cref="ITypeConverter"/> in.
+                /// </summary>
+                int Order { get; }
+            }
+
+            /// <summary>
+            /// Converts values to Guids.
+            /// </summary>
+            public class GuidConverter : ITypeConverter
+            {
+                #region Implementation of ITypeConverter
+
+                /// <summary>
+                /// Converts the given value to the requested type.
+                /// </summary>
+                /// <param name="value">Value to convert.</param>
+                /// <param name="type">Type the value is to be converted to.</param>
+                /// <returns>Converted value.</returns>
+                public object Convert( object value, Type type )
+                {
+                    object convertedValue = null;
+
+                    if ( value is string )
+                    {
+                        convertedValue = new Guid( value as string );
+                    }
+                    if ( value is byte[] )
+                    {
+                        convertedValue = new Guid( value as byte[] );
+                    }
+
+                    return convertedValue;
+                }
+
+                /// <summary>
+                /// Indicates whether it can convert the given value to the requested type.
+                /// </summary>
+                /// <param name="value">Value to convert.</param>
+                /// <param name="type">Type the value needs to be converted to.</param>
+                /// <returns>Boolean response.</returns>
+                public bool CanConvert( object value, Type type )
+                {
+                    return type == typeof( Guid );
+                }
+
+                /// <summary>
+                /// Order to execute an <see cref="ITypeConverter"/> in.
+                /// </summary>
+                public int Order { get { return 100; } }
+
+                #endregion
+            }
+
+            /// <summary>
+            /// Converts values to Enums.
+            /// </summary>
+            public class EnumConverter : ITypeConverter
+            {
+                #region Implementation of ITypeConverter
+
+                /// <summary>
+                /// Converts the given value to the requested type.
+                /// </summary>
+                /// <param name="value">Value to convert.</param>
+                /// <param name="type">Type the value is to be converted to.</param>
+                /// <returns>Converted value.</returns>
+                public object Convert( object value, Type type )
+                {
+                    // Handle Nullable types
+                    var conversionType = Nullable.GetUnderlyingType( type ) ?? type;
+
+                    object convertedValue = Enum.Parse( conversionType, value.ToString() );
+
+                    return convertedValue;
+                }
+
+                /// <summary>
+                /// Indicates whether it can convert the given value to the requested type.
+                /// </summary>
+                /// <param name="value">Value to convert.</param>
+                /// <param name="type">Type the value needs to be converted to.</param>
+                /// <returns>Boolean response.</returns>
+                public bool CanConvert( object value, Type type )
+                {
+                    return type.IsEnum;
+                }
+
+                /// <summary>
+                /// Order to execute an <see cref="ITypeConverter"/> in.
+                /// </summary>
+                public int Order { get { return 100; } }
+
+                #endregion
+            }
+
+            /// <summary>
+            /// Converts values types.
+            /// </summary>
+            public class ValueTypeConverter : ITypeConverter
+            {
+                #region Implementation of ITypeConverter
+
+                /// <summary>
+                /// Converts the given value to the requested type.
+                /// </summary>
+                /// <param name="value">Value to convert.</param>
+                /// <param name="type">Type the value is to be converted to.</param>
+                /// <returns>Converted value.</returns>
+                public object Convert( object value, Type type )
+                {
+                    // Handle Nullable types
+                    var conversionType = Nullable.GetUnderlyingType( type ) ?? type;
+
+                    var convertedValue = System.Convert.ChangeType( value, conversionType );
+
+                    return convertedValue;
+                }
+
+                /// <summary>
+                /// Indicates whether it can convert the given value to the requested type.
+                /// </summary>
+                /// <param name="value">Value to convert.</param>
+                /// <param name="type">Type the value needs to be converted to.</param>
+                /// <returns>Boolean response.</returns>
+                public bool CanConvert( object value, Type type )
+                {
+                    return type.IsValueType && !type.IsEnum && type != typeof( Guid );
+                }
+
+                /// <summary>
+                /// Order to execute an <see cref="ITypeConverter"/> in.
+                /// </summary>
+                public int Order { get { return 1000; } }
+
+                #endregion
+            }
         }
 
         #endregion Configuration
 
         #region Logging
 
+        /// <summary>
+        /// Contains the methods and members responsible for this libraries logging concerns.
+        /// </summary>
         public class Logging
         {
+            /// <summary>
+            /// Logger for this library.
+            /// </summary>
             public static ILogger Logger = new TraceLogger();
 
+            /// <summary>
+            /// Log levels.
+            /// </summary>
             public enum LogLevel
             {
+                /// <summary>
+                /// Logs debug level messages.
+                /// </summary>
                 Debug,
+
+                /// <summary>
+                /// Logs info level messages.
+                /// </summary>
                 Info,
+
+                /// <summary>
+                /// Logs warning level messages.
+                /// </summary>
                 Warn,
+
+                /// <summary>
+                /// Logs error level messages.
+                /// </summary>
                 Error,
+
+                /// <summary>
+                /// Logs fatal level messages.
+                /// </summary>
                 Fatal
             }
 
+            /// <summary>
+            /// Contains methods for logging messages.
+            /// </summary>
             public interface ILogger
             {
+                /// <summary>
+                /// Logs messages.
+                /// </summary>
+                /// <param name="logLevel">Log level.</param>
+                /// <param name="format">Log message format.</param>
+                /// <param name="args">Log message arguments.</param>
                 void Log( LogLevel logLevel, string format, params object[] args );
 
+                /// <summary>
+                /// Logs exception messages.
+                /// </summary>
+                /// <param name="logLevel">Log level.</param>
+                /// <param name="exception">Exception being logged.</param>
+                /// <param name="format">Log message format.</param>
+                /// <param name="args">Log message arguments.</param>
                 void Log( LogLevel logLevel, Exception exception, string format, params object[] args );
             }
 
+            /// <summary>
+            /// Logs messages to any trace listeners.
+            /// </summary>
             public class TraceLogger : ILogger
             {
+                /// <summary>
+                /// The minimum log level that this class will log messages for.
+                /// </summary>
                 public static LogLevel MinimumLogLevel = LogLevel.Error;
 
                 #region Implementation of ILogger
 
+                /// <summary>
+                /// Logs messages to any trace listeners.
+                /// </summary>
+                /// <param name="logLevel">Log level.</param>
+                /// <param name="format">Log message format.</param>
+                /// <param name="args">Log message arguments.</param>
                 public void Log( LogLevel logLevel, string format, params object[] args )
                 {
                     if ( logLevel >= MinimumLogLevel )
@@ -362,6 +606,13 @@ namespace Slapper
                     }
                 }
 
+                /// <summary>
+                /// Logs messages to any trace listeners.
+                /// </summary>
+                /// <param name="logLevel">Log level.</param>
+                /// <param name="exception">Exception being logged.</param>
+                /// <param name="format">Log message format.</param>
+                /// <param name="args">Log message arguments.</param>
                 public void Log( LogLevel logLevel, Exception exception, string format, params object[] args )
                 {
                     if ( logLevel >= MinimumLogLevel )
@@ -382,6 +633,9 @@ namespace Slapper
 
         #region Internal Helpers
 
+        /// <summary>
+        /// Contains the methods and members responsible for this libraries internal concerns.
+        /// </summary>
         public static class InternalHelpers
         {
             /// <summary>
@@ -584,7 +838,7 @@ namespace Slapper
                     }
                 }
             }
-
+            
             /// <summary>
             /// Converts the values type to the members type if needed.
             /// </summary>
@@ -595,31 +849,32 @@ namespace Slapper
             /// <returns>Value converted to the same type as the member type.</returns>
             private static object ConvertValuesTypeToMembersType( object value, string memberName, Type memberType, Type classType )
             {
-                if ( value == null )
+                if ( value == null || value == DBNull.Value )
                     return null;
-
+                
                 var valueType = value.GetType();
 
-                if ( valueType != memberType && valueType.IsValueType )
+                try
                 {
-                    try
+                    if ( valueType != memberType )
                     {
-                        if ( memberType.IsEnum )
+                        foreach ( var typeConverter in Configuration.TypeConverters.OrderBy( x => x.Order ) )
                         {
-                            value = Enum.Parse( memberType, value.ToString() );
-                        }
-                        else
-                        {
-                            value = Convert.ChangeType( value, memberType );
-                        }
-                    }
-                    catch ( Exception e )
-                    {
-                        string errorMessage = string.Format( "{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
-                            e.Message, value, valueType, memberName, memberType, classType );
+                            if ( typeConverter.CanConvert( value, memberType ) )
+                            {
+                                var convertedValue = typeConverter.Convert( value, memberType );
 
-                        throw new Exception( errorMessage, e );
+                                return convertedValue;
+                            }
+                        }
                     }
+                }
+                catch ( Exception e )
+                {
+                    string errorMessage = string.Format( "{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
+                        e.Message, value, valueType, memberName, memberType, classType );
+
+                    throw new Exception( errorMessage, e );
                 }
 
                 return value;
@@ -864,11 +1119,7 @@ namespace Slapper
             /// Provides a means of getting/storing data in the host application's
             /// appropriate context.
             /// </summary>
-            /// <remarks>
-            /// For ASP.NET applications, it will store in the data in the current HTTPContext.
-            /// For all other applications, it will store the data in the logical call context.
-            /// </remarks>
-            public static class ContextStorage
+            public interface IContextStorage
             {
                 /// <summary>
                 /// Get a stored item.
@@ -876,7 +1127,39 @@ namespace Slapper
                 /// <typeparam name="T">Object type</typeparam>
                 /// <param name="key">Item key</param>
                 /// <returns>Reference to the requested object</returns>
-                public static T Get<T>( string key )
+                T Get<T>( string key );
+
+                /// <summary>
+                /// Stores an item.
+                /// </summary>
+                /// <param name="key">Item key</param>
+                /// <param name="obj">Object to store</param>
+                void Store( string key, object obj );
+
+                /// <summary>
+                /// Removes an item.
+                /// </summary>
+                /// <param name="key">Item key</param>
+                void Remove( string key );
+            }
+
+            /// <summary>
+            /// Provides a means of getting/storing data in the host application's
+            /// appropriate context.
+            /// </summary>
+            /// <remarks>
+            /// For ASP.NET applications, it will store in the data in the current HTTPContext.
+            /// For all other applications, it will store the data in the logical call context.
+            /// </remarks>
+            public class InternalContextStorage : IContextStorage
+            {
+                /// <summary>
+                /// Get a stored item.
+                /// </summary>
+                /// <typeparam name="T">Object type</typeparam>
+                /// <param name="key">Item key</param>
+                /// <returns>Reference to the requested object</returns>
+                public T Get<T>( string key )
                 {
                     try
                     {
@@ -900,7 +1183,7 @@ namespace Slapper
                 /// </summary>
                 /// <param name="key">Item key</param>
                 /// <param name="obj">Object to store</param>
-                public static void Store( string key, object obj )
+                public void Store( string key, object obj )
                 {
                     if ( ReflectionHelper.HttpContext.GetCurrentHttpContext() == null )
                     {
@@ -916,7 +1199,7 @@ namespace Slapper
                 /// Removes an item.
                 /// </summary>
                 /// <param name="key">Item key</param>
-                public static void Remove( string key )
+                public void Remove( string key )
                 {
                     if ( ReflectionHelper.HttpContext.GetCurrentHttpContext() == null )
                     {
@@ -929,6 +1212,61 @@ namespace Slapper
                 }
             }
 
+            /// <summary>
+            /// Provides a means of getting/storing data in the host application's
+            /// appropriate context.
+            /// </summary>
+            /// <remarks>
+            /// For ASP.NET applications, it will store in the data in the current HTTPContext.
+            /// For all other applications, it will store the data in the logical call context.
+            /// </remarks>
+            public static class ContextStorage
+            {
+                /// <summary>
+                /// Provides a means of getting/storing data in the host application's
+                /// appropriate context.
+                /// </summary>
+                public static IContextStorage ContextStorageImplementation { get; set; }
+
+                static ContextStorage()
+                {
+                    ContextStorageImplementation = new InternalContextStorage();
+                }
+
+                /// <summary>
+                /// Get a stored item.
+                /// </summary>
+                /// <typeparam name="T">Object type</typeparam>
+                /// <param name="key">Item key</param>
+                /// <returns>Reference to the requested object</returns>
+                public static T Get<T>( string key )
+                {
+                    return ContextStorageImplementation.Get<T>( key );
+                }
+
+                /// <summary>
+                /// Stores an item.
+                /// </summary>
+                /// <param name="key">Item key</param>
+                /// <param name="obj">Object to store</param>
+                public static void Store( string key, object obj )
+                {
+                    ContextStorageImplementation.Store( key, obj );
+                }
+
+                /// <summary>
+                /// Removes an item.
+                /// </summary>
+                /// <param name="key">Item key</param>
+                public static void Remove( string key )
+                {
+                    ContextStorageImplementation.Remove( key );
+                }
+            }
+
+            /// <summary>
+            /// Contains the methods and members responsible for this libraries reflection concerns.
+            /// </summary>
             public static class ReflectionHelper
             {
                 /// <summary>
@@ -966,9 +1304,24 @@ namespace Slapper
                         }
                     }
 
+                    /// <summary>
+                    /// System.Web assembly reference.
+                    /// </summary>
                     public static readonly Assembly SystemDotWeb;
+
+                    /// <summary>
+                    /// System.Web.HttpContext type reference.
+                    /// </summary>
                     public static readonly Type SystemDotWebDotHttpContext;
+
+                    /// <summary>
+                    /// System.Web.HttpContext.Current PropertyInfo reference.
+                    /// </summary>
                     public static readonly PropertyInfo CurrentHttpContextPropertyInfo;
+
+                    /// <summary>
+                    /// System.Web.HttpContext.Current.Items PropertyInfo reference.
+                    /// </summary>
                     public static readonly PropertyInfo ItemsPropertyInfo;
 
                     /// <summary>

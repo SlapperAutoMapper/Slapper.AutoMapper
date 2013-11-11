@@ -81,6 +81,45 @@ namespace Slapper.Tests
         }
 
         [Test]
+        public void I_Can_Map_Nested_Types_And_Resolve_Duplicate_Entries_Properly_Using_Dynamics()
+        {
+            // Arrange
+            dynamic customer1 = new ExpandoObject();
+            customer1.CustomerId = 1;
+            customer1.FirstName = "Bob";
+            customer1.LastName = "Smith";
+            customer1.Orders_OrderId = 1;
+            customer1.Orders_OrderTotal = 50.50m;
+            customer1.Orders_OrderDetails_OrderDetailId = 1;
+            customer1.Orders_OrderDetails_OrderDetailTotal = 25.00m;
+
+            dynamic customer2 = new ExpandoObject();
+            customer2.CustomerId = 1;
+            customer2.FirstName = "Bob";
+            customer2.LastName = "Smith";
+            customer2.Orders_OrderId = 1;
+            customer2.Orders_OrderTotal = 50.50m;
+            customer2.Orders_OrderDetails_OrderDetailId = 2;
+            customer2.Orders_OrderDetails_OrderDetailTotal = 25.50m;
+
+            var customerList = new List<dynamic> { customer1, customer2 };
+
+            // Act
+            var customers = Slapper.AutoMapper.MapDynamic<Customer>( customerList );
+
+            // Assert
+
+            // There should only be a single customer
+            Assert.That( customers.Count() == 1 );
+
+            // There should only be a single Order
+            Assert.That( customers.FirstOrDefault().Orders.Count == 1 );
+
+            // There should be two OrderDetails
+            Assert.That( customers.FirstOrDefault().Orders.FirstOrDefault().OrderDetails.Count == 2 );
+        }
+
+        [Test]
         public void Can_Map_Matching_Field_Names_With_Ease()
         {
             // Arrange
