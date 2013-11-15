@@ -1035,7 +1035,14 @@ namespace Slapper
                             // If the member is null and is a class, try to create an instance of the type
                             if ( nestedInstance == null && memberType.IsClass )
                             {
-                                nestedInstance = CreateInstance( memberType );
+                                if (memberType.IsArray)
+                                {
+                                    nestedInstance = new ArrayList().ToArray(memberType.GetElementType());
+                                }
+                                else
+                                {
+                                    nestedInstance = CreateInstance( memberType );
+                                }
                             }
 
                             Type genericCollectionType = typeof( IEnumerable<> );
@@ -1043,7 +1050,12 @@ namespace Slapper
                             if ( memberType.IsGenericType && genericCollectionType.IsAssignableFrom( memberType.GetGenericTypeDefinition() )
                                  || memberType.GetInterfaces().Any( x => x.IsGenericType && x.GetGenericTypeDefinition() == genericCollectionType ) )
                             {
-                                var innerType = memberType.GetGenericArguments().First();
+                                var innerType = memberType.GetGenericArguments().FirstOrDefault();
+                                
+                                if (innerType == null)
+                                {
+                                    innerType = memberType.GetElementType();
+                                }
 
                                 nestedInstance = MapCollection( innerType, newDictionary, nestedInstance, instance );
                             }
@@ -1087,6 +1099,8 @@ namespace Slapper
 
                 // Is this a newly created instance? If false, then this item was retrieved from the instance cache.
                 bool isNewlyCreatedInstance = getInstanceResult.Item1;
+                
+                bool isArray = instance.GetType().IsArray;
 
                 object instanceToAddToCollectionInstance = getInstanceResult.Item2;
 
@@ -1094,9 +1108,18 @@ namespace Slapper
 
                 if ( isNewlyCreatedInstance )
                 {
-                    MethodInfo addMethod = listType.GetMethod( "Add" );
+                    if (isArray)
+                    {
+                        var arrayList = new ArrayList { instanceToAddToCollectionInstance };
+                        
+                        instance = arrayList.ToArray(type);
+                    }
+                    else
+                    {
+                        MethodInfo addMethod = listType.GetMethod( "Add" );
 
-                    addMethod.Invoke( instance, new[] { instanceToAddToCollectionInstance } );
+                        addMethod.Invoke( instance, new[] { instanceToAddToCollectionInstance } );
+                    }
                 }
                 else
                 {
@@ -1106,9 +1129,18 @@ namespace Slapper
 
                     if ( alreadyContainsInstance == false )
                     {
-                        MethodInfo addMethod = listType.GetMethod( "Add" );
+                        if (isArray)
+                        {
+                            var arrayList = new ArrayList((ICollection) instance);
+                            
+                            instance = arrayList.ToArray(type);
+                        }
+                        else
+                        {
+                            MethodInfo addMethod = listType.GetMethod( "Add" );
 
-                        addMethod.Invoke( instance, new[] { instanceToAddToCollectionInstance } );
+                            addMethod.Invoke( instance, new[] { instanceToAddToCollectionInstance } );
+                        }
                     }
                 }
 
