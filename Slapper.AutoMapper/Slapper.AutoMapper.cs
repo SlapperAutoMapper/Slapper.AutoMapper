@@ -1,4 +1,4 @@
-﻿/*  Slapper.AutoMapper v1.0.0.4 ( https://github.com/randyburden/Slapper.AutoMapper )
+﻿/*  Slapper.AutoMapper v1.0.0.5 ( https://github.com/randyburden/Slapper.AutoMapper )
 
     MIT License:
    
@@ -61,7 +61,9 @@ namespace Slapper
         /// Attribute for specifying that a field or property is an identifier.
         /// </summary>
         [AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false )]
-        public class Id : Attribute { }
+        public class Id : Attribute
+        {
+        }
 
         #endregion Attributes
 
@@ -79,7 +81,7 @@ namespace Slapper
         /// <exception cref="ArgumentException">Exception that is thrown when the <paramref name="dynamicObject"/> cannot be converted to an IDictionary of type string and object.</exception>
         public static T MapDynamic<T>( object dynamicObject )
         {
-            if ( dynamicObject == null ) 
+            if ( dynamicObject == null )
                 return default( T );
 
             var dictionary = dynamicObject as IDictionary<string, object>;
@@ -104,7 +106,7 @@ namespace Slapper
         /// <exception cref="ArgumentException">Exception that is thrown when the <paramref name="dynamicListOfProperties"/> cannot be converted to an IDictionary of type string and object.</exception>
         public static IEnumerable<T> MapDynamic<T>( IEnumerable<object> dynamicListOfProperties )
         {
-            if ( dynamicListOfProperties == null ) 
+            if ( dynamicListOfProperties == null )
                 return new List<T>();
 
             var dictionary = dynamicListOfProperties.Select( dynamicItem => dynamicItem as IDictionary<string, object> ).ToList();
@@ -149,7 +151,7 @@ namespace Slapper
 
             foreach ( var properties in listOfProperties )
             {
-                var getInstanceResult = InternalHelpers.GetInstance( typeof( T ), properties );
+                var getInstanceResult = InternalHelpers.GetInstance( typeof ( T ), properties );
 
                 object instance = getInstanceResult.Item2;
 
@@ -276,15 +278,15 @@ namespace Slapper
         {
             static Configuration()
             {
-                IdentifierAttributeType = typeof( Id );
-                
+                IdentifierAttributeType = typeof ( Id );
+
                 ApplyDefaultTypeConverters();
             }
 
             /// <summary>
             /// Current version of Slapper.AutoMapper.
             /// </summary>
-            public static readonly Version Version = new Version( "1.0.0.4" );
+            public static readonly Version Version = new Version( "1.0.0.5" );
 
             /// <summary>
             /// The attribute Type specifying that a field or property is an identifier.
@@ -416,7 +418,7 @@ namespace Slapper
                 /// <returns>Boolean response.</returns>
                 public bool CanConvert( object value, Type type )
                 {
-                    return type == typeof( Guid );
+                    return type == typeof ( Guid );
                 }
 
                 /// <summary>
@@ -500,7 +502,7 @@ namespace Slapper
                 /// <returns>Boolean response.</returns>
                 public bool CanConvert( object value, Type type )
                 {
-                    return type.IsValueType && !type.IsEnum && type != typeof( Guid );
+                    return type.IsValueType && !type.IsEnum && type != typeof ( Guid );
                 }
 
                 /// <summary>
@@ -810,8 +812,9 @@ namespace Slapper
                     }
                     catch ( Exception e )
                     {
-                        string errorMessage = string.Format( "{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
-                            e.Message, value, value.GetType(), fieldInfo.Name, fieldInfo.FieldType, fieldInfo.DeclaringType );
+                        string errorMessage =
+                            string.Format( "{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
+                                           e.Message, value, value.GetType(), fieldInfo.Name, fieldInfo.FieldType, fieldInfo.DeclaringType );
 
                         throw new Exception( errorMessage, e );
                     }
@@ -830,15 +833,16 @@ namespace Slapper
                         }
                         catch ( Exception e )
                         {
-                            string errorMessage = string.Format( "{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
-                                e.Message, value, value.GetType(), propertyInfo.Name, propertyInfo.PropertyType, propertyInfo.DeclaringType );
+                            string errorMessage =
+                                string.Format( "{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
+                                               e.Message, value, value.GetType(), propertyInfo.Name, propertyInfo.PropertyType, propertyInfo.DeclaringType );
 
                             throw new Exception( errorMessage, e );
                         }
                     }
                 }
             }
-            
+
             /// <summary>
             /// Converts the values type to the members type if needed.
             /// </summary>
@@ -851,7 +855,7 @@ namespace Slapper
             {
                 if ( value == null || value == DBNull.Value )
                     return null;
-                
+
                 var valueType = value.GetType();
 
                 try
@@ -872,7 +876,7 @@ namespace Slapper
                 catch ( Exception e )
                 {
                     string errorMessage = string.Format( "{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
-                        e.Message, value, valueType, memberName, memberType, classType );
+                                                         e.Message, value, valueType, memberName, memberType, classType );
 
                     throw new Exception( errorMessage, e );
                 }
@@ -1026,7 +1030,8 @@ namespace Slapper
                             }
 
                             var newDictionary = nestedDictionary.ToDictionary( pair => pair.Key.ToLower()
-                                .Replace( memberName + "_", string.Empty ), pair => pair.Value, StringComparer.OrdinalIgnoreCase );
+                                                                                           .Replace( memberName + "_", string.Empty ), pair => pair.Value,
+                                                                               StringComparer.OrdinalIgnoreCase );
 
                             // Try to get the value of the complex member. If the member
                             // hasn't been initialized, then this will return null.
@@ -1035,9 +1040,9 @@ namespace Slapper
                             // If the member is null and is a class, try to create an instance of the type
                             if ( nestedInstance == null && memberType.IsClass )
                             {
-                                if (memberType.IsArray)
+                                if ( memberType.IsArray )
                                 {
-                                    nestedInstance = new ArrayList().ToArray(memberType.GetElementType());
+                                    nestedInstance = new ArrayList().ToArray( memberType.GetElementType() );
                                 }
                                 else
                                 {
@@ -1045,14 +1050,14 @@ namespace Slapper
                                 }
                             }
 
-                            Type genericCollectionType = typeof( IEnumerable<> );
+                            Type genericCollectionType = typeof ( IEnumerable<> );
 
                             if ( memberType.IsGenericType && genericCollectionType.IsAssignableFrom( memberType.GetGenericTypeDefinition() )
                                  || memberType.GetInterfaces().Any( x => x.IsGenericType && x.GetGenericTypeDefinition() == genericCollectionType ) )
                             {
                                 var innerType = memberType.GetGenericArguments().FirstOrDefault();
-                                
-                                if (innerType == null)
+
+                                if ( innerType == null )
                                 {
                                     innerType = memberType.GetElementType();
                                 }
@@ -1086,7 +1091,7 @@ namespace Slapper
             /// <returns>Populated instance</returns>
             public static object MapCollection( Type type, IDictionary<string, object> dictionary, object instance, object parentInstance = null )
             {
-                Type baseListType = typeof( List<> );
+                Type baseListType = typeof ( List<> );
 
                 Type listType = baseListType.MakeGenericType( type );
 
@@ -1099,7 +1104,7 @@ namespace Slapper
 
                 // Is this a newly created instance? If false, then this item was retrieved from the instance cache.
                 bool isNewlyCreatedInstance = getInstanceResult.Item1;
-                
+
                 bool isArray = instance.GetType().IsArray;
 
                 object instanceToAddToCollectionInstance = getInstanceResult.Item2;
@@ -1108,11 +1113,11 @@ namespace Slapper
 
                 if ( isNewlyCreatedInstance )
                 {
-                    if (isArray)
+                    if ( isArray )
                     {
                         var arrayList = new ArrayList { instanceToAddToCollectionInstance };
-                        
-                        instance = arrayList.ToArray(type);
+
+                        instance = arrayList.ToArray( type );
                     }
                     else
                     {
@@ -1129,11 +1134,11 @@ namespace Slapper
 
                     if ( alreadyContainsInstance == false )
                     {
-                        if (isArray)
+                        if ( isArray )
                         {
-                            var arrayList = new ArrayList((ICollection) instance);
-                            
-                            instance = arrayList.ToArray(type);
+                            var arrayList = new ArrayList( ( ICollection ) instance );
+
+                            instance = arrayList.ToArray( type );
                         }
                         else
                         {
@@ -1204,7 +1209,7 @@ namespace Slapper
                     }
                     catch ( Exception ex )
                     {
-                        Logging.Logger.Log( Logging.LogLevel.Error, ex, "An error occurred in ContextStorage.Get() retrieving key: {0} for type: {1}.", key, typeof( T ) );
+                        Logging.Logger.Log( Logging.LogLevel.Error, ex, "An error occurred in ContextStorage.Get() retrieving key: {0} for type: {1}.", key, typeof ( T ) );
                     }
 
                     return default( T );
@@ -1330,7 +1335,7 @@ namespace Slapper
                             ItemsPropertyInfo = SystemDotWebDotHttpContext
                                 .GetProperty( "Items", ( BindingFlags.Public | BindingFlags.Instance ) );
                         }
-                        catch( Exception ex )
+                        catch ( Exception ex )
                         {
                             Logging.Logger.Log( Logging.LogLevel.Error, ex, "An error occurred attempting to get the current HttpContext." );
                         }

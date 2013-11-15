@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArrayTests.cs" />
     <Compile Include="MappingToGuidTests.cs" />
     <Compile Include="MappingToNullableTypesTests.cs" />
     <Compile Include="MappingToEnumTests.cs" />
