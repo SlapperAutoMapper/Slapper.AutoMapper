@@ -1,4 +1,4 @@
-﻿/*  Slapper.AutoMapper v1.0.0.5 ( https://github.com/randyburden/Slapper.AutoMapper )
+﻿/*  Slapper.AutoMapper v1.0.0.6 ( https://github.com/randyburden/Slapper.AutoMapper )
 
     MIT License:
    
@@ -286,7 +286,7 @@ namespace Slapper
             /// <summary>
             /// Current version of Slapper.AutoMapper.
             /// </summary>
-            public static readonly Version Version = new Version( "1.0.0.5" );
+            public static readonly Version Version = new Version( "1.0.0.6" );
 
             /// <summary>
             /// The attribute Type specifying that a field or property is an identifier.
@@ -963,6 +963,11 @@ namespace Slapper
                         }
                     }
                 }
+
+                // An identifier hash with a value of zero means the type does not have any identifiers.
+                // To make this instance unique generate a unique hash for it.
+                if ( identifierHash == 0 )
+                    identifierHash = Guid.NewGuid().GetHashCode();
 
                 if ( instance == null )
                 {
