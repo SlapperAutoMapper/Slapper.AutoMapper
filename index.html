@@ -31,30 +31,37 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h1>Slapper.AutoMapper</h1>
+        <h1>
+<a name="slapperautomapper" class="anchor" href="#slapperautomapper"><span class="octicon octicon-link"></span></a>Slapper.AutoMapper</h1>
 
-<p><em>Slap your ORM into submission.</em></p>
+<p><em>Slap your data into submission.</em></p>
 
 <p>Slapper.AutoMapper maps dynamic data to static types.</p>
 
 <p>Project Homepage: <a href="http://randyburden.com/Slapper.AutoMapper/">http://randyburden.com/Slapper.AutoMapper/</a></p>
 
-<h3>What is it?</h3>
+<p>Available on NuGet as well: <a href="http://www.nuget.org/packages/Slapper.AutoMapper/">http://www.nuget.org/packages/Slapper.AutoMapper/</a></p>
 
-<p>Slapper.AutoMapper is a single file mapping library that can convert dynamic data into static types and populate complex nested
-child objects.</p>
+<h3>
+<a name="what-is-it" class="anchor" href="#what-is-it"><span class="octicon octicon-link"></span></a>What is it?</h3>
 
-<p>Another way of stating it is that it allows you to convert an <code>IDictionary&lt;string, object&gt;</code> to a strongly typed object. </p>
+<p>Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a single file mapping library that can convert dynamic data into 
+static types and populate complex nested child objects.</p>
 
-<p>Why use an IDictionary? Because a C# dynamic can easily be cast to one allowing this library to be used in a variety of ways.</p>
+<p>It primarily converts C# dynamics and <code>IDictionary&lt;string, object&gt;</code> to strongly typed objects and supports
+populating an entire object graph by using underscore notation to underscore into nested objects.</p>
+
+<p>Why use an IDictionary? Because a C# dynamic ( well really an ExpandoObject ) can easily be cast to one allowing 
+this library to be used in a variety of ways not only with dictionaries of property names and values but with dynamics as well.</p>
 
 <p>Okay, so what... doesn't other ORMs do this?</p>
 
 <p>Answer: Yes and no but the philosophy of this project is much different. This small single file library is meant to be used as a 
-piece/lego block in a larger solution and puts a great emphasis on its ability to map to complex nested properties such as mapping 
+building block in a larger solution and puts a great emphasis on its ability to map to complex nested properties such as mapping 
 a Customer and it's list of Orders and it's list of OrderDetails.</p>
 
-<h3>Is this an ORM?</h3>
+<h3>
+<a name="is-this-an-orm" class="anchor" href="#is-this-an-orm"><span class="octicon octicon-link"></span></a>Is this an ORM?</h3>
 
 <p>No, this is not an ORM in itself but can easily be extended to create one. This library can be thought of as a building 
 block of an ORM or used as an extension to an existing ORM or Micro-ORM.</p>
@@ -62,12 +69,14 @@ block of an ORM or used as an extension to an existing ORM or Micro-ORM.</p>
 <p>ORMs typically query the database and then map the data into objects. Slapper just handles the mapping part and essentially
 only has one input: a dictionary of property names and values.</p>
 
-<h3>What problems does this solve?</h3>
+<h3>
+<a name="what-problems-does-this-solve" class="anchor" href="#what-problems-does-this-solve"><span class="octicon octicon-link"></span></a>What problems does this solve?</h3>
 
 <p>Simply put, it allows you to convert dynamic data into strongly typed objects with ease and populating complex nested child 
 objects in your object hierarchy comes free out of the box --something severely lacking in almost every Micro-ORM solution!</p>
 
-<h3>Auto mapping?</h3>
+<h3>
+<a name="auto-mapping" class="anchor" href="#auto-mapping"><span class="octicon octicon-link"></span></a>Auto mapping?</h3>
 
 <p>Yep, Slapper.AutoMapper stays true to its name and allows auto-mapping between dynamic data and static types by using
 conventions to find a given classes identifier ( the property that gives the class uniqueness ). This allows Slapper to 
@@ -77,7 +86,8 @@ an attribute.</p>
 
 <p>And yes, multiple identifiers aka Composite Primary Keys are supported out of the box!</p>
 
-<h3>Some more ramblings...</h3>
+<h3>
+<a name="some-more-ramblings" class="anchor" href="#some-more-ramblings"><span class="octicon octicon-link"></span></a>Some more ramblings...</h3>
 
 <p>Micro-ORMs have been springing up left and right but many of them are quite basic in their functionality. Many have also 
 been opting for either very basic mapping to strongly typed objects or skipping it completely and opting for a completely 
@@ -86,29 +96,34 @@ dynamic solution.</p>
 <p>Dynamics are super cool and have their place but strongly typed objects have their place too and that is what this library 
 focuses on... converting dynamic data into strongly typed objects with strong support for populating nested child properties. </p>
 
-<h3>Target Audience</h3>
+<h3>
+<a name="target-audience" class="anchor" href="#target-audience"><span class="octicon octicon-link"></span></a>Target Audience</h3>
 
-<p>C# developers is a given but besides that, anyone looking to enhance an ORM or write their own would find that Slapper.AutoMapper
-can take care of a lot of the hard work or mapping back to strongly typed objects.</p>
+<p>The target audience is C# developers looking to enhance an ORM or write their own. Slapper.AutoMapper
+can take care of a lot of the hard work of mapping back to strongly typed objects.</p>
 
-<p>Because Slapper.AutoMappers primary input is simply an Dictionary of property names and values, as long as you can get your data
-into that form, your good to go. One thing to note though is that the values must be the same data types as the strongly typed object
-you are wishing to create. Slapper.AutoMapper does not handle data type conversions, that is up to you the consumer to feed the proper
+<p>Because Slapper.AutoMappers primary input is simply a dictionary of property names and values, as long as you can get your data
+into that form, you're good to go. One thing to note is that the values must be the same data types as the strongly typed object's properties/fields
+you are wishing to populate. Slapper.AutoMapper does not handle data type conversions, that is up to you the consumer to feed the proper
 data into the library.</p>
 
 <p>And that's it, feel free to explore the examples below and the unit tests and hack away. This library is licensed with the MIT license
 so feel free to re-use the code in your own projects any way you please. I only ask that you keep the license comment at the top of the
 file or any file that uses significant portions of this projects code for proper attribution.</p>
 
+<p>Slapper.AutoMapper is also available on NuGet as a compiled dll if you prefer that. Check it out at: <a href="http://www.nuget.org/packages/Slapper.AutoMapper/">http://www.nuget.org/packages/Slapper.AutoMapper/</a></p>
+
 <p>Now let the slapping commence! :)</p>
 
-<h1>Usage - Mapping</h1>
+<h1>
+<a name="usage---mapping" class="anchor" href="#usage---mapping"><span class="octicon octicon-link"></span></a>Usage - Mapping</h1>
 
-<h3>Simple Example Using a Dictionary</h3>
+<h3>
+<a name="simple-example-using-a-dictionary" class="anchor" href="#simple-example-using-a-dictionary"><span class="octicon octicon-link"></span></a>Simple Example Using a Dictionary</h3>
 
 <p>The following simple example maps a dictionary of property names and values to a Person class.</p>
 
-<div class="highlight"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Person</span>
+<div class="highlight highlight-csharp"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Person</span>
 <span class="p">{</span>
     <span class="k">public</span> <span class="kt">int</span> <span class="n">Id</span><span class="p">;</span>
     <span class="k">public</span> <span class="kt">string</span> <span class="n">FirstName</span><span class="p">;</span>
@@ -137,13 +152,14 @@ file or any file that uses significant portions of this projects code for proper
 <span class="p">}</span>
 </pre></div>
 
-<h3>Simple Example Using Dynamic</h3>
+<h3>
+<a name="simple-example-using-dynamic" class="anchor" href="#simple-example-using-dynamic"><span class="octicon octicon-link"></span></a>Simple Example Using Dynamic</h3>
 
 <p>The following simple example maps a dynamic object to a Person class.</p>
 
 <p>When mapping dynamics use the <code>MapDynamic&lt;T&gt;()</code> method instead of the <code>Map&lt;T&gt;()</code> method.</p>
 
-<div class="highlight"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Person</span>
+<div class="highlight highlight-csharp"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Person</span>
 <span class="p">{</span>
     <span class="k">public</span> <span class="kt">int</span> <span class="n">Id</span><span class="p">;</span>
     <span class="k">public</span> <span class="kt">string</span> <span class="n">FirstName</span><span class="p">;</span>
@@ -170,14 +186,19 @@ file or any file that uses significant portions of this projects code for proper
 <span class="p">}</span>
 </pre></div>
 
-<h3>Mapping Nested Types Using a Dictionary</h3>
+<h3>
+<a name="mapping-nested-types-using-a-dictionary" class="anchor" href="#mapping-nested-types-using-a-dictionary"><span class="octicon octicon-link"></span></a>Mapping Nested Types Using a Dictionary</h3>
 
 <p>The following example maps a list of dictionaries of property names and values to a Customer class and using underscore notation ("_"), 
-Slapper.AutoMapper properly populates the nested child types. You can just as easily use a list of dynamics too.</p>
+Slapper.AutoMapper properly populates the nested child types. This is really what I would consider this libraries secret sauce.
+You can just as easily use a list of dynamics which is demonstrated below too which is what is typically returned back from Micro ORMs.</p>
 
-<p>As an example, the following SQL would return similar results to what is in the dictionaries in the example below ( Note the use of SQL aliases ):</p>
+<p>As an example, the following SQL would return similar results to what is in the dictionaries in the example below ( Note the use of SQL aliases ).</p>
 
-<div class="highlight"><pre><span class="k">SELECT</span>  <span class="k">c</span><span class="p">.</span><span class="n">CustomerId</span><span class="p">,</span>
+<p><em>Now it may not seem immediately obvious but what we are really achieving here is something very interesting... we are effectively combining
+SQL and the mapping to C# objects at the same time by use of SQL aliases.</em></p>
+
+<div class="highlight highlight-sql"><pre><span class="k">SELECT</span>  <span class="k">c</span><span class="p">.</span><span class="n">CustomerId</span><span class="p">,</span>
         <span class="k">c</span><span class="p">.</span><span class="n">FirstName</span><span class="p">,</span>
         <span class="k">c</span><span class="p">.</span><span class="n">LastName</span><span class="p">,</span>
         <span class="n">o</span><span class="p">.</span><span class="n">OrderId</span> <span class="k">AS</span> <span class="n">Orders_OrderId</span><span class="p">,</span>
@@ -198,7 +219,7 @@ object, it will see that it has already created a Customer object with an Custom
 instance resulting in only one Customer object being returned back. This is how Slapper.AutoMapper effectively groups results
 together and is the key to this libraries awesomeness.</p>
 
-<div class="highlight"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span>
+<div class="highlight highlight-csharp"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span>
 <span class="p">{</span>
     <span class="k">public</span> <span class="kt">int</span> <span class="n">CustomerId</span><span class="p">;</span>
     <span class="k">public</span> <span class="kt">string</span> <span class="n">FirstName</span><span class="p">;</span>
@@ -261,23 +282,65 @@ together and is the key to this libraries awesomeness.</p>
     <span class="c1">// There should be two OrderDetails</span>
     <span class="n">Assert</span><span class="p">.</span><span class="n">That</span><span class="p">(</span> <span class="n">customers</span><span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">().</span><span class="n">Orders</span><span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">().</span><span class="n">OrderDetails</span><span class="p">.</span><span class="n">Count</span> <span class="p">==</span> <span class="m">2</span> <span class="p">);</span>
 <span class="p">}</span>
+
+<span class="na">[Test]</span>
+<span class="k">public</span> <span class="k">void</span> <span class="nf">I_Can_Map_Nested_Types_And_Resolve_Duplicate_Entries_Properly_Using_Dynamics</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="c1">// Arrange</span>
+    <span class="kt">dynamic</span> <span class="n">customer1</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ExpandoObject</span><span class="p">();</span>
+    <span class="n">customer1</span><span class="p">.</span><span class="n">CustomerId</span> <span class="p">=</span> <span class="m">1</span><span class="p">;</span>
+    <span class="n">customer1</span><span class="p">.</span><span class="n">FirstName</span> <span class="p">=</span> <span class="s">"Bob"</span><span class="p">;</span>
+    <span class="n">customer1</span><span class="p">.</span><span class="n">LastName</span> <span class="p">=</span> <span class="s">"Smith"</span><span class="p">;</span>
+    <span class="n">customer1</span><span class="p">.</span><span class="n">Orders_OrderId</span> <span class="p">=</span> <span class="m">1</span><span class="p">;</span>
+    <span class="n">customer1</span><span class="p">.</span><span class="n">Orders_OrderTotal</span> <span class="p">=</span> <span class="m">50.50</span><span class="n">m</span><span class="p">;</span>
+    <span class="n">customer1</span><span class="p">.</span><span class="n">Orders_OrderDetails_OrderDetailId</span> <span class="p">=</span> <span class="m">1</span><span class="p">;</span>
+    <span class="n">customer1</span><span class="p">.</span><span class="n">Orders_OrderDetails_OrderDetailTotal</span> <span class="p">=</span> <span class="m">25.00</span><span class="n">m</span><span class="p">;</span>
+
+    <span class="kt">dynamic</span> <span class="n">customer2</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ExpandoObject</span><span class="p">();</span>
+    <span class="n">customer2</span><span class="p">.</span><span class="n">CustomerId</span> <span class="p">=</span> <span class="m">1</span><span class="p">;</span>
+    <span class="n">customer2</span><span class="p">.</span><span class="n">FirstName</span> <span class="p">=</span> <span class="s">"Bob"</span><span class="p">;</span>
+    <span class="n">customer2</span><span class="p">.</span><span class="n">LastName</span> <span class="p">=</span> <span class="s">"Smith"</span><span class="p">;</span>
+    <span class="n">customer2</span><span class="p">.</span><span class="n">Orders_OrderId</span> <span class="p">=</span> <span class="m">1</span><span class="p">;</span>
+    <span class="n">customer2</span><span class="p">.</span><span class="n">Orders_OrderTotal</span> <span class="p">=</span> <span class="m">50.50</span><span class="n">m</span><span class="p">;</span>
+    <span class="n">customer2</span><span class="p">.</span><span class="n">Orders_OrderDetails_OrderDetailId</span> <span class="p">=</span> <span class="m">2</span><span class="p">;</span>
+    <span class="n">customer2</span><span class="p">.</span><span class="n">Orders_OrderDetails_OrderDetailTotal</span> <span class="p">=</span> <span class="m">25.50</span><span class="n">m</span><span class="p">;</span>
+
+    <span class="kt">var</span> <span class="n">customerList</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">dynamic</span><span class="p">&gt;</span> <span class="p">{</span> <span class="n">customer1</span><span class="p">,</span> <span class="n">customer2</span> <span class="p">};</span>
+
+    <span class="c1">// Act</span>
+    <span class="kt">var</span> <span class="n">customers</span> <span class="p">=</span> <span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">MapDynamic</span><span class="p">&lt;</span><span class="n">Customer</span><span class="p">&gt;(</span> <span class="n">customerList</span> <span class="p">);</span>
+
+    <span class="c1">// Assert</span>
+
+    <span class="c1">// There should only be a single customer</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">That</span><span class="p">(</span> <span class="n">customers</span><span class="p">.</span><span class="n">Count</span><span class="p">()</span> <span class="p">==</span> <span class="m">1</span> <span class="p">);</span>
+
+    <span class="c1">// There should only be a single Order</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">That</span><span class="p">(</span> <span class="n">customers</span><span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">().</span><span class="n">Orders</span><span class="p">.</span><span class="n">Count</span> <span class="p">==</span> <span class="m">1</span> <span class="p">);</span>
+
+    <span class="c1">// There should be two OrderDetails</span>
+    <span class="n">Assert</span><span class="p">.</span><span class="n">That</span><span class="p">(</span> <span class="n">customers</span><span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">().</span><span class="n">Orders</span><span class="p">.</span><span class="n">FirstOrDefault</span><span class="p">().</span><span class="n">OrderDetails</span><span class="p">.</span><span class="n">Count</span> <span class="p">==</span> <span class="m">2</span> <span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 
-<h1>Usage - Auto Mapping and Identifiers</h1>
+<h1>
+<a name="usage---auto-mapping-and-identifiers" class="anchor" href="#usage---auto-mapping-and-identifiers"><span class="octicon octicon-link"></span></a>Usage - Auto Mapping and Identifiers</h1>
 
-<h3>Auto Mapping</h3>
+<h3>
+<a name="auto-mapping-1" class="anchor" href="#auto-mapping-1"><span class="octicon octicon-link"></span></a>Auto Mapping</h3>
 
 <p>Auto mapping allows Slapper to figure out how to effectively group objects together so that you do not get 
 duplicate results. Now internally, no actual grouping is happening but this is the easiest way to conceptualize
 how it works.</p>
 
-<p>For the curious, the actual implementation relies upon an instance cache implemented as a Dictionary where the key is the all of
-the identifier's hashes summed together and the value being the instance.</p>
+<p><em>For the curious, the actual implementation relies upon an instance cache implemented as a Dictionary where the key is the all of
+the identifier's hashes summed together and the value being the instance.</em></p>
 
-<p>So a classes identifier(s) play an important role in the ability of the mapper to effectively group objects together. If no
+<p>A classes identifier(s) play an important role in the ability of the mapper to effectively group objects together. If no
 identifiers are found, the mapper will still map the results to the requested type but there will be duplicates in the results.</p>
 
-<h4>Default Convention</h4>
+<h4>
+<a name="default-convention" class="anchor" href="#default-convention"><span class="octicon octicon-link"></span></a>Default Convention</h4>
 
 <p>Slapper.AutoMapper uses three different conventions in an attempt to locate/match a requested types
 identifier:</p>
@@ -292,20 +355,22 @@ identifier:</p>
 <li>Id</li>
 <li>CustomerId</li>
 <li>CustomerNbr</li>
-</ul><h4>Creating Your Own Convention</h4>
+</ul><h4>
+<a name="creating-your-own-convention" class="anchor" href="#creating-your-own-convention"><span class="octicon octicon-link"></span></a>Creating Your Own Convention</h4>
 
 <p>You can specify your own conventions very easily. The following example creates a convention of TypeName + _Id:</p>
 
-<div class="highlight"><pre><span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">Configuration</span><span class="p">.</span><span class="n">IdentifierConventions</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span> <span class="n">type</span> <span class="p">=&gt;</span> <span class="n">type</span><span class="p">.</span><span class="n">Name</span> <span class="p">+</span> <span class="s">"_Id"</span> <span class="p">);</span>
+<div class="highlight highlight-csharp"><pre><span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">Configuration</span><span class="p">.</span><span class="n">IdentifierConventions</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span> <span class="n">type</span> <span class="p">=&gt;</span> <span class="n">type</span><span class="p">.</span><span class="n">Name</span> <span class="p">+</span> <span class="s">"_Id"</span> <span class="p">);</span>
 </pre></div>
 
-<h4>Manually Specifying the Identifier(s)</h4>
+<h4>
+<a name="manually-specifying-the-identifiers" class="anchor" href="#manually-specifying-the-identifiers"><span class="octicon octicon-link"></span></a>Manually Specifying the Identifier(s)</h4>
 
 <p>Slapper allows you to manually specify a classes identifiers. 1 through N number of identifiers are supported.</p>
 
 <p>The following example specifies two identifiers for the Customer object by using the AddIdentifiers() method:</p>
 
-<div class="highlight"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span>
+<div class="highlight highlight-csharp"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span>
 <span class="p">{</span>
     <span class="k">public</span> <span class="kt">int</span> <span class="n">CustomerId</span><span class="p">;</span>
 
@@ -319,7 +384,8 @@ identifier:</p>
 <span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">Configuration</span><span class="p">.</span><span class="n">AddIdentifiers</span><span class="p">(</span> <span class="k">typeof</span><span class="p">(</span> <span class="n">Customer</span> <span class="p">),</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="p">{</span> <span class="s">"CustomerId"</span><span class="p">,</span> <span class="s">"CustomerType"</span> <span class="p">}</span> <span class="p">);</span>
 </pre></div>
 
-<h4>Attribute-based Identifiers</h4>
+<h4>
+<a name="attribute-based-identifiers" class="anchor" href="#attribute-based-identifiers"><span class="octicon octicon-link"></span></a>Attribute-based Identifiers</h4>
 
 <p>Slapper.AutoMapper also supports attribute-based identifiers.</p>
 
@@ -328,12 +394,12 @@ a <code>[Slapper.AutoMapper.Id]</code> attribute.</p>
 
 <p>If you wish to use your own attribute instead of the default one, just set the Type to use on the following field:</p>
 
-<div class="highlight"><pre><span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">Configuration</span><span class="p">.</span><span class="n">IdentifierAttributeType</span> <span class="p">=</span> <span class="k">typeof</span><span class="p">(</span> <span class="n">YourCustomAttribute</span> <span class="p">);</span>
+<div class="highlight highlight-csharp"><pre><span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">Configuration</span><span class="p">.</span><span class="n">IdentifierAttributeType</span> <span class="p">=</span> <span class="k">typeof</span><span class="p">(</span> <span class="n">YourCustomAttribute</span> <span class="p">);</span>
 </pre></div>
 
 <p>The following example specifies two identifiers for the Customer object:</p>
 
-<div class="highlight"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span>
+<div class="highlight highlight-csharp"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span>
 <span class="p">{</span>
 <span class="na">    [Slapper.AutoMapper.Id]</span>
     <span class="k">public</span> <span class="kt">int</span> <span class="n">CustomerId</span><span class="p">;</span>
@@ -347,33 +413,71 @@ a <code>[Slapper.AutoMapper.Id]</code> attribute.</p>
 <span class="p">}</span>
 </pre></div>
 
-<h1>Usage - Caching</h1>
+<h1>
+<a name="usage---caching" class="anchor" href="#usage---caching"><span class="octicon octicon-link"></span></a>Usage - Caching</h1>
 
-<h4>Caching Explained</h4>
+<h4>
+<a name="caching-explained" class="anchor" href="#caching-explained"><span class="octicon octicon-link"></span></a>Caching Explained</h4>
 
 <p>Slapper.AutoMapper internally maintains a cache of every object it creates, referred to as the instance cache.
 This cache plays an important role in Slapper's ability to easily lookup existing objects and ultimately assists
 in the ability for Slapper.AutoMapper to populate complex nested types.</p>
 
 <p>Slapper.AutoMapper itself never removes an instance from this cache, so if you tell it to create 50,000 objects, 
-then there are going to be 50,000 objects in the cache for the lifetime of the current thread. </p>
+then there are going to be 50,000 objects in the cache for the lifetime of the current thread or Http context. </p>
 
 <p>The instance cache exists for the lifetime of the current thread and each of your application's threads will
 get it's own unique cache making use of this library thread safe.</p>
 
-<h4>Clearing the Cache</h4>
+<h4>
+<a name="cache-backing-store" class="anchor" href="#cache-backing-store"><span class="octicon octicon-link"></span></a>Cache Backing Store</h4>
+
+<p>The instance cache backing store will either make use of the HttpContext if one exists or the CallContext of the
+executing thread. The library makes use of reflection in order to persist the cache in the HttpContext when
+neccessary so that the library does not require a dependency on the System.Web library.</p>
+
+<h4>
+<a name="clearing-the-cache" class="anchor" href="#clearing-the-cache"><span class="octicon octicon-link"></span></a>Clearing the Cache</h4>
 
 <p>Slapper never clears the cache because we feel that it should be the consumer of this library that should have that 
 responsibility.</p>
 
 <p>If you would like to clear this cache, you can do so at any time like so:</p>
 
-<div class="highlight"><pre><span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">Cache</span><span class="p">.</span><span class="n">ClearInstanceCache</span><span class="p">();</span>
+<div class="highlight highlight-csharp"><pre><span class="n">Slapper</span><span class="p">.</span><span class="n">AutoMapper</span><span class="p">.</span><span class="n">Cache</span><span class="p">.</span><span class="n">ClearInstanceCache</span><span class="p">();</span>
 </pre></div>
 
-<h3>License</h3>
+<h3>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h3>
 
-<p>MIT</p>
+<p>MIT License:</p>
+
+<p>Copyright (c) 2013, Randy Burden ( <a href="http://randyburden.com">http://randyburden.com</a> )
+All rights reserved.</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
+associated documentation files (the "Software"), to deal in the Software without restriction, including 
+without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the 
+following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial 
+portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT 
+LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN 
+NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. </p>
+
+<p>Description:</p>
+
+<p>Slapper.AutoMapper maps dynamic data to static types. Slap your data into submission!</p>
+
+<p>Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a single file mapping library that can convert 
+dynamic data into static types and populate complex nested child objects.
+It primarily converts C# dynamics and IDictionary to strongly typed objects and supports
+populating an entire object graph by using underscore notation to underscore into nested objects.</p>
       </section>
     </div>
 
