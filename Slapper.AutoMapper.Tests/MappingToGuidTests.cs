@@ -130,6 +130,26 @@ namespace Slapper.Tests
         }
 
         [Test]
+        public void Can_Map_Guid_Byte_Array_Values_To_Guid_Properties()
+        {
+            // Arrange
+            const int id = 1;
+            Guid uniqueId = Guid.NewGuid();
+
+            dynamic dynamicPerson = new ExpandoObject();
+            dynamicPerson.Id = id;
+            dynamicPerson.UniqueId = uniqueId.ToByteArray(); // This is what we are testing
+
+            // Act
+            PersonWithProperties customer = Slapper.AutoMapper.MapDynamic<PersonWithProperties>(dynamicPerson);
+
+            // Assert
+            Assert.NotNull(customer);
+            Assert.That(customer.Id == id);
+            Assert.That(Equals(customer.UniqueId, uniqueId)); // This is what we are testing
+        }
+
+        [Test]
         public void Can_Map_Null_Values_To_Guid_Fields()
         {
             // Arrange
