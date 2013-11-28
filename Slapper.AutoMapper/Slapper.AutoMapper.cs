@@ -310,6 +310,8 @@ namespace Slapper
             /// </summary>
             public static readonly List<ITypeConverter> TypeConverters = new List<ITypeConverter>();
 
+            public static readonly List<IAbstractTypeActivator> TypeActivators = new List<IAbstractTypeActivator>(); 
+
             /// <summary>
             /// Applies default conventions for finding identifiers.
             /// </summary>
@@ -352,6 +354,15 @@ namespace Slapper
                 var typeMap = Cache.TypeMapCache.GetOrAdd( type, InternalHelpers.CreateTypeMap( type ) );
 
                 typeMap.Identifiers = identifiers;
+            }
+
+            public interface IAbstractTypeActivator
+            {
+                object Create(IDictionary<string, object> dictionary, Type type);
+
+                bool CanCreate(Type type);
+
+                int Order { get; }
             }
 
             /// <summary>
@@ -955,7 +966,18 @@ namespace Slapper
                         }
                         else
                         {
-                            instance = CreateInstance( type );
+                            foreach (var typeActivator in Configuration.TypeActivators.OrderBy(x => x.Order))
+                            {
+                                if (typeActivator.CanCreate(type))
+                                {
+                                    instance = typeActivator.Create(properties, type);
+                                }
+                            }
+
+                            if (instance == null)
+                            {
+                                instance = CreateInstance(type);
+                            }
 
                             instanceCache.Add( identifierHash, instance );
 
@@ -968,6 +990,17 @@ namespace Slapper
                 // To make this instance unique generate a unique hash for it.
                 if ( identifierHash == 0 )
                     identifierHash = Guid.NewGuid().GetHashCode();
+
+                if (instance == null)
+                {
+                    foreach (var typeActivator in Configuration.TypeActivators.OrderBy(x => x.Order))
+                    {
+                        if (typeActivator.CanCreate(type))
+                        {
+                            instance = typeActivator.Create(properties, type);
+                        }
+                    }
+                }
 
                 if ( instance == null )
                 {
@@ -1051,7 +1084,18 @@ namespace Slapper
                                 }
                                 else
                                 {
-                                    nestedInstance = CreateInstance( memberType );
+                                    foreach (var typeActivator in Configuration.TypeActivators.OrderBy(x => x.Order))
+                                    {
+                                        if (typeActivator.CanCreate(memberType))
+                                        {
+                                            nestedInstance = typeActivator.Create(dictionary, memberType);
+                                        }
+                                    }
+
+                                    if (nestedInstance == null)
+                                    {
+                                        nestedInstance = CreateInstance(memberType);
+                                    }
                                 }
                             }
 
