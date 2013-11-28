@@ -111,7 +111,7 @@ namespace Slapper
 
             var dictionary = dynamicListOfProperties.Select( dynamicItem => dynamicItem as IDictionary<string, object> ).ToList();
 
-            if ( dictionary == null )
+            if ( dictionary == null ) // I can't think of any case where this could possibly happen
                 throw new ArgumentException( "Object types cannot be converted to an IDictionary<string,object>", "dynamicListOfProperties" );
 
             if ( dictionary.Count == 0 || dictionary[ 0 ] == null )
@@ -1120,7 +1120,7 @@ namespace Slapper
                 {
                     if ( isArray )
                     {
-                        var arrayList = new ArrayList { instanceToAddToCollectionInstance };
+                        var arrayList = new ArrayList((ICollection) instance) {instanceToAddToCollectionInstance};
 
                         instance = arrayList.ToArray( type );
                     }
@@ -1133,19 +1133,23 @@ namespace Slapper
                 }
                 else
                 {
-                    MethodInfo containsMethod = listType.GetMethod( "Contains" );
-
-                    var alreadyContainsInstance = ( bool ) containsMethod.Invoke( instance, new[] { instanceToAddToCollectionInstance } );
-
-                    if ( alreadyContainsInstance == false )
+                    if (isArray)
                     {
-                        if ( isArray )
-                        {
-                            var arrayList = new ArrayList( ( ICollection ) instance );
+                        var arrayList = new ArrayList((ICollection)instance);
 
-                            instance = arrayList.ToArray( type );
+                        if ( !arrayList.Contains(instanceToAddToCollectionInstance) )
+                        {
+                            arrayList.Add(instanceToAddToCollectionInstance);
                         }
-                        else
+                        instance = arrayList.ToArray(type);
+                    }
+                    else
+                    {
+                        MethodInfo containsMethod = listType.GetMethod( "Contains" );
+
+                        var alreadyContainsInstance = ( bool ) containsMethod.Invoke( instance, new[] { instanceToAddToCollectionInstance } );
+
+                        if ( alreadyContainsInstance == false )
                         {
                             MethodInfo addMethod = listType.GetMethod( "Add" );
 
