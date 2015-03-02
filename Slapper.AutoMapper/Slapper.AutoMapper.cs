@@ -38,6 +38,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Messaging;
+using System.Text.RegularExpressions;
 
 namespace Slapper
 {
@@ -1034,9 +1035,10 @@ namespace Slapper
                                 continue;
                             }
 
-                            var newDictionary = nestedDictionary.ToDictionary( pair => pair.Key.ToLower()
-                                                                                           .Replace( memberName + "_", string.Empty ), pair => pair.Value,
-                                                                               StringComparer.OrdinalIgnoreCase );
+                            var regex = new Regex(Regex.Escape(memberName + "_"));
+                            var newDictionary = nestedDictionary.ToDictionary(  pair => regex.Replace(pair.Key.ToLower(), string.Empty, 1)
+                                                                               ,pair => pair.Value
+                                                                               ,StringComparer.OrdinalIgnoreCase );
 
                             // Try to get the value of the complex member. If the member
                             // hasn't been initialized, then this will return null.
