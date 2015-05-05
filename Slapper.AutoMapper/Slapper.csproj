@@ -42,7 +42,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Slapper.AutoMapper.Cache.cs" />
+    <Compile Include="Slapper.AutoMapper.Configuration.cs" />
     <Compile Include="Slapper.AutoMapper.cs" />
+    <Compile Include="Slapper.AutoMapper.InternalHelpers.cs" />
+    <Compile Include="Slapper.AutoMapper.Logging.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

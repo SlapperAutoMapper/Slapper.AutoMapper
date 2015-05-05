@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using NUnit.Framework;
 
 namespace Slapper.Tests
@@ -31,7 +32,7 @@ namespace Slapper.Tests
 
             var dictionary = new Dictionary<string, object>
                 {
-                    { "Id", Double.Parse( "1.245698" ) },
+                    { "Id", double.Parse( "1.245698", CultureInfo.InvariantCulture)},
                     { "FirstName", firstName },
                     { "LastName", lastName }
                 };
@@ -56,7 +57,7 @@ namespace Slapper.Tests
             
             var dictionary = new Dictionary<string, object>
                 {
-                    { "Id", Double.Parse( "1.245698" ) },
+                    { "Id", Double.Parse( "1.245698", CultureInfo.InvariantCulture ) },
                     { "FirstName", firstName },
                     { "LastName", lastName }
                 };
