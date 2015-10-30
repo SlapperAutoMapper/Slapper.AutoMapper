@@ -164,11 +164,7 @@ namespace Slapper
 
                 var caseInsensitiveDictionary = new Dictionary<string, object>( properties, StringComparer.OrdinalIgnoreCase );
                 
-                // If the dictionnary contains only null values, no need to map the instance
-                if (caseInsensitiveDictionary.Values.FirstOrDefault(v => v != null) != null)
-                {
-                    InternalHelpers.Map(caseInsensitiveDictionary, instance);
-                }
+                InternalHelpers.Map(caseInsensitiveDictionary, instance);
             }
 
             foreach ( var pair in instanceCache )
@@ -1071,11 +1067,7 @@ namespace Slapper
                                     innerType = memberType.GetElementType();
                                 }
 
-                                // If the dictionnary contains only null values, no need to map the instance
-                                if (newDictionary.Values.FirstOrDefault(v => v != null) != null)
-                                {
-                                    nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, instance);
-                                }
+                                nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, instance);
                             }
                             else
                             {
@@ -1111,6 +1103,12 @@ namespace Slapper
                 if ( instance == null )
                 {
                     instance = CreateInstance( listType );
+                }
+
+                // If the dictionnary only contains null values, we return an empty instance
+                if (dictionary.Values.FirstOrDefault(v => v != null) == null)
+                {
+                    return instance;
                 }
 
                 var getInstanceResult = GetInstance( type, dictionary );

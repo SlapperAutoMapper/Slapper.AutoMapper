@@ -38,7 +38,10 @@ namespace Slapper.Tests
 
             // Assert
             Assert.NotNull( customer );
-            Assert.That( customer.Orders == null );
+
+            // Empty list
+            Assert.That(customer.Orders != null);
+            Assert.That(customer.Orders.Count == 0);
         }
 
     }
