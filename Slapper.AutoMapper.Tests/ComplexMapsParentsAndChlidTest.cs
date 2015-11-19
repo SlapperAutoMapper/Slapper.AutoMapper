@@ -15,10 +15,17 @@ namespace Slapper.Tests
             public string Name { get; set; }
         }
 
+        public class Tour
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
+
         public class Service
         {
             public int Id { get; set; }
             public IEnumerable<Hotel> Hotels { get; set; }
+            public IEnumerable<Tour> Tours { get; set; }
         }
 
         public class Booking
@@ -69,6 +76,48 @@ namespace Slapper.Tests
 
             Assert.NotNull(bookings[1].Services.SingleOrDefault(s => s.Id == 1));
             Assert.That(bookings[1].Services.SingleOrDefault(s => s.Id == 1).Hotels.Count() == 1);
+        }
+
+        [Test]
+        public void Can_Load_ChildList_With_NullElements()
+        {
+            var listOfDictionaries = new List<Dictionary<string, object>>
+            {
+                new Dictionary<string, object>
+                {
+                    { "Id", 1 },
+                    { "Tours_Id", null },
+                    { "Tours_Name", null },
+                    { "Hotels_Id", 10 },
+                    { "Hotels_Name", "Test 10" },
+                },
+                new Dictionary<string, object>
+                {
+                    { "Id", 1 },
+                    { "Tours_Id", null },
+                    { "Tours_Name", null },
+                    { "Hotels_Id", 11 },
+                    { "Hotels_Name", "Test 11" },
+                },
+                new Dictionary<string, object>
+                {
+                    { "Id", 1 },
+                    { "Tours_Id", null },
+                    { "Tours_Name", null },
+                    { "Hotels_Id", 12 },
+                    { "Hotels_Name", "Test 12" },
+                },
+            };
+
+            var result = AutoMapper.Map<Service>(listOfDictionaries).ToList();
+
+            Assert.NotNull(result);
+            Assert.That(result.Count == 1);
+            Assert.NotNull(result[0].Hotels);
+            Assert.That(result[0].Hotels.Any());
+            Assert.That(result[0].Hotels.Count() == 3);
+
+            Assert.That(!result[0].Tours.Any());
         }
     }
 }

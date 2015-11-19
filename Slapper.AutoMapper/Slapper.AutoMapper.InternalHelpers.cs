@@ -313,12 +313,12 @@ namespace Slapper
                 {
                     foreach (var identifier in identifiers)
                     {
-                        if (properties.ContainsKey(identifier))
-                        {
-                            var identifierValue = properties[identifier];
+                        if (!properties.ContainsKey(identifier)) continue;
 
-                            identifierHash += identifierValue.GetHashCode() + type.GetHashCode() + parentHash;
-                        }
+                        var identifierValue = properties[identifier];
+                        if (identifierValue == null) continue;
+
+                        identifierHash += identifierValue.GetHashCode() + type.GetHashCode() + parentHash;
                     }
 
                     if (identifierHash != 0)
@@ -340,12 +340,12 @@ namespace Slapper
 
                 // An identifier hash with a value of zero means the type does not have any identifiers.
                 // To make this instance unique generate a unique hash for it.
-                if (identifierHash == 0)
-                    identifierHash = Guid.NewGuid().GetHashCode();
+                if (identifierHash == 0) identifierHash = type.GetHashCode() + parentHash;
+                    //identifierHash = Guid.NewGuid().GetHashCode();
 
                 if (instance == null)
                 {
-                    instance = CreateInstance(type);
+                    //instance = CreateInstance(type);
 
                     isNewlyCreatedInstance = true;
                 }
@@ -366,8 +366,9 @@ namespace Slapper
             /// <returns>Populated instance</returns>
             public static object Map(IDictionary<string, object> dictionary, object instance, object parentInstance = null)
             {
-                var fieldsAndProperties = GetFieldsAndProperties(instance.GetType());
+                if (instance == null) return null;
 
+                var fieldsAndProperties = GetFieldsAndProperties(instance.GetType());
                 foreach (var fieldOrProperty in fieldsAndProperties)
                 {
                     var memberName = fieldOrProperty.Key.ToLower();
@@ -471,7 +472,6 @@ namespace Slapper
             public static object MapCollection(Type type, IDictionary<string, object> dictionary, object instance, object parentInstance = null)
             {
                 Type baseListType = typeof(List<>);
-
                 Type listType = baseListType.MakeGenericType(type);
 
                 if (instance == null)
@@ -483,32 +483,29 @@ namespace Slapper
 
                 // Is this a newly created instance? If false, then this item was retrieved from the instance cache.
                 bool isNewlyCreatedInstance = getInstanceResult.Item1;
-
                 bool isArray = instance.GetType().IsArray;
 
                 object instanceToAddToCollectionInstance = getInstanceResult.Item2;
 
                 instanceToAddToCollectionInstance = Map(dictionary, instanceToAddToCollectionInstance, parentInstance);
+                if (instanceToAddToCollectionInstance == null) return instance;
 
                 if (isNewlyCreatedInstance)
                 {
                     if (isArray)
                     {
                         var arrayList = new ArrayList { instanceToAddToCollectionInstance };
-
                         instance = arrayList.ToArray(type);
                     }
                     else
                     {
                         MethodInfo addMethod = listType.GetMethod("Add");
-
                         addMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
                     }
                 }
                 else
                 {
                     MethodInfo containsMethod = listType.GetMethod("Contains");
-
                     var alreadyContainsInstance = (bool)containsMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
 
                     if (alreadyContainsInstance == false)
@@ -516,13 +513,11 @@ namespace Slapper
                         if (isArray)
                         {
                             var arrayList = new ArrayList((ICollection)instance);
-
                             instance = arrayList.ToArray(type);
                         }
                         else
                         {
                             MethodInfo addMethod = listType.GetMethod("Add");
-
                             addMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
                         }
                     }
