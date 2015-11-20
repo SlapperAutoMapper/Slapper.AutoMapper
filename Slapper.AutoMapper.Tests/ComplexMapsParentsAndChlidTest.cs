@@ -65,7 +65,6 @@ namespace Slapper.Tests
             var bookings = AutoMapper.Map<Booking>(listOfDictionaries).ToList();
 
             Assert.That(bookings.Count == 2);
-
             Assert.That(bookings[0].Services.Count() == 2);
 
             Assert.NotNull(bookings[0].Services.SingleOrDefault(s => s.Id == 1));
@@ -116,6 +115,31 @@ namespace Slapper.Tests
             Assert.NotNull(result[0].Hotels);
             Assert.That(result[0].Hotels.Any());
             Assert.That(result[0].Hotels.Count() == 3);
+
+            Assert.That(!result[0].Tours.Any());
+        }
+
+        [Test]
+        public void Can_Load_Child_With_NullElements()
+        {
+            var listOfDictionaries = new List<Dictionary<string, object>>
+            {
+                new Dictionary<string, object>
+                {
+                    { "Id", 1 },
+                    { "Tours_Id", null },
+                    { "Tours_Name", null },
+                    { "Hotels_Id", 10 },
+                    { "Hotels_Name", "Test 10" },
+                }
+            };
+
+            var result = AutoMapper.Map<Service>(listOfDictionaries).ToList();
+
+            Assert.NotNull(result);
+            Assert.That(result.Count == 1);
+            Assert.NotNull(result[0].Hotels);
+            Assert.That(result[0].Hotels.Any());
 
             Assert.That(!result[0].Tours.Any());
         }
