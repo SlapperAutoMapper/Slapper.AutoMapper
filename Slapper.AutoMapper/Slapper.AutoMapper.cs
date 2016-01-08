@@ -460,7 +460,8 @@ namespace Slapper
                 /// <returns>Boolean response.</returns>
                 public bool CanConvert( object value, Type type )
                 {
-                    return type.IsEnum;
+                    var conversionType = Nullable.GetUnderlyingType(type) ?? type;
+                    return conversionType.IsEnum;
                 }
 
                 /// <summary>
