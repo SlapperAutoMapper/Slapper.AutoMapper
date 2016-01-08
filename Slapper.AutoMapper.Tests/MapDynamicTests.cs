@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using NUnit.Framework;
@@ -20,6 +21,46 @@ namespace Slapper.Tests
         {
             public int Id;
             public decimal OrderTotal;
+        }
+
+        [Test]
+        public void Returns_Empty_List_For_Null_Dictionary()
+        {
+            // Arrange
+
+            // Act
+            var result = Slapper.AutoMapper.MapDynamic<Customer>(null);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.That(!result.Any());
+        }
+
+        [Test]
+        public void Returns_Null_For_Reference_Types()
+        {
+            // Arrange
+            object nullDictionary = null;
+
+            // Act
+            var result = Slapper.AutoMapper.MapDynamic<Customer>(nullDictionary);
+
+            // Assert
+            Assert.IsNull(result);
+        }
+
+        [Test]
+        public void Returns_Zero_For_Numeric_Value_Types()
+        {
+            // Arrange
+            object nullDictionary = null;
+
+            // Act
+            var result = Slapper.AutoMapper.MapDynamic<int>(nullDictionary);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.That(result == 0);
         }
 
         [Test]
