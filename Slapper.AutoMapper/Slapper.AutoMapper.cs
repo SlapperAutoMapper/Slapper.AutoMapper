@@ -163,8 +163,8 @@ namespace Slapper
                 }
 
                 var caseInsensitiveDictionary = new Dictionary<string, object>( properties, StringComparer.OrdinalIgnoreCase );
-
-                InternalHelpers.Map( caseInsensitiveDictionary, instance );
+                
+                InternalHelpers.Map(caseInsensitiveDictionary, instance);
             }
 
             foreach ( var pair in instanceCache )
@@ -942,8 +942,8 @@ namespace Slapper
                         if ( properties.ContainsKey( identifier ) )
                         {
                             var identifierValue = properties[ identifier ];
-
-                            identifierHash += identifierValue.GetHashCode() + type.GetHashCode();
+                            if (identifierValue != null)
+                                identifierHash += identifierValue.GetHashCode() + type.GetHashCode();
                         }
                     }
 
@@ -1067,7 +1067,7 @@ namespace Slapper
                                     innerType = memberType.GetElementType();
                                 }
 
-                                nestedInstance = MapCollection( innerType, newDictionary, nestedInstance, instance );
+                                nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, instance);
                             }
                             else
                             {
@@ -1103,6 +1103,12 @@ namespace Slapper
                 if ( instance == null )
                 {
                     instance = CreateInstance( listType );
+                }
+
+                // If the dictionnary only contains null values, we return an empty instance
+                if (dictionary.Values.FirstOrDefault(v => v != null) == null)
+                {
+                    return instance;
                 }
 
                 var getInstanceResult = GetInstance( type, dictionary );
