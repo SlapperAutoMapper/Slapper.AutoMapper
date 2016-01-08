@@ -1,4 +1,36 @@
-﻿using System;
+﻿/*  Slapper.AutoMapper v1.0.0.6 ( https://github.com/SlapperAutoMapper/Slapper.AutoMapper )
+
+    MIT License:
+   
+    Copyright (c) 2016, Randy Burden ( http://randyburden.com ) and contributors. All rights reserved.
+    All rights reserved.
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
+    associated documentation files (the "Software"), to deal in the Software without restriction, including 
+    without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+    copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the 
+    following conditions:
+
+    The above copyright notice and this permission notice shall be included in all copies or substantial 
+    portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT 
+    LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN 
+    NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+    Description:
+    
+    Slapper.AutoMapper maps dynamic data to static types. Slap your data into submission!
+    
+    Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a single file mapping library that can convert 
+    dynamic data into static types and populate complex nested child objects.
+    It primarily converts C# dynamics and IDictionary<string, object> to strongly typed objects and supports
+    populating an entire object graph by using underscore notation to underscore into nested objects.
+*/
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +41,8 @@ namespace Slapper
 {
     public static partial class AutoMapper
     {
+        #region Internal Helpers
+
         /// <summary>
         /// Contains the methods and members responsible for this libraries internal concerns.
         /// </summary>
@@ -119,8 +153,15 @@ namespace Slapper
             /// <returns>Dictionary of member names and member info objects</returns>
             public static Dictionary<string, object> CreateFieldAndPropertyInfoDictionary(Type type)
             {
+                var dictionary = new Dictionary<string, object>();
+
                 var properties = type.GetProperties();
-                var dictionary = properties.ToDictionary<PropertyInfo, string, object>(propertyInfo => propertyInfo.Name, propertyInfo => propertyInfo);
+
+                foreach (var propertyInfo in properties)
+                {
+                    dictionary.Add(propertyInfo.Name, propertyInfo);
+                }
+
                 var fields = type.GetFields();
 
                 foreach (var fieldInfo in fields)
@@ -286,7 +327,7 @@ namespace Slapper
             /// </summary>
             /// <param name="type">Type of instance to get</param>
             /// <param name="properties">List of properties and values</param>
-            /// <param name="parentHash">Parent unique hash</param>
+            /// <param name="parentHash">Hash from parent object</param>
             /// <returns>
             /// Tuple of bool, object, int where bool represents whether this is a newly created instance,
             /// object being an instance of the requested type and int being the instance's identifier hash.
@@ -294,22 +335,25 @@ namespace Slapper
             public static Tuple<bool, object, int> GetInstance(Type type, IDictionary<string, object> properties, int parentHash)
             {
                 var instanceCache = Cache.GetInstanceCache();
+
                 var identifiers = GetIdentifiers(type);
-                var isNewlyCreatedInstance = false;
-                var identifierHash = 0;
 
                 object instance = null;
+
+                bool isNewlyCreatedInstance = false;
+
+                int identifierHash = 0;
 
                 if (identifiers != null)
                 {
                     foreach (var identifier in identifiers)
                     {
-                        if (!properties.ContainsKey(identifier)) continue;
-
-                        var identifierValue = properties[identifier];
-                        if (identifierValue == null) continue;
-
-                        identifierHash += identifierValue.GetHashCode() + type.GetHashCode() + parentHash;
+                        if (properties.ContainsKey(identifier))
+                        {
+                            var identifierValue = properties[identifier];
+                            if (identifierValue != null)
+                                identifierHash += identifierValue.GetHashCode() + type.GetHashCode();
+                        }
                     }
 
                     if (identifierHash != 0)
@@ -321,6 +365,7 @@ namespace Slapper
                         else
                         {
                             instance = CreateInstance(type);
+
                             instanceCache.Add(identifierHash, instance);
 
                             isNewlyCreatedInstance = true;
@@ -334,7 +379,7 @@ namespace Slapper
 
                 if (instance == null)
                 {
-                    if (identifiers == null) 
+                    if (identifiers == null)
                     {
                         instance = CreateInstance(type);
                         identifierHash = Guid.NewGuid().GetHashCode();
@@ -359,12 +404,12 @@ namespace Slapper
             /// <returns>Populated instance</returns>
             public static object Map(IDictionary<string, object> dictionary, object instance, object parentInstance = null)
             {
-                if (instance == null) return null;
-
                 var fieldsAndProperties = GetFieldsAndProperties(instance.GetType());
+
                 foreach (var fieldOrProperty in fieldsAndProperties)
                 {
                     var memberName = fieldOrProperty.Key.ToLower();
+
                     var member = fieldOrProperty.Value;
 
                     object value;
@@ -376,57 +421,73 @@ namespace Slapper
                     }
                     else
                     {
-                        var memberType = GetMemberType(member);
+                        Type memberType = GetMemberType(member);
 
                         // Handle populating complex members on the current type
-                        if (!memberType.IsClass && !memberType.IsInterface) continue;
-
-                        // Try to find any keys that start with the current member name
-                        var nestedDictionary = dictionary.Where(x => x.Key.ToLower().StartsWith(memberName + "_")).ToList();
-
-                        // If there weren't any keys
-                        if (!nestedDictionary.Any())
+                        if (memberType.IsClass || memberType.IsInterface)
                         {
-                            // And the parent instance was not null
-                            if (parentInstance != null)
+                            // Try to find any keys that start with the current member name
+                            var nestedDictionary = dictionary.Where(x => x.Key.ToLower().StartsWith(memberName + "_")).ToList();
+
+                            // If there weren't any keys
+                            if (!nestedDictionary.Any())
                             {
-                                // And the parent instance is of the same type as the current member
-                                if (parentInstance.GetType() == memberType)
+                                // And the parent instance was not null
+                                if (parentInstance != null)
                                 {
-                                    // Then this must be a 'parent' to the current type
-                                    SetMemberValue(member, instance, parentInstance);
+                                    // And the parent instance is of the same type as the current member
+                                    if (parentInstance.GetType() == memberType)
+                                    {
+                                        // Then this must be a 'parent' to the current type
+                                        SetMemberValue(member, instance, parentInstance);
+                                    }
+                                }
+
+                                continue;
+                            }
+
+                            var newDictionary = nestedDictionary.ToDictionary(pair => pair.Key.ToLower()
+                                                                                          .Replace(memberName + "_", string.Empty), pair => pair.Value,
+                                                                               StringComparer.OrdinalIgnoreCase);
+
+                            // Try to get the value of the complex member. If the member
+                            // hasn't been initialized, then this will return null.
+                            object nestedInstance = GetMemberValue(member, instance);
+
+                            // If the member is null and is a class, try to create an instance of the type
+                            if (nestedInstance == null && memberType.IsClass)
+                            {
+                                if (memberType.IsArray)
+                                {
+                                    nestedInstance = new ArrayList().ToArray(memberType.GetElementType());
+                                }
+                                else
+                                {
+                                    nestedInstance = CreateInstance(memberType);
                                 }
                             }
 
-                            continue;
+                            Type genericCollectionType = typeof(IEnumerable<>);
+
+                            if (memberType.IsGenericType && genericCollectionType.IsAssignableFrom(memberType.GetGenericTypeDefinition())
+                                 || memberType.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericCollectionType))
+                            {
+                                var innerType = memberType.GetGenericArguments().FirstOrDefault();
+
+                                if (innerType == null)
+                                {
+                                    innerType = memberType.GetElementType();
+                                }
+
+                                nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, instance);
+                            }
+                            else
+                            {
+                                nestedInstance = Map(newDictionary, nestedInstance, instance);
+                            }
+
+                            SetMemberValue(member, instance, nestedInstance);
                         }
-
-                        var newDictionary = nestedDictionary.ToDictionary(pair => pair.Key.ToLower().Replace(memberName + "_", string.Empty), pair => pair.Value,StringComparer.OrdinalIgnoreCase);
-
-                        // Try to get the value of the complex member. If the member
-                        // hasn't been initialized, then this will return null.
-                        var nestedInstance = GetMemberValue(member, instance);
-
-                        // If the member is null and is a class, try to create an instance of the type
-                        if (nestedInstance == null && memberType.IsClass)
-                        {
-                            nestedInstance = memberType.IsArray ? new ArrayList().ToArray(memberType.GetElementType()) : CreateInstance(memberType);
-                        }
-
-                        var genericCollectionType = typeof(IEnumerable<>);
-
-                        if (memberType.IsGenericType && genericCollectionType.IsAssignableFrom(memberType.GetGenericTypeDefinition())
-                            || memberType.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericCollectionType))
-                        {
-                            var innerType = memberType.GetGenericArguments().FirstOrDefault() ?? memberType.GetElementType();
-                            nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, instance);
-                        }
-                        else
-                        {
-                            nestedInstance = Map(newDictionary, nestedInstance, instance);
-                        }
-
-                        SetMemberValue(member, instance, nestedInstance);
                     }
                 }
 
@@ -447,54 +508,67 @@ namespace Slapper
             /// <returns>Populated instance</returns>
             public static object MapCollection(Type type, IDictionary<string, object> dictionary, object instance, object parentInstance = null)
             {
-                var baseListType = typeof(List<>);
-                var listType = baseListType.MakeGenericType(type);
+                Type baseListType = typeof(List<>);
+
+                Type listType = baseListType.MakeGenericType(type);
 
                 if (instance == null)
                 {
                     instance = CreateInstance(listType);
                 }
 
-                var getInstanceResult = GetInstance(type, dictionary, parentInstance.GetHashCode());
+                // If the dictionnary only contains null values, we return an empty instance
+                if (dictionary.Values.FirstOrDefault(v => v != null) == null)
+                {
+                    return instance;
+                }
+
+                var getInstanceResult = GetInstance(type, dictionary, parentInstance == null ? 0 : parentInstance.GetHashCode());
 
                 // Is this a newly created instance? If false, then this item was retrieved from the instance cache.
-                var isNewlyCreatedInstance = getInstanceResult.Item1;
-                var isArray = instance.GetType().IsArray;
+                bool isNewlyCreatedInstance = getInstanceResult.Item1;
 
-                var instanceToAddToCollectionInstance = getInstanceResult.Item2;
+                bool isArray = instance.GetType().IsArray;
+
+                object instanceToAddToCollectionInstance = getInstanceResult.Item2;
 
                 instanceToAddToCollectionInstance = Map(dictionary, instanceToAddToCollectionInstance, parentInstance);
-                if (instanceToAddToCollectionInstance == null) return instance;
 
                 if (isNewlyCreatedInstance)
                 {
                     if (isArray)
                     {
                         var arrayList = new ArrayList { instanceToAddToCollectionInstance };
-                        instance = arrayList.ToArray(type);
-                    }
-                    else
-                    {
-                        var addMethod = listType.GetMethod("Add");
-                        addMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
-                    }
-                }
-                else
-                {
-                    var containsMethod = listType.GetMethod("Contains");
-                    var alreadyContainsInstance = (bool)containsMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
 
-                    if (alreadyContainsInstance) return instance;
-
-                    if (isArray)
-                    {
-                        var arrayList = new ArrayList((ICollection)instance);
                         instance = arrayList.ToArray(type);
                     }
                     else
                     {
                         MethodInfo addMethod = listType.GetMethod("Add");
+
                         addMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
+                    }
+                }
+                else
+                {
+                    MethodInfo containsMethod = listType.GetMethod("Contains");
+
+                    var alreadyContainsInstance = (bool)containsMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
+
+                    if (alreadyContainsInstance == false)
+                    {
+                        if (isArray)
+                        {
+                            var arrayList = new ArrayList((ICollection)instance);
+
+                            instance = arrayList.ToArray(type);
+                        }
+                        else
+                        {
+                            MethodInfo addMethod = listType.GetMethod("Add");
+
+                            addMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
+                        }
                     }
                 }
 
@@ -806,5 +880,7 @@ namespace Slapper
                 }
             }
         }
+
+        #endregion Internal Helpers
     }
 }

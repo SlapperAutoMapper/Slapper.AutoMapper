@@ -1,8 +1,8 @@
-﻿/*  Slapper.AutoMapper v1.0.0.6 ( https://github.com/randyburden/Slapper.AutoMapper )
+﻿/*  Slapper.AutoMapper v1.0.0.6 ( https://github.com/SlapperAutoMapper/Slapper.AutoMapper )
 
     MIT License:
    
-    Copyright (c) 2013, Randy Burden ( http://randyburden.com )
+    Copyright (c) 2016, Randy Burden ( http://randyburden.com ) and contributors. All rights reserved.
     All rights reserved.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
@@ -31,13 +31,8 @@
 */
 
 using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Remoting.Messaging;
 
 namespace Slapper
 {
@@ -163,8 +158,8 @@ namespace Slapper
                 }
 
                 var caseInsensitiveDictionary = new Dictionary<string, object>( properties, StringComparer.OrdinalIgnoreCase );
-
-                InternalHelpers.Map( caseInsensitiveDictionary, instance );
+                
+                InternalHelpers.Map(caseInsensitiveDictionary, instance);
             }
 
             foreach ( var pair in instanceCache )

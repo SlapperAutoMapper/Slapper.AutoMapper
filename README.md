@@ -4,13 +4,12 @@ Slapper.AutoMapper
 
 Slapper.AutoMapper maps dynamic data to static types.
 
-Project Homepage: http://randyburden.com/Slapper.AutoMapper/
-
-Available on NuGet as well: http://www.nuget.org/packages/Slapper.AutoMapper/
+<a href="https://www.nuget.org/packages/Slapper.AutoMapper"><img src="https://img.shields.io/nuget/v/Slapper.AutoMapper.svg" alt="NuGet Version" /></a> 
+<a href="https://www.nuget.org/packages/Slapper.AutoMapper"><img src="https://img.shields.io/nuget/dt/Slapper.AutoMapper.svg" alt="NuGet Download Count" /></a>
 
 ###What is it?###
 
-Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a single file mapping library that can convert dynamic data into 
+Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a mapping library that can convert dynamic data into 
 static types and populate complex nested child objects.
 
 It primarily converts C# dynamics and `IDictionary<string, object>` to strongly typed objects and supports
@@ -21,7 +20,7 @@ this library to be used in a variety of ways not only with dictionaries of prope
 
 Okay, so what... doesn't other ORMs do this?
 
-Answer: Yes and no but the philosophy of this project is much different. This small single file library is meant to be used as a 
+Answer: Yes and no but the philosophy of this project is much different. This small library is meant to be used as a 
 building block in a larger solution and puts a great emphasis on its ability to map to complex nested properties such as mapping 
 a Customer and it's list of Orders and it's list of OrderDetails.
 
@@ -411,7 +410,7 @@ Slapper.AutoMapper.Cache.ClearInstanceCache();
 
 MIT License:
 
-Copyright (c) 2013, Randy Burden ( http://randyburden.com )
+Copyright (c) 2016, Randy Burden and contributors.
 All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
@@ -433,7 +432,7 @@ Description:
 
 Slapper.AutoMapper maps dynamic data to static types. Slap your data into submission!
 
-Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a single file mapping library that can convert 
+Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a mapping library that can convert 
 dynamic data into static types and populate complex nested child objects.
 It primarily converts C# dynamics and IDictionary<string, object> to strongly typed objects and supports
 populating an entire object graph by using underscore notation to underscore into nested objects.
