@@ -352,7 +352,7 @@ namespace Slapper
                         {
                             var identifierValue = properties[identifier];
                             if (identifierValue != null)
-                                identifierHash += identifierValue.GetHashCode() + type.GetHashCode();
+                                identifierHash += identifierValue.GetHashCode() + type.GetHashCode() + parentHash;
                         }
                     }
 
@@ -379,11 +379,8 @@ namespace Slapper
 
                 if (instance == null)
                 {
-                    if (identifiers == null)
-                    {
-                        instance = CreateInstance(type);
-                        identifierHash = Guid.NewGuid().GetHashCode();
-                    }
+                    instance = CreateInstance(type);
+                    identifierHash = Guid.NewGuid().GetHashCode();
 
                     isNewlyCreatedInstance = true;
                 }
