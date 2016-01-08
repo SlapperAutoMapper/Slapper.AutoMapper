@@ -262,5 +262,24 @@ namespace Slapper.Tests
             Assert.That( customer.Gender == gender );
             Assert.That( customer.MaritalStatus == maritalStatus );
         }
+
+        [Test]
+        public void Can_Map_Int32_Values_To_NUllable_Enum_Properties()
+        {
+            dynamic person = new ExpandoObject();
+
+            person.Id = 1;
+            person.FirstName = "FirstName";
+            person.LastName = "LastName";
+            person.MaritalStatus = 2;
+            person.Gender = Gender.Male;
+
+            // Act
+            var customer = Slapper.AutoMapper.MapDynamic<PersonWithProperties>(person);
+
+            // Assert
+            Assert.NotNull(customer);
+            Assert.That(customer.MaritalStatus == MaritalStatus.Single);
+        }
     }
 }
