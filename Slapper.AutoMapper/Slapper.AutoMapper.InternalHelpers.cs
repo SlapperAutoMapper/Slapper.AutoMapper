@@ -88,7 +88,7 @@ namespace Slapper
             /// </returns>
             public static object CreateInstance(Type type)
             {
-                return Activator.CreateInstance(type);
+                return type == typeof(string) ? string.Empty : Activator.CreateInstance(type);
             }
 
             /// <summary>
@@ -401,6 +401,18 @@ namespace Slapper
             /// <returns>Populated instance</returns>
             public static object Map(IDictionary<string, object> dictionary, object instance, object parentInstance = null)
             {
+                if (instance.GetType().IsPrimitive || instance is string)
+                {
+                    object value;
+                    if (!dictionary.TryGetValue("$", out value))
+                    {
+                        throw new InvalidCastException("For lists of primitive types, include $ as the name of the property");
+                    }
+
+                    instance = value;
+                    return instance;
+                }
+
                 var fieldsAndProperties = GetFieldsAndProperties(instance.GetType());
 
                 foreach (var fieldOrProperty in fieldsAndProperties)
@@ -444,8 +456,7 @@ namespace Slapper
                             }
 
                             var newDictionary = nestedDictionary.ToDictionary(pair => pair.Key.ToLower()
-                                                                                          .Replace(memberName + "_", string.Empty), pair => pair.Value,
-                                                                               StringComparer.OrdinalIgnoreCase);
+                                                      .Replace(memberName + "_", string.Empty), pair => pair.Value, StringComparer.OrdinalIgnoreCase);
 
                             // Try to get the value of the complex member. If the member
                             // hasn't been initialized, then this will return null.
