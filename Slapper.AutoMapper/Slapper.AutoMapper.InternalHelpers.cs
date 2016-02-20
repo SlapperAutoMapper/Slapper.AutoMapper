@@ -471,7 +471,8 @@ namespace Slapper
                                 }
                                 else
                                 {
-                                    nestedInstance = CreateInstance(memberType);
+                                    var result = GetInstance(memberType, newDictionary, parentInstance == null ? 0 : parentInstance.GetHashCode());
+                                    nestedInstance = result.Item2;
                                 }
                             }
 
@@ -480,13 +481,7 @@ namespace Slapper
                             if (memberType.IsGenericType && genericCollectionType.IsAssignableFrom(memberType.GetGenericTypeDefinition())
                                  || memberType.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericCollectionType))
                             {
-                                var innerType = memberType.GetGenericArguments().FirstOrDefault();
-
-                                if (innerType == null)
-                                {
-                                    innerType = memberType.GetElementType();
-                                }
-
+                                var innerType = memberType.GetGenericArguments().FirstOrDefault() ?? memberType.GetElementType();
                                 nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, instance);
                             }
                             else

@@ -162,10 +162,7 @@ namespace Slapper
                 InternalHelpers.Map(caseInsensitiveDictionary, instance);
             }
 
-            foreach ( var pair in instanceCache )
-            {
-                yield return ( T ) pair.Value;
-            }
+            return instanceCache.Select(pair => ( T ) pair.Value);
         }
 
         #endregion Mapping
