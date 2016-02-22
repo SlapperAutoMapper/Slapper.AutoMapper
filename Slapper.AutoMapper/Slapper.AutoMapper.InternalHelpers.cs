@@ -471,8 +471,7 @@ namespace Slapper
                                 }
                                 else
                                 {
-                                    var result = GetInstance(memberType, newDictionary, parentInstance == null ? 0 : parentInstance.GetHashCode());
-                                    nestedInstance = result.Item2;
+                                    nestedInstance = typeof(IEnumerable).IsAssignableFrom(memberType) ? CreateInstance(memberType) : GetInstance(memberType, newDictionary, parentInstance == null ? 0 : parentInstance.GetHashCode()).Item2;
                                 }
                             }
 
