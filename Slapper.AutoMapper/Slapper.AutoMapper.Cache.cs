@@ -43,22 +43,22 @@ namespace Slapper
         /// <summary>
         /// Contains the methods and members responsible for this libraries caching concerns.
         /// </summary>
-        internal static class Cache
+        public static class Cache
         {
             /// <summary>
             /// The name of the instance cache stored in the logical call context.
             /// </summary>
-            public const string InstanceCacheContextStorageKey = "Slapper.AutoMapper.InstanceCache";
+            internal const string InstanceCacheContextStorageKey = "Slapper.AutoMapper.InstanceCache";
 
             /// <summary>
             /// Cache of TypeMaps containing the types identifiers and PropertyInfo/FieldInfo objects.
             /// </summary>
-            public static readonly ConcurrentDictionary<Type, TypeMap> TypeMapCache = new ConcurrentDictionary<Type, TypeMap>();
+            internal static readonly ConcurrentDictionary<Type, TypeMap> TypeMapCache = new ConcurrentDictionary<Type, TypeMap>();
 
             /// <summary>
             /// A TypeMap holds data relevant for a particular Type.
             /// </summary>
-            public class TypeMap
+            internal class TypeMap
             {
                 /// <summary>
                 /// Creates a new <see cref="TypeMap"/>.
