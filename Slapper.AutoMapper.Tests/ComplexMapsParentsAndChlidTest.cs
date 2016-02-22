@@ -35,7 +35,7 @@ namespace Slapper.Tests
         }
 
         [Test]
-        public void Can_Make_Cache_HashTypeEquals_With_Diferents_Parents()
+        public void Can_Make_Cache_HashTypeEquals_With_Different_Parents()
         {
             var listOfDictionaries = new List<Dictionary<string, object>>
             {
@@ -68,13 +68,13 @@ namespace Slapper.Tests
             Assert.That(bookings[0].Services.Count() == 2);
 
             Assert.NotNull(bookings[0].Services.SingleOrDefault(s => s.Id == 1));
-            Assert.That(bookings[0].Services.SingleOrDefault(s => s.Id == 1).Hotels.Count() == 1);
-            Assert.That(bookings[0].Services.SingleOrDefault(s => s.Id == 2).Hotels.Count() == 1);
+            Assert.That(bookings[0].Services.Single(s => s.Id == 1).Hotels.Count() == 1);
+            Assert.That(bookings[0].Services.Single(s => s.Id == 2).Hotels.Count() == 1);
 
             Assert.That(bookings[1].Services.Count() == 1);
 
             Assert.NotNull(bookings[1].Services.SingleOrDefault(s => s.Id == 1));
-            Assert.That(bookings[1].Services.SingleOrDefault(s => s.Id == 1).Hotels.Count() == 1);
+            Assert.That(bookings[1].Services.Single(s => s.Id == 1).Hotels.Count() == 1);
         }
     }
 }
