@@ -48,17 +48,17 @@ namespace Slapper
             /// <summary>
             /// The name of the instance cache stored in the logical call context.
             /// </summary>
-            public const string InstanceCacheContextStorageKey = "Slapper.AutoMapper.InstanceCache";
+            internal const string InstanceCacheContextStorageKey = "Slapper.AutoMapper.InstanceCache";
 
             /// <summary>
             /// Cache of TypeMaps containing the types identifiers and PropertyInfo/FieldInfo objects.
             /// </summary>
-            public static readonly ConcurrentDictionary<Type, TypeMap> TypeMapCache = new ConcurrentDictionary<Type, TypeMap>();
+            internal static readonly ConcurrentDictionary<Type, TypeMap> TypeMapCache = new ConcurrentDictionary<Type, TypeMap>();
 
             /// <summary>
             /// A TypeMap holds data relevant for a particular Type.
             /// </summary>
-            public class TypeMap
+            internal class TypeMap
             {
                 /// <summary>
                 /// Creates a new <see cref="TypeMap"/>.
@@ -115,13 +115,13 @@ namespace Slapper
             /// unique cache.
             /// </remarks>
             /// <returns>Instance Cache</returns>
-            public static Dictionary<object, object> GetInstanceCache()
+            public static Dictionary<Tuple<int, int, object>, object> GetInstanceCache()
             {
-                var instanceCache = InternalHelpers.ContextStorage.Get<Dictionary<object, object>>(InstanceCacheContextStorageKey);
+                var instanceCache = InternalHelpers.ContextStorage.Get<Dictionary<Tuple<int, int, object>, object>>(InstanceCacheContextStorageKey);
 
                 if (instanceCache == null)
                 {
-                    instanceCache = new Dictionary<object, object>();
+                    instanceCache = new Dictionary<Tuple<int, int, object>, object>();
 
                     InternalHelpers.ContextStorage.Store(InstanceCacheContextStorageKey, instanceCache);
                 }

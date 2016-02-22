@@ -36,6 +36,17 @@ namespace Slapper.Tests
             public string Name { get; set; }
         }
 
+        public class Order
+        {
+            public int Id { get; set; }
+            public List<OrderItem> OrderItems { get; set; }
+        }
+
+        public class OrderItem
+        {
+            public int Id { get; set; }
+        }
+
         [Test]
         public void Previously_Instantiated_Objects_Will_Be_Returned_Until_The_Cache_Is_Cleared()
         {
@@ -51,7 +62,7 @@ namespace Slapper.Tests
             var customer = Slapper.AutoMapper.Map<Customer>(dictionary);
 
             // Assert
-            Assert.That(customer.FirstName == "Bob");
+            Assert.AreEqual("Bob", customer.FirstName);
 
             // Arrange
             var dictionary2 = new Dictionary<string, object> { { "CustomerId", 1 } };
@@ -61,7 +72,7 @@ namespace Slapper.Tests
 
             // Assert that this will be "Bob" because the identifier of the Customer object was the same, 
             // so we recieved back the cached instance of the Customer object.
-            Assert.That(customer2.FirstName == "Bob");
+            Assert.AreEqual("Bob", customer2.FirstName);
 
             // Arrange
             var dictionary3 = new Dictionary<string, object> { { "CustomerId", 1 } };
@@ -72,7 +83,7 @@ namespace Slapper.Tests
             var customer3 = Slapper.AutoMapper.Map<Customer>(dictionary3);
 
             // Assert
-            Assert.That(customer3.FirstName == null);
+            Assert.Null(customer3.FirstName);
         }
 
         [Test]
@@ -98,6 +109,28 @@ namespace Slapper.Tests
             var employeeList = AutoMapper.Map<Employee>(list).ToList();
 
             Assert.AreSame(employeeList[0].Department, employeeList[1].Department);           
+        }
+
+        [Test]
+        public void Cache_is_cleared_if_KeepCache_is_false()
+        {
+            var item1 = new Dictionary<string, object> {
+                { "Id", 1 },
+                { "OrderItems_Id", 1 }
+            };
+
+            var item2 = new Dictionary<string, object> {
+                { "Id", 1 },
+                { "OrderItems_Id", 2 }
+            };
+
+            var firstResult = AutoMapper.Map<Order>(item1, false);
+            var secondResult = AutoMapper.Map<Order>(item2, false);
+
+            Assert.AreEqual(1, firstResult.OrderItems.Count);
+            Assert.AreEqual(1, firstResult.OrderItems[0].Id);
+            Assert.AreEqual(1, secondResult.OrderItems.Count);
+            Assert.AreEqual(2, secondResult.OrderItems[0].Id);
         }
     }
 }

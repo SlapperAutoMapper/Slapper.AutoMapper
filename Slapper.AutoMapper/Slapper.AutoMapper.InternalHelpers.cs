@@ -46,7 +46,7 @@ namespace Slapper
         /// <summary>
         /// Contains the methods and members responsible for this libraries internal concerns.
         /// </summary>
-        public static class InternalHelpers
+        internal static class InternalHelpers
         {
             /// <summary>
             /// Gets the identifiers for the given type. Returns NULL if not found.
@@ -298,7 +298,7 @@ namespace Slapper
             /// <param name="member">FieldInfo or PropertyInfo object</param>
             /// <param name="obj">Object to get the value from</param>
             /// <returns>Value of the member</returns>
-            public static object GetMemberValue(object member, object obj)
+            private static object GetMemberValue(object member, object obj)
             {
                 object value = null;
 
@@ -327,22 +327,43 @@ namespace Slapper
             /// </summary>
             /// <param name="type">Type of instance to get</param>
             /// <param name="properties">List of properties and values</param>
-            /// <param name="parentHash">Hash from parent object</param>
+            /// <param name="parentInstance">Parent instance. Can be NULL if this is the root instance.</param>
             /// <returns>
             /// Tuple of bool, object, int where bool represents whether this is a newly created instance,
             /// object being an instance of the requested type and int being the instance's identifier hash.
             /// </returns>
-            public static Tuple<bool, object, int> GetInstance(Type type, IDictionary<string, object> properties, int parentHash)
+            internal static Tuple<bool, object, Tuple<int, int, object>> GetInstance(Type type, IDictionary<string, object> properties, object parentInstance = null)
             {
+                var key = GetCacheKey(type, properties, parentInstance);
+
                 var instanceCache = Cache.GetInstanceCache();
 
+                object instance;
+
+                var isNewlyCreatedInstance = !instanceCache.TryGetValue(key, out instance);
+
+                if (isNewlyCreatedInstance)
+                {
+                    instance = CreateInstance(type);
+                    instanceCache[key] = instance;
+                }
+
+                return Tuple.Create(isNewlyCreatedInstance, instance, key);
+            }
+
+            private static Tuple<int, int, object> GetCacheKey(Type type, IDictionary<string, object> properties, object parentInstance)
+            {
+                var identifierHash = GetIdentifierHash(type, properties);
+
+                var key = Tuple.Create(identifierHash, type.GetHashCode(), parentInstance);
+                return key;
+            }
+
+            private static int GetIdentifierHash(Type type, IDictionary<string, object> properties)
+            {
                 var identifiers = GetIdentifiers(type);
 
-                object instance = null;
-
-                bool isNewlyCreatedInstance = false;
-
-                int identifierHash = 0;
+                var identifierHash = 0;
 
                 if (identifiers != null)
                 {
@@ -352,40 +373,23 @@ namespace Slapper
                         {
                             var identifierValue = properties[identifier];
                             if (identifierValue != null)
-                                identifierHash += identifierValue.GetHashCode() + type.GetHashCode() + parentHash;
-                        }
-                    }
-
-                    if (identifierHash != 0)
                     {
-                        if (instanceCache.ContainsKey(identifierHash))
+                                // Unchecked to avoid arithmetic overflow
+                                unchecked
                         {
-                            instance = instanceCache[identifierHash];
+                                    // Include identifier hashcode to avoid collisions between e.g. multiple int IDs
+                                    identifierHash += identifierValue.GetHashCode() + identifier.GetHashCode();
+                                }
                         }
-                        else
-                        {
-                            instance = CreateInstance(type);
-
-                            instanceCache.Add(identifierHash, instance);
-
-                            isNewlyCreatedInstance = true;
                         }
                     }
                 }
-
-                // An identifier hash with a value of zero means the type does not have any identifiers.
-                // To make this instance unique generate a unique hash for it.
-                if (identifierHash == 0 && identifiers != null) identifierHash = type.GetHashCode() + parentHash;
-
-                if (instance == null)
+                else
                 {
-                    instance = CreateInstance(type);
+                    // If the type has no identifiers we must generate a unique hash for it.
                     identifierHash = Guid.NewGuid().GetHashCode();
-
-                    isNewlyCreatedInstance = true;
                 }
-
-                return new Tuple<bool, object, int>(isNewlyCreatedInstance, instance, identifierHash);
+                return identifierHash;
             }
 
             /// <summary>
@@ -399,7 +403,7 @@ namespace Slapper
             /// <param name="instance">Instance to populate</param>
             /// <param name="parentInstance">Optional parent instance of the instance being populated</param>
             /// <returns>Populated instance</returns>
-            public static object Map(IDictionary<string, object> dictionary, object instance, object parentInstance = null)
+            internal static object Map(IDictionary<string, object> dictionary, object instance, object parentInstance = null)
             {
                 if (instance.GetType().IsPrimitive || instance is string)
                 {
@@ -508,7 +512,7 @@ namespace Slapper
             /// <param name="instance">Instance to populate</param>
             /// <param name="parentInstance">Optional parent instance of the instance being populated</param>
             /// <returns>Populated instance</returns>
-            public static object MapCollection(Type type, IDictionary<string, object> dictionary, object instance, object parentInstance = null)
+            internal static object MapCollection(Type type, IDictionary<string, object> dictionary, object instance, object parentInstance = null)
             {
                 Type baseListType = typeof(List<>);
 
@@ -525,7 +529,7 @@ namespace Slapper
                     return instance;
                 }
 
-                var getInstanceResult = GetInstance(type, dictionary, parentInstance == null ? 0 : parentInstance.GetHashCode());
+                var getInstanceResult = GetInstance(type, dictionary, parentInstance);
 
                 // Is this a newly created instance? If false, then this item was retrieved from the instance cache.
                 bool isNewlyCreatedInstance = getInstanceResult.Item1;
@@ -581,7 +585,7 @@ namespace Slapper
             /// Provides a means of getting/storing data in the host application's
             /// appropriate context.
             /// </summary>
-            public interface IContextStorage
+            internal interface IContextStorage
             {
                 /// <summary>
                 /// Get a stored item.
@@ -682,7 +686,7 @@ namespace Slapper
             /// For ASP.NET applications, it will store in the data in the current HTTPContext.
             /// For all other applications, it will store the data in the logical call context.
             /// </remarks>
-            public static class ContextStorage
+            internal static class ContextStorage
             {
                 /// <summary>
                 /// Provides a means of getting/storing data in the host application's
@@ -729,7 +733,7 @@ namespace Slapper
             /// <summary>
             /// Contains the methods and members responsible for this libraries reflection concerns.
             /// </summary>
-            public static class ReflectionHelper
+            private static class ReflectionHelper
             {
                 /// <summary>
                 /// Provides access to System.Web.HttpContext.Current.Items via reflection.
