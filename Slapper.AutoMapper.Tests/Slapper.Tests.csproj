@@ -51,6 +51,7 @@
     <Compile Include="MappingToGuidTests.cs" />
     <Compile Include="MappingToNullableTypesTests.cs" />
     <Compile Include="MappingToEnumTests.cs" />
+    <Compile Include="MatchingChildNameTests.cs" />
     <Compile Include="NoIdentifierTests.cs" />
     <Compile Include="NullTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
