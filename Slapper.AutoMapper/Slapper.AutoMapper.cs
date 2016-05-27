@@ -41,15 +41,6 @@ namespace Slapper
     /// </summary>
     public static partial class AutoMapper
     {
-        #region Constructor
-
-        static AutoMapper()
-        {
-            Configuration.ApplyDefaultIdentifierConventions();
-        }
-
-        #endregion Constructor
-
         #region Attributes
 
         /// <summary>

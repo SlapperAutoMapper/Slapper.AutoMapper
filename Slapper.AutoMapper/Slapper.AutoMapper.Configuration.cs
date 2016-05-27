@@ -48,6 +48,7 @@ namespace Slapper
             {
                 IdentifierAttributeType = typeof(Id);
 
+                ApplyDefaultIdentifierConventions();
                 ApplyDefaultTypeConverters();
             }
 

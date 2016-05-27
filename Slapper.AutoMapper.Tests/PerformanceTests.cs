@@ -66,8 +66,8 @@ namespace Slapper.Tests
             
             // Act
             Stopwatch stopwatch = Stopwatch.StartNew();
-
-            var customers = Slapper.AutoMapper.Map<Customer>( list );
+            var customers = AutoMapper.Map<Customer>( list );
+            stopwatch.Stop();
 
             // Assert
             Assert.NotNull( customers );
@@ -118,8 +118,8 @@ namespace Slapper.Tests
             
             // Act
             Stopwatch stopwatch = Stopwatch.StartNew();
-
-            var customers = Slapper.AutoMapper.Map<Customer>( list );
+            var customers = AutoMapper.Map<Customer>( list );
+            stopwatch.Stop();
 
             // Assert
             Assert.NotNull( customers );
