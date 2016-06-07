@@ -88,7 +88,23 @@ namespace Slapper
             /// </returns>
             public static object CreateInstance(Type type)
             {
-                return type == typeof(string) ? string.Empty : Activator.CreateInstance(type);
+                if (type == typeof(string))
+                {
+                    return string.Empty;
+                }
+
+                if (Configuration.TypeActivators.Count > 0)
+                {
+                    foreach (var typeActivator in Configuration.TypeActivators.OrderBy(ta => ta.Order))
+                    {
+                        if (typeActivator.CanCreate(type))
+                        {
+                            return typeActivator.Create(type);
+                        }
+                    }
+                }
+
+                return Activator.CreateInstance(type);
             }
 
             /// <summary>
@@ -466,8 +482,12 @@ namespace Slapper
                             // hasn't been initialized, then this will return null.
                             object nestedInstance = GetMemberValue(member, instance);
 
-                            // If the member is null and is a class, try to create an instance of the type
-                            if (nestedInstance == null && memberType.IsClass)
+                            var genericCollectionType = typeof(IEnumerable<>);
+                            var isEnumerableType = memberType.IsGenericType && genericCollectionType.IsAssignableFrom(memberType.GetGenericTypeDefinition())
+                                                   || memberType.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericCollectionType);
+
+                            // If the member is null and is a class or interface (not ienumerable), try to create an instance of the type
+                            if (nestedInstance == null && (memberType.IsClass || (memberType.IsInterface && !isEnumerableType)))
                             {
                                 if (memberType.IsArray)
                                 {
@@ -475,14 +495,13 @@ namespace Slapper
                                 }
                                 else
                                 {
-                                    nestedInstance = typeof(IEnumerable).IsAssignableFrom(memberType) ? CreateInstance(memberType) : GetInstance(memberType, newDictionary, parentInstance == null ? 0 : parentInstance.GetHashCode()).Item2;
+                                    nestedInstance = typeof(IEnumerable).IsAssignableFrom(memberType)
+                                                         ? CreateInstance(memberType)
+                                                         : GetInstance(memberType, newDictionary, parentInstance == null ? 0 : parentInstance.GetHashCode()).Item2;
                                 }
                             }
 
-                            Type genericCollectionType = typeof(IEnumerable<>);
-
-                            if (memberType.IsGenericType && genericCollectionType.IsAssignableFrom(memberType.GetGenericTypeDefinition())
-                                 || memberType.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericCollectionType))
+                            if (isEnumerableType)
                             {
                                 var innerType = memberType.GetGenericArguments().FirstOrDefault() ?? memberType.GetElementType();
                                 nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, instance);

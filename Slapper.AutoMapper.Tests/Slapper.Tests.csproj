@@ -66,6 +66,7 @@
     <Compile Include="SimpleTypeConversionTests.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="TestHelpers.cs" />
+    <Compile Include="TypeActivatorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Slapper.AutoMapper\Slapper.csproj">
