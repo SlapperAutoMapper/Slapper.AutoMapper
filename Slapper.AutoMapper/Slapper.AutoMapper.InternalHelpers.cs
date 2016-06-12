@@ -490,7 +490,14 @@ namespace Slapper
                             }
                             else
                             {
-                                nestedInstance = Map(newDictionary, nestedInstance, instance);
+                                if (newDictionary.Values.All(v => v == null))
+                                {
+                                    nestedInstance = null;
+                                }
+                                else
+                                {
+                                    nestedInstance = Map(newDictionary, nestedInstance, instance);
+                                }
                             }
 
                             SetMemberValue(member, instance, nestedInstance);

@@ -22,6 +22,25 @@ namespace Slapper.Tests
             public decimal OrderTotal;
         }
 
+        public class CustomerSingleOrder
+        {
+            public int Id;
+            public string FirstName;
+            public string LastName;
+            public SingleOrder Order;
+        }
+
+        public class SingleOrder
+        {
+            public int Id;
+            public OrderDetails Details;
+        }
+
+        public class OrderDetails
+        {
+            public string Address;
+        }
+
         [Test]
         public void Can_Handle_Mapping_A_Single_Dynamic_Object()
         {
@@ -65,6 +84,48 @@ namespace Slapper.Tests
             // Assert
             Assert.That( customers.Count() == 5 );
             Assert.That( customers.First().Orders.Count == 1 );
+        }
+
+        [Test]
+        public void Nested_Member_Should_Be_Null_If_All_Values_Are_Null()
+        {
+            // Arrange
+            dynamic customer = new ExpandoObject();
+            customer.Id = 1;
+            customer.FirstName = "FirstName";
+            customer.LastName = "LastName";
+            customer.Order_Id = null;
+            customer.Order_OrderTotal = null;
+
+            // Act
+            var test = Slapper.AutoMapper.MapDynamic<CustomerSingleOrder>(customer);
+
+            // Assert
+            Assert.That(test != null);
+            Assert.That(test.Order == null);
+        }
+
+        [Test]
+        public void Nested_Member_Should_Be_Null_Only_If_All_Nested_Values_Are_Null()
+        {
+            // Arrange
+            dynamic customer = new ExpandoObject();
+            customer.Id = 1;
+            customer.FirstName = "FirstName";
+            customer.LastName = "LastName";
+            customer.Order_Id = null;
+            customer.Order_OrderTotal = null;
+            customer.Order_Details_Address = "123 Fake Ave.";
+
+            // Act
+            var test = Slapper.AutoMapper.MapDynamic<CustomerSingleOrder>(customer);
+
+            // Assert
+            Assert.That(test != null);
+            Assert.That(test.Order != null);
+            Assert.That(test.Order.Details != null);
+            Assert.That(!string.IsNullOrWhiteSpace(test.Order.Details.Address));
+            Assert.That(test.Order.Details.Address == "123 Fake Ave.");
         }
     }
 }
