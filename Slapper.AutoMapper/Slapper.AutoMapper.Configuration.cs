@@ -80,6 +80,11 @@ namespace Slapper
             public static readonly List<ITypeConverter> TypeConverters = new List<ITypeConverter>();
 
             /// <summary>
+            /// Activators to instantiate types.
+            /// </summary>
+            public static readonly List<ITypeActivator> TypeActivators = new List<ITypeActivator>();
+
+            /// <summary>
             /// Applies default conventions for finding identifiers.
             /// </summary>
             public static void ApplyDefaultIdentifierConventions()
@@ -281,6 +286,31 @@ namespace Slapper
                 public int Order { get { return 1000; } }
 
                 #endregion
+            }
+
+            /// <summary>
+            /// Defines an interface for an activator for a specific type.
+            /// </summary>
+            public interface ITypeActivator
+            {
+                /// <summary>
+                /// Creates the type.
+                /// </summary>
+                /// <param name="type">The type to create.</param>
+                /// <returns>The created type.</returns>
+                object Create(Type type);
+
+                /// <summary>
+                /// Indicates whether it can create the type.
+                /// </summary>
+                /// <param name="type">The type to create.</param>
+                /// <returns>Boolean response.</returns>
+                bool CanCreate(Type type);
+
+                /// <summary>
+                /// The order to try the activator in.
+                /// </summary>
+                int Order { get; }
             }
         }
 
