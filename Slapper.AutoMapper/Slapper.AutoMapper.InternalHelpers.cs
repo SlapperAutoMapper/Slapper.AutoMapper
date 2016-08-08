@@ -542,12 +542,11 @@ namespace Slapper
             internal static object MapCollection(Type type, IDictionary<string, object> dictionary, object instance, object parentInstance = null)
             {
                 Type baseListType = typeof(List<>);
-
-                Type listType = baseListType.MakeGenericType(type);
+                Type collectionType = instance == null ? baseListType.MakeGenericType(type) : instance.GetType();
 
                 if (instance == null)
                 {
-                    instance = CreateInstance(listType);
+                    instance = CreateInstance(collectionType);
                 }
 
                 // If the dictionnary only contains null values, we return an empty instance
@@ -577,14 +576,14 @@ namespace Slapper
                     }
                     else
                     {
-                        MethodInfo addMethod = listType.GetMethod("Add");
+                        MethodInfo addMethod = collectionType.GetMethod("Add");
 
                         addMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
                     }
                 }
                 else
                 {
-                    MethodInfo containsMethod = listType.GetMethod("Contains");
+                    MethodInfo containsMethod = collectionType.GetMethod("Contains");
 
                     var alreadyContainsInstance = (bool)containsMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
 
@@ -598,7 +597,7 @@ namespace Slapper
                         }
                         else
                         {
-                            MethodInfo addMethod = listType.GetMethod("Add");
+                            MethodInfo addMethod = collectionType.GetMethod("Add");
 
                             addMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
                         }
