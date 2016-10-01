@@ -1,0 +1,736 @@
+﻿/*  Slapper.AutoMapper v1.0.0.6 ( https://github.com/SlapperAutoMapper/Slapper.AutoMapper )
+
+    MIT License:
+   
+    Copyright (c) 2016, Randy Burden ( http://randyburden.com ) and contributors. All rights reserved.
+    All rights reserved.
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
+    associated documentation files (the "Software"), to deal in the Software without restriction, including 
+    without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+    copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the 
+    following conditions:
+
+    The above copyright notice and this permission notice shall be included in all copies or substantial 
+    portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT 
+    LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN 
+    NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+
+    Description:
+    
+    Slapper.AutoMapper maps dynamic data to static types. Slap your data into submission!
+    
+    Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a single file mapping library that can convert 
+    dynamic data into static types and populate complex nested child objects.
+    It primarily converts C# dynamics and IDictionary<string, object> to strongly typed objects and supports
+    populating an entire object graph by using underscore notation to underscore into nested objects.
+*/
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using Microsoft.Extensions.Caching.Memory;
+
+namespace Slapper
+{
+    public static partial class AutoMapper
+    {
+        #region Internal Helpers
+
+        /// <summary>
+        /// Contains the methods and members responsible for this libraries internal concerns.
+        /// </summary>
+        internal static class InternalHelpers
+        {
+            /// <summary>
+            /// Gets the identifiers for the given type. Returns NULL if not found.
+            /// Results are cached for subsequent use and performance.
+            /// </summary>
+            /// <remarks>
+            /// If no identifiers have been manually added, this method will attempt
+            /// to first find an <see cref="Slapper.AutoMapper.Id"/> attribute on the <paramref name="type"/>
+            /// and if not found will then try to match based upon any specified identifier conventions.
+            /// </remarks>
+            /// <param name="type">Type</param>
+            /// <returns>Identifier</returns>
+            public static IEnumerable<string> GetIdentifiers(Type type)
+            {
+                var typeMap = Cache.TypeMapCache.GetOrAdd(type, CreateTypeMap(type));
+
+                return typeMap.Identifiers.Any() ? typeMap.Identifiers : null;
+            }
+
+            /// <summary>
+            /// Get a Dictionary of a type's property names and field names and their corresponding PropertyInfo or FieldInfo.
+            /// Results are cached for subsequent use and performance.
+            /// </summary>
+            /// <param name="type">Type</param>
+            /// <returns>Dictionary of a type's property names and their corresponding PropertyInfo</returns>
+            public static Dictionary<string, object> GetFieldsAndProperties(Type type)
+            {
+                var typeMap = Cache.TypeMapCache.GetOrAdd(type, CreateTypeMap(type));
+
+                return typeMap.PropertiesAndFieldsInfo;
+            }
+
+            /// <summary>
+            /// Creates an instance of the specified type using that type's default constructor.
+            /// </summary>
+            /// <param name="type">The type of object to create.</param>
+            /// <returns>
+            /// A reference to the newly created object.
+            /// </returns>
+            public static object CreateInstance(Type type)
+            {
+                if (type == typeof(string))
+                {
+                    return string.Empty;
+                }
+
+                if (Configuration.TypeActivators.Count > 0)
+                {
+                    foreach (var typeActivator in Configuration.TypeActivators.OrderBy(ta => ta.Order))
+                    {
+                        if (typeActivator.CanCreate(type))
+                        {
+                            return typeActivator.Create(type);
+                        }
+                    }
+                }
+
+                return Activator.CreateInstance(type);
+            }
+
+            /// <summary>
+            /// Creates a TypeMap for a given Type.
+            /// </summary>
+            /// <param name="type">Type</param>
+            /// <returns>TypeMap</returns>
+            public static Cache.TypeMap CreateTypeMap(Type type)
+            {
+                var conventionIdentifiers = Configuration.IdentifierConventions.Select(applyIdentifierConvention => applyIdentifierConvention(type)).ToList();
+                var fieldsAndProperties = CreateFieldAndPropertyInfoDictionary(type);
+                var identifiers = new List<string>();
+
+                foreach (var fieldOrProperty in fieldsAndProperties)
+                {
+                    var memberName = fieldOrProperty.Key;
+
+                    var member = fieldOrProperty.Value;
+
+                    var fieldInfo = member as FieldInfo;
+
+                    if (fieldInfo != null)
+                    {
+                        if (fieldInfo.GetCustomAttributes(Configuration.IdentifierAttributeType, false).Any())
+                        {
+                            identifiers.Add(memberName);
+                        }
+                        else if (conventionIdentifiers.Exists(x => x.ToLower() == memberName.ToLower()))
+                        {
+                            identifiers.Add(memberName);
+                        }
+                    }
+                    else
+                    {
+                        var propertyInfo = member as PropertyInfo;
+
+                        if (propertyInfo != null)
+                        {
+                            if (propertyInfo.GetCustomAttributes(Configuration.IdentifierAttributeType, false).Any())
+                            {
+                                identifiers.Add(memberName);
+                            }
+                            else if (conventionIdentifiers.Exists(x => x.ToLower() == memberName.ToLower()))
+                            {
+                                identifiers.Add(memberName);
+                            }
+                        }
+                    }
+                }
+
+                var typeMap = new Cache.TypeMap(type, identifiers, fieldsAndProperties);
+
+                return typeMap;
+            }
+
+            /// <summary>
+            /// Creates a Dictionary of field or property names and their corresponding FieldInfo or PropertyInfo objects
+            /// </summary>
+            /// <param name="type">Type</param>
+            /// <returns>Dictionary of member names and member info objects</returns>
+            public static Dictionary<string, object> CreateFieldAndPropertyInfoDictionary(Type type)
+            {
+                var properties = type.GetRuntimeProperties();
+                var dictionary = properties.ToDictionary<PropertyInfo, string, object>(propertyInfo => propertyInfo.Name, propertyInfo => propertyInfo);
+                var fields = type.GetRuntimeFields();
+
+                foreach (var fieldInfo in fields)
+                {
+                    dictionary.Add(fieldInfo.Name, fieldInfo);
+                }
+
+                return dictionary;
+            }
+
+            /// <summary>
+            /// Gets the Type of the Field or Property
+            /// </summary>
+            /// <param name="member">FieldInfo or PropertyInfo object</param>
+            /// <returns>Type</returns>
+            public static Type GetMemberType(object member)
+            {
+                Type type = null;
+
+                var fieldInfo = member as FieldInfo;
+
+                if (fieldInfo != null)
+                {
+                    type = fieldInfo.FieldType;
+                }
+                else
+                {
+                    var propertyInfo = member as PropertyInfo;
+
+                    if (propertyInfo != null)
+                    {
+                        type = propertyInfo.PropertyType;
+                    }
+                }
+
+                return type;
+            }
+
+            /// <summary>
+            /// Sets the value on a Field or Property
+            /// </summary>
+            /// <param name="member">FieldInfo or PropertyInfo object</param>
+            /// <param name="obj">Object to set the value on</param>
+            /// <param name="value">Value</param>
+            public static void SetMemberValue(object member, object obj, object value)
+            {
+                var fieldInfo = member as FieldInfo;
+
+                if (fieldInfo != null)
+                {
+                    value = ConvertValuesTypeToMembersType(value, fieldInfo.Name, fieldInfo.FieldType, fieldInfo.DeclaringType);
+
+                    try
+                    {
+                        fieldInfo.SetValue(obj, value);
+                    }
+                    catch (Exception e)
+                    {
+                        string errorMessage =
+                            string.Format("{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
+                                           e.Message, value, value.GetType(), fieldInfo.Name, fieldInfo.FieldType, fieldInfo.DeclaringType);
+
+                        throw new Exception(errorMessage, e);
+                    }
+                }
+                else
+                {
+                    var propertyInfo = member as PropertyInfo;
+
+                    if (propertyInfo != null)
+                    {
+                        value = ConvertValuesTypeToMembersType(value, propertyInfo.Name, propertyInfo.PropertyType, propertyInfo.DeclaringType);
+
+                        try
+                        {
+                            propertyInfo.SetValue(obj, value, null);
+                        }
+                        catch (Exception e)
+                        {
+                            string errorMessage =
+                                string.Format("{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
+                                               e.Message, value, value.GetType(), propertyInfo.Name, propertyInfo.PropertyType, propertyInfo.DeclaringType);
+
+                            throw new Exception(errorMessage, e);
+                        }
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Converts the values type to the members type if needed.
+            /// </summary>
+            /// <param name="value">Object value.</param>
+            /// <param name="memberName">Member name.</param>
+            /// <param name="memberType">Member type.</param>
+            /// <param name="classType">Declaring class type.</param>
+            /// <returns>Value converted to the same type as the member type.</returns>
+            private static object ConvertValuesTypeToMembersType(object value, string memberName, Type memberType, Type classType)
+            {
+                if (value == null) return null;
+
+                var valueType = value.GetType();
+
+                try
+                {
+                    if (valueType != memberType)
+                    {
+                        foreach (var typeConverter in Configuration.TypeConverters.OrderBy(x => x.Order))
+                        {
+                            if (typeConverter.CanConvert(value, memberType))
+                            {
+                                var convertedValue = typeConverter.Convert(value, memberType);
+
+                                return convertedValue;
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    string errorMessage = string.Format("{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
+                                                         e.Message, value, valueType, memberName, memberType, classType);
+
+                    throw new Exception(errorMessage, e);
+                }
+
+                return value;
+            }
+
+            /// <summary>
+            /// Gets the value of the member
+            /// </summary>
+            /// <param name="member">FieldInfo or PropertyInfo object</param>
+            /// <param name="obj">Object to get the value from</param>
+            /// <returns>Value of the member</returns>
+            private static object GetMemberValue(object member, object obj)
+            {
+                object value = null;
+
+                var fieldInfo = member as FieldInfo;
+
+                if (fieldInfo != null)
+                {
+                    value = fieldInfo.GetValue(obj);
+                }
+                else
+                {
+                    var propertyInfo = member as PropertyInfo;
+
+                    if (propertyInfo != null)
+                    {
+                        value = propertyInfo.GetValue(obj, null);
+                    }
+                }
+
+                return value;
+            }
+
+            /// <summary>
+            /// Gets a new or existing instance depending on whether an instance with the same identifiers already existing
+            /// in the instance cache.
+            /// </summary>
+            /// <param name="type">Type of instance to get</param>
+            /// <param name="properties">List of properties and values</param>
+            /// <param name="parentInstance">Parent instance. Can be NULL if this is the root instance.</param>
+            /// <returns>
+            /// Tuple of bool, object, int where bool represents whether this is a newly created instance,
+            /// object being an instance of the requested type and int being the instance's identifier hash.
+            /// </returns>
+            internal static Tuple<bool, object, Tuple<int, int, object>> GetInstance(Type type, IDictionary<string, object> properties, object parentInstance = null)
+            {
+                var key = GetCacheKey(type, properties, parentInstance);
+
+                var instanceCache = Cache.GetInstanceCache();
+
+                object instance;
+
+                var isNewlyCreatedInstance = !instanceCache.TryGetValue(key, out instance);
+
+                if (isNewlyCreatedInstance)
+                {
+                    instance = CreateInstance(type);
+                    instanceCache[key] = instance;
+                }
+
+                return Tuple.Create(isNewlyCreatedInstance, instance, key);
+            }
+
+            private static Tuple<int, int, object> GetCacheKey(Type type, IDictionary<string, object> properties, object parentInstance)
+            {
+                var identifierHash = GetIdentifierHash(type, properties);
+
+                var key = Tuple.Create(identifierHash, type.GetHashCode(), parentInstance);
+                return key;
+            }
+
+            private static int GetIdentifierHash(Type type, IDictionary<string, object> properties)
+            {
+                var identifiers = GetIdentifiers(type);
+
+                var identifierHash = 0;
+
+                if (identifiers != null)
+                {
+                    foreach (var identifier in identifiers)
+                    {
+                        if (properties.ContainsKey(identifier))
+                        {
+                            var identifierValue = properties[identifier];
+                            if (identifierValue != null)
+                    {
+                                // Unchecked to avoid arithmetic overflow
+                                unchecked
+                        {
+                                    // Include identifier hashcode to avoid collisions between e.g. multiple int IDs
+                                    identifierHash += identifierValue.GetHashCode() + identifier.GetHashCode();
+                                }
+                        }
+                        }
+                    }
+                }
+                else
+                {
+                    // If the type has no identifiers we must generate a unique hash for it.
+                    identifierHash = Guid.NewGuid().GetHashCode();
+                }
+                return identifierHash;
+            }
+
+            /// <summary>
+            /// Populates the given instance's properties where the IDictionary key property names
+            /// match the type's property names case insensitively.
+            /// 
+            /// Population of complex nested child properties is supported by underscoring "_" into the
+            /// nested child properties in the property name.
+            /// </summary>
+            /// <param name="dictionary">Dictionary of property names and values</param>
+            /// <param name="instance">Instance to populate</param>
+            /// <param name="parentInstance">Optional parent instance of the instance being populated</param>
+            /// <returns>Populated instance</returns>
+            internal static object Map(IDictionary<string, object> dictionary, object instance, object parentInstance = null)
+            {
+                if (instance.GetType().GetTypeInfo().IsPrimitive || instance is string)
+                {
+                    object value;
+                    if (!dictionary.TryGetValue("$", out value))
+                    {
+                        throw new InvalidCastException("For lists of primitive types, include $ as the name of the property");
+                    }
+
+                    instance = value;
+                    return instance;
+                }
+
+                var fieldsAndProperties = GetFieldsAndProperties(instance.GetType());
+
+                foreach (var fieldOrProperty in fieldsAndProperties)
+                {
+                    var memberName = fieldOrProperty.Key.ToLower();
+
+                    var member = fieldOrProperty.Value;
+
+                    object value;
+
+                    // Handle populating simple members on the current type
+                    if (dictionary.TryGetValue(memberName, out value))
+                    {
+                        SetMemberValue(member, instance, value);
+                    }
+                    else
+                    {
+                        Type memberType = GetMemberType(member);
+
+                        // Handle populating complex members on the current type
+                        if (memberType.GetTypeInfo().IsClass || memberType.GetTypeInfo().IsInterface)
+                        {
+                            // Try to find any keys that start with the current member name
+                            var nestedDictionary = dictionary.Where(x => x.Key.ToLower().StartsWith(memberName + "_")).ToList();
+
+                            // If there weren't any keys
+                            if (!nestedDictionary.Any())
+                            {
+                                // And the parent instance was not null
+                                if (parentInstance != null)
+                                {
+                                    // And the parent instance is of the same type as the current member
+                                    if (parentInstance.GetType() == memberType)
+                                    {
+                                        // Then this must be a 'parent' to the current type
+                                        SetMemberValue(member, instance, parentInstance);
+                                    }
+                                }
+
+                                continue;
+                            }
+                            var regex = new Regex(Regex.Escape(memberName + "_"));
+                            var newDictionary = nestedDictionary.ToDictionary(pair => regex.Replace(pair.Key.ToLower(), string.Empty, 1),
+                                pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+
+                            // Try to get the value of the complex member. If the member
+                            // hasn't been initialized, then this will return null.
+                            object nestedInstance = GetMemberValue(member, instance);
+
+                            var genericCollectionType = typeof(IEnumerable<>);
+                            var isEnumerableType = memberType.GetTypeInfo().IsGenericType && genericCollectionType.GetTypeInfo().IsAssignableFrom(memberType.GetGenericTypeDefinition())
+                                                   || memberType.GetTypeInfo().GetInterfaces().Any(x => x.GetTypeInfo().IsGenericType && x.GetGenericTypeDefinition() == genericCollectionType);
+
+                            // If the member is null and is a class or interface (not ienumerable), try to create an instance of the type
+                            if (nestedInstance == null && (memberType.GetTypeInfo().IsClass || (memberType.GetTypeInfo().IsInterface && !isEnumerableType)))
+                            {
+                                if (memberType.IsArray)
+                                {
+                                    nestedInstance = new ArrayList().ToArray(memberType.GetElementType());
+                                }
+                                else
+                                {
+                                    nestedInstance = typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(memberType)
+                                                         ? CreateInstance(memberType)
+                                                         : GetInstance(memberType, newDictionary, parentInstance == null ? 0 : parentInstance.GetHashCode()).Item2;
+                                }
+                            }
+
+                            if (isEnumerableType)
+                            {
+                                var innerType = memberType.GetTypeInfo().GetGenericArguments().FirstOrDefault() ?? memberType.GetElementType();
+                                nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, instance);
+                            }
+                            else
+                            {
+                                if (newDictionary.Values.All(v => v == null))
+                                {
+                                    nestedInstance = null;
+                                }
+                                else
+                                {
+                                    nestedInstance = Map(newDictionary, nestedInstance, instance);
+                                }
+                            }
+
+                            SetMemberValue(member, instance, nestedInstance);
+                        }
+                    }
+                }
+
+                return instance;
+            }
+
+            /// <summary>
+            /// Populates the given instance's properties where the IDictionary key property names
+            /// match the type's property names case insensitively.
+            /// 
+            /// Population of complex nested child properties is supported by underscoring "_" into the
+            /// nested child properties in the property name.
+            /// </summary>
+            /// <param name="type">Underlying instance type</param>
+            /// <param name="dictionary">Dictionary of property names and values</param>
+            /// <param name="instance">Instance to populate</param>
+            /// <param name="parentInstance">Optional parent instance of the instance being populated</param>
+            /// <returns>Populated instance</returns>
+            internal static object MapCollection(Type type, IDictionary<string, object> dictionary, object instance, object parentInstance = null)
+            {
+                Type baseListType = typeof(List<>);
+
+                Type listType = baseListType.MakeGenericType(type);
+
+                if (instance == null)
+                {
+                    instance = CreateInstance(listType);
+                }
+
+                // If the dictionnary only contains null values, we return an empty instance
+                if (dictionary.Values.FirstOrDefault(v => v != null) == null)
+                {
+                    return instance;
+                }
+
+                var getInstanceResult = GetInstance(type, dictionary, parentInstance);
+
+                // Is this a newly created instance? If false, then this item was retrieved from the instance cache.
+                bool isNewlyCreatedInstance = getInstanceResult.Item1;
+
+                bool isArray = instance.GetType().IsArray;
+
+                object instanceToAddToCollectionInstance = getInstanceResult.Item2;
+
+                instanceToAddToCollectionInstance = Map(dictionary, instanceToAddToCollectionInstance, parentInstance);
+
+                if (isNewlyCreatedInstance)
+                {
+                    if (isArray)
+                    {
+                        var arrayList = new ArrayList { instanceToAddToCollectionInstance };
+
+                        instance = arrayList.ToArray(type);
+                    }
+                    else
+                    {
+                        MethodInfo addMethod = listType.GetTypeInfo().GetMethod("Add");
+
+                        addMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
+                    }
+                }
+                else
+                {
+                    MethodInfo containsMethod = listType.GetTypeInfo().GetMethod("Contains");
+
+                    var alreadyContainsInstance = (bool)containsMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
+
+                    if (alreadyContainsInstance == false)
+                    {
+                        if (isArray)
+                        {
+                            var arrayList = new ArrayList((ICollection)instance);
+
+                            instance = arrayList.ToArray(type);
+                        }
+                        else
+                        {
+                            MethodInfo addMethod = listType.GetTypeInfo().GetMethod("Add");
+
+                            addMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
+                        }
+                    }
+                }
+
+                return instance;
+            }
+
+            /// <summary>
+            /// Provides a means of getting/storing data in the host application's
+            /// appropriate context.
+            /// </summary>
+            internal interface IContextStorage
+            {
+                /// <summary>
+                /// Get a stored item.
+                /// </summary>
+                /// <typeparam name="T">Object type</typeparam>
+                /// <param name="key">Item key</param>
+                /// <returns>Reference to the requested object</returns>
+                T Get<T>(string key);
+
+                /// <summary>
+                /// Stores an item.
+                /// </summary>
+                /// <param name="key">Item key</param>
+                /// <param name="obj">Object to store</param>
+                void Store(string key, object obj);
+
+                /// <summary>
+                /// Removes an item.
+                /// </summary>
+                /// <param name="key">Item key</param>
+                void Remove(string key);
+            }
+
+            /// <summary>
+            /// Provides a means of getting/storing data in the host application's
+            /// appropriate context.
+            /// </summary>
+            /// <remarks>
+            /// For ASP.NET applications, it will store in the data in the current HTTPContext.
+            /// For all other applications, it will store the data in the logical call context.
+            /// </remarks>
+            public class InternalContextStorage : IContextStorage
+            {
+                private static readonly MemoryCache MemoryCache = new MemoryCache(new MemoryCacheOptions());
+
+                /// <summary>
+                /// Get a stored item.
+                /// </summary>
+                /// <typeparam name="T">Object type</typeparam>
+                /// <param name="key">Item key</param>
+                /// <returns>Reference to the requested object</returns>
+                public T Get<T>(string key)
+                {
+                    try
+                    {
+                        return MemoryCache.Get<T>(key);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logging.Logger.Log(Logging.LogLevel.Error, ex, "An error occurred in ContextStorage.Get() retrieving key: {0} for type: {1}.", key, typeof(T));
+                    }
+
+                    return default(T);
+                }
+
+                /// <summary>
+                /// Stores an item.
+                /// </summary>
+                /// <param name="key">Item key</param>
+                /// <param name="obj">Object to store</param>
+                public void Store(string key, object obj)
+                {
+                    MemoryCache.Set(key, obj);
+                }
+
+                /// <summary>
+                /// Removes an item.
+                /// </summary>
+                /// <param name="key">Item key</param>
+                public void Remove(string key)
+                {
+                    MemoryCache.Remove(key);
+                }
+            }
+
+            /// <summary>
+            /// Provides a means of getting/storing data in the host application's
+            /// appropriate context.
+            /// </summary>
+            /// <remarks>
+            /// For ASP.NET applications, it will store in the data in the current HTTPContext.
+            /// For all other applications, it will store the data in the logical call context.
+            /// </remarks>
+            internal static class ContextStorage
+            {
+                /// <summary>
+                /// Provides a means of getting/storing data in the host application's
+                /// appropriate context.
+                /// </summary>
+                public static IContextStorage ContextStorageImplementation { get; set; }
+
+                static ContextStorage()
+                {
+                    ContextStorageImplementation = new InternalContextStorage();
+                }
+
+                /// <summary>
+                /// Get a stored item.
+                /// </summary>
+                /// <typeparam name="T">Object type</typeparam>
+                /// <param name="key">Item key</param>
+                /// <returns>Reference to the requested object</returns>
+                public static T Get<T>(string key)
+                {
+                    return ContextStorageImplementation.Get<T>(key);
+                }
+
+                /// <summary>
+                /// Stores an item.
+                /// </summary>
+                /// <param name="key">Item key</param>
+                /// <param name="obj">Object to store</param>
+                public static void Store(string key, object obj)
+                {
+                    ContextStorageImplementation.Store(key, obj);
+                }
+
+                /// <summary>
+                /// Removes an item.
+                /// </summary>
+                /// <param name="key">Item key</param>
+                public static void Remove(string key)
+                {
+                    ContextStorageImplementation.Remove(key);
+                }
+            }
+        }
+
+        #endregion Internal Helpers
+    }
+}
