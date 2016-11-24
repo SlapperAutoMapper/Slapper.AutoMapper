@@ -427,9 +427,10 @@ namespace Slapper
 
             private static InstanceKey GetCacheKey(Type type, IDictionary<string, object> properties, object parentInstance)
             {
-                var identifiers= GetIdentifiers(type).Select(id => properties[id]).ToArray();
+                var identifierValues = GetIdentifiers(type)?.Select(id => properties[id]).DefaultIfEmpty(Guid.NewGuid()).ToArray()
+                    ?? new object[] {Guid.NewGuid()};
 
-                var key = new InstanceKey(type, identifiers, parentInstance);
+                var key = new InstanceKey(type, identifierValues, parentInstance);
                 return key;
             }
 
