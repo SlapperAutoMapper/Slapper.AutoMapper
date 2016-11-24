@@ -72,7 +72,7 @@ namespace Slapper
             {
                 public bool Equals(InstanceKey other) {
                     return Equals(Type, other.Type) 
-                        && ReferenceEquals(ParentInstance, other.ParentInstance) 
+                        && Equals(ParentInstance, other.ParentInstance) 
                         && StructuralComparisons.StructuralEqualityComparer.Equals(IdentifierValues, other.IdentifierValues);
                 }
 
