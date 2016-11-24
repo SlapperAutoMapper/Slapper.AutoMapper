@@ -49,6 +49,63 @@ namespace Slapper
         /// </summary>
         internal static class InternalHelpers
         {
+            private static int CombineHashCodes(params int[] hashCodes)
+            {
+                int hash1 = (5381 << 16) + 5381;
+                int hash2 = hash1;
+
+                int i = 0;
+                foreach (var hashCode in hashCodes)
+                {
+                    if (i % 2 == 0)
+                        hash1 = ((hash1 << 5) + hash1 + (hash1 >> 27)) ^ hashCode;
+                    else
+                        hash2 = ((hash2 << 5) + hash2 + (hash2 >> 27)) ^ hashCode;
+
+                    ++i;
+                }
+
+                return hash1 + (hash2 * 1566083941);
+            }
+
+            public struct InstanceKey : IEquatable<InstanceKey>
+            {
+                public bool Equals(InstanceKey other) {
+                    return Equals(Type, other.Type) 
+                        && ReferenceEquals(ParentInstance, other.ParentInstance) 
+                        && StructuralComparisons.StructuralEqualityComparer.Equals(IdentifierValues, other.IdentifierValues);
+                }
+
+                public override bool Equals(object obj)
+                {
+                    if (ReferenceEquals(null, obj)) return false;
+                    return obj is InstanceKey && Equals((InstanceKey) obj);
+                }
+
+                public override int GetHashCode()
+                {
+                    unchecked
+                    {
+                        return CombineHashCodes(Type?.GetHashCode() ?? 0, StructuralComparisons.StructuralEqualityComparer.GetHashCode(IdentifierValues), ParentInstance?.GetHashCode() ?? 0);
+                    }
+                }
+
+                public static bool operator ==(InstanceKey left, InstanceKey right) { return left.Equals(right); }
+
+                public static bool operator !=(InstanceKey left, InstanceKey right) { return !left.Equals(right); }
+
+                public InstanceKey(Type type, object[] identifierValues, object parentInstance)
+                {
+                    Type = type;
+                    IdentifierValues = identifierValues;
+                    ParentInstance = parentInstance;
+                }
+
+                public  Type Type { get; }
+                public object[] IdentifierValues { get; }
+                public object ParentInstance { get;  }
+            }
+
             /// <summary>
             /// Gets the identifiers for the given type. Returns NULL if not found.
             /// Results are cached for subsequent use and performance.
@@ -349,7 +406,7 @@ namespace Slapper
             /// Tuple of bool, object, int where bool represents whether this is a newly created instance,
             /// object being an instance of the requested type and int being the instance's identifier hash.
             /// </returns>
-            internal static Tuple<bool, object, Tuple<int, int, object>> GetInstance(Type type, IDictionary<string, object> properties, object parentInstance = null)
+            internal static Tuple<bool, object, InstanceKey> GetInstance(Type type, IDictionary<string, object> properties, object parentInstance = null)
             {
                 var key = GetCacheKey(type, properties, parentInstance);
 
@@ -368,45 +425,12 @@ namespace Slapper
                 return Tuple.Create(isNewlyCreatedInstance, instance, key);
             }
 
-            private static Tuple<int, int, object> GetCacheKey(Type type, IDictionary<string, object> properties, object parentInstance)
+            private static InstanceKey GetCacheKey(Type type, IDictionary<string, object> properties, object parentInstance)
             {
-                var identifierHash = GetIdentifierHash(type, properties);
+                var identifiers= GetIdentifiers(type).Select(id => properties[id]).ToArray();
 
-                var key = Tuple.Create(identifierHash, type.GetHashCode(), parentInstance);
+                var key = new InstanceKey(type, identifiers, parentInstance);
                 return key;
-            }
-
-            private static int GetIdentifierHash(Type type, IDictionary<string, object> properties)
-            {
-                var identifiers = GetIdentifiers(type);
-
-                var identifierHash = 0;
-
-                if (identifiers != null)
-                {
-                    foreach (var identifier in identifiers)
-                    {
-                        if (properties.ContainsKey(identifier))
-                        {
-                            var identifierValue = properties[identifier];
-                            if (identifierValue != null)
-                    {
-                                // Unchecked to avoid arithmetic overflow
-                                unchecked
-                        {
-                                    // Include identifier hashcode to avoid collisions between e.g. multiple int IDs
-                                    identifierHash += identifierValue.GetHashCode() + identifier.GetHashCode();
-                                }
-                        }
-                        }
-                    }
-                }
-                else
-                {
-                    // If the type has no identifiers we must generate a unique hash for it.
-                    identifierHash = Guid.NewGuid().GetHashCode();
-                }
-                return identifierHash;
             }
 
             /// <summary>
