@@ -49,6 +49,12 @@ namespace Slapper
         /// </summary>
         internal static class InternalHelpers
         {
+            /// <summary>
+            /// Combine several hashcodes into a single new one. This implementation was grabbed from http://stackoverflow.com/a/34229665 where it is introduced 
+            /// as MS implementation of GetHashCode() for strings.
+            /// </summary>
+            /// <param name="hashCodes">Hascodes to be combined.</param>
+            /// <returns>A new Hascode value combining those passed as parameters.</returns>
             private static int CombineHashCodes(params int[] hashCodes)
             {
                 int hash1 = (5381 << 16) + 5381;
