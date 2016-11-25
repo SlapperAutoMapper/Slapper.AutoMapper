@@ -74,6 +74,10 @@ namespace Slapper
                 return hash1 + (hash2 * 1566083941);
             }
 
+            /// <summary>
+            /// Defines the key for caching instances. Overrides Equality as to get unicity for a given set of identifiers values
+            /// for a given type.
+            /// </summary>
             public struct InstanceKey : IEquatable<InstanceKey>
             {
                 public bool Equals(InstanceKey other) {
