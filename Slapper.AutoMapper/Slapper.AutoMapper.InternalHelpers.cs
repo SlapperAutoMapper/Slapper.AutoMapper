@@ -396,6 +396,26 @@ namespace Slapper
             }
 
             /// <summary>
+            /// Computes a key for storing and identifying an instance in the cache.
+            /// </summary>
+            /// <param name="type">Type of instance to get</param>
+            /// <param name="properties">List of properties and values</param>
+            /// <param name="parentInstance">Parent instance. Can be NULL if this is the root instance.</param>
+            /// <returns>
+            /// InstanceKey that will be unique for given set of identifiers values for the type. If the type isn't associated with any 
+            /// identifier, the return value is made unique by generating a Guid.
+            /// </returns>
+            private static InstanceKey GetCacheKey(Type type, IDictionary<string, object> properties, object parentInstance)
+            {
+                var identifierValues = GetIdentifiers(type)?.Select(id => properties[id]).DefaultIfEmpty(Guid.NewGuid()).ToArray()
+                    ?? new object[] { Guid.NewGuid() };
+
+                var key = new InstanceKey(type, identifierValues, parentInstance);
+                return key;
+            }
+
+
+            /// <summary>
             /// Gets a new or existing instance depending on whether an instance with the same identifiers already existing
             /// in the instance cache.
             /// </summary>
@@ -423,15 +443,6 @@ namespace Slapper
                 }
 
                 return Tuple.Create(isNewlyCreatedInstance, instance, key);
-            }
-
-            private static InstanceKey GetCacheKey(Type type, IDictionary<string, object> properties, object parentInstance)
-            {
-                var identifierValues = GetIdentifiers(type)?.Select(id => properties[id]).DefaultIfEmpty(Guid.NewGuid()).ToArray()
-                    ?? new object[] {Guid.NewGuid()};
-
-                var key = new InstanceKey(type, identifierValues, parentInstance);
-                return key;
             }
 
             /// <summary>
