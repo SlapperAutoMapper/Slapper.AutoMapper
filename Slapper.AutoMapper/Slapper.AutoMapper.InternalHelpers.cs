@@ -414,6 +414,8 @@ namespace Slapper
             /// <returns>
             /// InstanceKey that will be unique for given set of identifiers values for the type. If the type isn't associated with any 
             /// identifier, the return value is made unique by generating a Guid.
+            /// ASSUMES GetIdentifiers(type) ALWAYS RETURN IDENTIFIERS IN THE SAME ORDER FOR A GIVEN TYPE.
+            /// This is certainly the case as long as GetIdentifiers caches its result for a given type (which it does by 2016-11-25).
             /// </returns>
             private static InstanceKey GetCacheKey(Type type, IDictionary<string, object> properties, object parentInstance)
             {
