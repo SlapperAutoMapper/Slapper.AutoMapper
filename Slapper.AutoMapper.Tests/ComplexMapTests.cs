@@ -117,11 +117,16 @@ namespace Slapper.Tests
         }
 
         /// <summary>
+        /// OLD SUMMARY ===
         /// When mapping, it internally keeps a cache of instantiated objects with the key being the
         /// hash of the objects identifier hashes summed together so when another record with the exact
         /// same identifier hash is detected, it will re-use the existing instantiated object instead of
         /// creating a second one alleviating the burden of the consumer of the library to group objects
         /// by their identifier.
+        /// ===
+        /// This was flawed as SAME HASHCODE DOESN'T MEAN SAME VALUE. Hash collisions would lead to
+        /// wrongly reusing an instance instead of creating a new one (issue #48).
+        /// It's now fixed as real identifier values are compared, not their hashes anymore.
         /// </summary>
         [Test]
         public void Can_Detect_Duplicate_Parent_Members_And_Properly_Instantiate_The_Object_Only_Once()
