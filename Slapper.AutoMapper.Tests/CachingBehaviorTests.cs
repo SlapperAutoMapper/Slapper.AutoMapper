@@ -119,8 +119,10 @@ namespace Slapper.Tests
         }
 
         [Test]
-        public void Test_Long_Ids_With_Colliding_Hasvalues()
+        public void Test_Long_Ids_With_Colliding_HashValues()
         {
+            // This test could fail if MS GetHashCode implementation for long changed. We would then have to find new long values
+            // having the same hashcode.
             const long longId1 = 95988224123597;
             var item1 = new Dictionary<string, object>()
                                                {
