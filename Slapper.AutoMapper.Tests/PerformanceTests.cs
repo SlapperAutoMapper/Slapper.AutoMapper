@@ -105,9 +105,9 @@ namespace Slapper.Tests
                     { "CustomerId", i },
                     { "FirstName", "Bob" },
                     { "LastName", "Smith" },
-                    { "Orders_Id", i },
+                    { "Orders_OrderId", i },
                     { "Orders_OrderTotal", 50.50m },
-                    { "Orders_OrderDetails_Id", i },
+                    { "Orders_OrderDetails_OrderDetailId", i },
                     { "Orders_OrderDetails_OrderDetailTotal", 50.50m },
                     { "Orders_OrderDetails_Product_Id", 546 },
                     { "Orders_OrderDetails_Product_ProductName", "Black Bookshelf" }

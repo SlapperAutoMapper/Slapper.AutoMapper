@@ -47,6 +47,13 @@ namespace Slapper.Tests
             public int Id { get; set; }
         }
 
+
+        public class OrderWithLongId
+        {
+            public long Id { get; set; }
+            public List<OrderItem> OrderItems { get; set; }
+        }
+
         [Test]
         public void Previously_Instantiated_Objects_Will_Be_Returned_Until_The_Cache_Is_Cleared()
         {
@@ -109,6 +116,32 @@ namespace Slapper.Tests
             var employeeList = AutoMapper.Map<Employee>(list).ToList();
 
             Assert.AreSame(employeeList[0].Department, employeeList[1].Department);           
+        }
+
+        [Test]
+        public void Test_Long_Ids_With_Colliding_HashValues()
+        {
+            // This test could fail if MS GetHashCode implementation for long changed. We would then have to find new long values
+            // having the same hashcode.
+            const long longId1 = 95988224123597;
+            var item1 = new Dictionary<string, object>()
+                                               {
+                                                   { "Id", longId1 },
+                                                   { "OrderDetail_Id", 1 }
+                                               };
+
+            const long longId2 = 95983929156300;
+            var item2 = new Dictionary<string, object>()
+                                               {
+                                                   { "Id", longId2 },
+                                                   { "OrderDetail_Id", 2 }
+                                               };
+
+            var list = new List<Dictionary<string, object>>() { item1, item2 };
+            var orderList = AutoMapper.Map<OrderWithLongId>(list).ToList();
+
+            Assert.AreEqual(longId1.GetHashCode(), longId2.GetHashCode());
+            Assert.AreEqual(orderList.Count, list.Count);
         }
 
         [Test]
