@@ -56,7 +56,7 @@ namespace Slapper
             /// <summary>
             /// Current version of Slapper.AutoMapper.
             /// </summary>
-            public static readonly Version Version = new Version("2.0.0.6");
+            public static readonly Version Version = new Version("2.0.0.7");
 
             /// <summary>
             /// The attribute Type specifying that a field or property is an identifier.

@@ -43,7 +43,7 @@ namespace Slapper
         /// <summary>
         /// Contains the methods and members responsible for this libraries caching concerns.
         /// </summary>
-        internal static class Cache
+        public static class Cache
         {
             /// <summary>
             /// The name of the instance cache stored in the logical call context.
@@ -115,7 +115,7 @@ namespace Slapper
             /// unique cache.
             /// </remarks>
             /// <returns>Instance Cache</returns>
-            public static Dictionary<InternalHelpers.InstanceKey,object> GetInstanceCache()
+            internal static Dictionary<InternalHelpers.InstanceKey,object> GetInstanceCache()
             {
                 var instanceCache = InternalHelpers.ContextStorage.Get<Dictionary<InternalHelpers.InstanceKey, object>>(InstanceCacheContextStorageKey);
 
