@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.0.0-*",
 
   "dependencies": {
@@ -6,11 +6,12 @@
     "NETStandard.Library": "1.6.0",
     "System.Collections.NonGeneric": "4.0.1",
     "System.Diagnostics.TraceSource": "4.0.0",
-    "System.Reflection.Primitives": "4.0.1"
+    "System.Reflection.Primitives": "4.0.1",
+    "System.Reflection.TypeExtensions": "4.1.0"
   },
 
   "frameworks": {
-    "netstandard1.6": {
+    "netstandard1.4": {
       "imports": "dnxcore50"
     }
   }

@@ -43,7 +43,7 @@ namespace Slapper
         /// <summary>
         /// Contains the methods and members responsible for this libraries caching concerns.
         /// </summary>
-        public static class Cache
+        internal static class Cache
         {
             /// <summary>
             /// The name of the instance cache stored in the logical call context.
@@ -68,9 +68,9 @@ namespace Slapper
                 /// <param name="propertiesAndFields">The <paramref name="type"/>s properties and fields.</param>
                 public TypeMap(Type type, IEnumerable<string> identifiers, Dictionary<string, object> propertiesAndFields)
                 {
-                    this.Type = type;
-                    this.Identifiers = identifiers;
-                    this.PropertiesAndFieldsInfo = propertiesAndFields;
+                    Type = type;
+                    Identifiers = identifiers;
+                    PropertiesAndFieldsInfo = propertiesAndFields;
                 }
 
                 /// <summary>
@@ -115,13 +115,13 @@ namespace Slapper
             /// unique cache.
             /// </remarks>
             /// <returns>Instance Cache</returns>
-            public static Dictionary<Tuple<int, int, object>, object> GetInstanceCache()
+            public static Dictionary<InternalHelpers.InstanceKey,object> GetInstanceCache()
             {
-                var instanceCache = InternalHelpers.ContextStorage.Get<Dictionary<Tuple<int, int, object>, object>>(InstanceCacheContextStorageKey);
+                var instanceCache = InternalHelpers.ContextStorage.Get<Dictionary<InternalHelpers.InstanceKey, object>>(InstanceCacheContextStorageKey);
 
                 if (instanceCache == null)
                 {
-                    instanceCache = new Dictionary<Tuple<int, int, object>, object>();
+                    instanceCache = new Dictionary<InternalHelpers.InstanceKey, object>();
 
                     InternalHelpers.ContextStorage.Store(InstanceCacheContextStorageKey, instanceCache);
                 }

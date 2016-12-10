@@ -50,6 +50,73 @@ namespace Slapper
         internal static class InternalHelpers
         {
             /// <summary>
+            /// Combine several hashcodes into a single new one. This implementation was grabbed from http://stackoverflow.com/a/34229665 where it is introduced 
+            /// as MS implementation of GetHashCode() for strings.
+            /// </summary>
+            /// <param name="hashCodes">Hascodes to be combined.</param>
+            /// <returns>A new Hascode value combining those passed as parameters.</returns>
+            private static int CombineHashCodes(params int[] hashCodes)
+            {
+                int hash1 = (5381 << 16) + 5381;
+                int hash2 = hash1;
+
+                int i = 0;
+                foreach (var hashCode in hashCodes)
+                {
+                    if (i % 2 == 0)
+                        hash1 = ((hash1 << 5) + hash1 + (hash1 >> 27)) ^ hashCode;
+                    else
+                        hash2 = ((hash2 << 5) + hash2 + (hash2 >> 27)) ^ hashCode;
+
+                    ++i;
+                }
+
+                return hash1 + (hash2 * 1566083941);
+            }
+
+            /// <summary>
+            /// Defines the key for caching instances. Overrides Equality as to get unicity for a given set of identifiers values
+            /// for a given type.
+            /// </summary>
+            public struct InstanceKey : IEquatable<InstanceKey>
+            {
+                public bool Equals(InstanceKey other) {
+                    return Equals(Type, other.Type) 
+                        && Equals(ParentInstance, other.ParentInstance) 
+                        && StructuralComparisons.StructuralEqualityComparer.Equals(IdentifierValues, other.IdentifierValues);
+                }
+
+                public override bool Equals(object obj)
+                {
+                    if (ReferenceEquals(null, obj)) return false;
+                    return obj is InstanceKey && Equals((InstanceKey) obj);
+                }
+
+                public override int GetHashCode()
+                {
+                    unchecked
+                    {
+                        return CombineHashCodes(Type?.GetHashCode() ?? 0, StructuralComparisons.StructuralEqualityComparer.GetHashCode(IdentifierValues), ParentInstance?.GetHashCode() ?? 0);
+                    }
+                }
+
+                public static bool operator ==(InstanceKey left, InstanceKey right) { return left.Equals(right); }
+
+                public static bool operator !=(InstanceKey left, InstanceKey right) { return !left.Equals(right); }
+
+                public InstanceKey(Type type, object[] identifierValues, object parentInstance)
+                {
+                    Type = type;
+                    IdentifierValues = identifierValues;
+                    ParentInstance = parentInstance;
+                }
+
+                public  Type Type { get; }
+                public object[] IdentifierValues { get; }
+                public object ParentInstance { get;  }
+            }
+
+            /// <summary>
             /// Gets the identifiers for the given type. Returns NULL if not found.
             /// Results are cached for subsequent use and performance.
             /// </summary>
@@ -116,7 +183,9 @@ namespace Slapper
             public static Cache.TypeMap CreateTypeMap(Type type)
             {
                 var conventionIdentifiers = Configuration.IdentifierConventions.Select(applyIdentifierConvention => applyIdentifierConvention(type)).ToList();
+
                 var fieldsAndProperties = CreateFieldAndPropertyInfoDictionary(type);
+
                 var identifiers = new List<string>();
 
                 foreach (var fieldOrProperty in fieldsAndProperties)
@@ -168,10 +237,14 @@ namespace Slapper
             /// <returns>Dictionary of member names and member info objects</returns>
             public static Dictionary<string, object> CreateFieldAndPropertyInfoDictionary(Type type)
             {
-                var properties = type.GetRuntimeProperties();
-                var dictionary = properties.ToDictionary<PropertyInfo, string, object>(propertyInfo => propertyInfo.Name, propertyInfo => propertyInfo);
-                var fields = type.GetRuntimeFields();
+                var dictionary = new Dictionary<string, object>();
+                var properties = type.GetProperties();
+                foreach (var propertyInfo in properties)
+                {
+                    dictionary.Add(propertyInfo.Name, propertyInfo);
+                }
 
+                var fields = type.GetFields();
                 foreach (var fieldInfo in fields)
                 {
                     dictionary.Add(fieldInfo.Name, fieldInfo);
@@ -265,7 +338,7 @@ namespace Slapper
             /// <param name="value">Object value.</param>
             /// <param name="memberName">Member name.</param>
             /// <param name="memberType">Member type.</param>
-            /// <param name="classType">Declaring class type.</param>
+            /// <param name="classType">Declarying class type.</param>
             /// <returns>Value converted to the same type as the member type.</returns>
             private static object ConvertValuesTypeToMembersType(object value, string memberName, Type memberType, Type classType)
             {
@@ -329,6 +402,28 @@ namespace Slapper
             }
 
             /// <summary>
+            /// Computes a key for storing and identifying an instance in the cache.
+            /// </summary>
+            /// <param name="type">Type of instance to get</param>
+            /// <param name="properties">List of properties and values</param>
+            /// <param name="parentInstance">Parent instance. Can be NULL if this is the root instance.</param>
+            /// <returns>
+            /// InstanceKey that will be unique for given set of identifiers values for the type. If the type isn't associated with any 
+            /// identifier, the return value is made unique by generating a Guid.
+            /// ASSUMES GetIdentifiers(type) ALWAYS RETURN IDENTIFIERS IN THE SAME ORDER FOR A GIVEN TYPE.
+            /// This is certainly the case as long as GetIdentifiers caches its result for a given type (which it does by 2016-11-25).
+            /// </returns>
+            private static InstanceKey GetCacheKey(Type type, IDictionary<string, object> properties, object parentInstance)
+            {
+                var identifierValues = GetIdentifiers(type)?.Select(id => properties[id]).DefaultIfEmpty(Guid.NewGuid()).ToArray()
+                    ?? new object[] { Guid.NewGuid() };
+
+                var key = new InstanceKey(type, identifierValues, parentInstance);
+                return key;
+            }
+
+
+            /// <summary>
             /// Gets a new or existing instance depending on whether an instance with the same identifiers already existing
             /// in the instance cache.
             /// </summary>
@@ -339,7 +434,7 @@ namespace Slapper
             /// Tuple of bool, object, int where bool represents whether this is a newly created instance,
             /// object being an instance of the requested type and int being the instance's identifier hash.
             /// </returns>
-            internal static Tuple<bool, object, Tuple<int, int, object>> GetInstance(Type type, IDictionary<string, object> properties, object parentInstance = null)
+            internal static Tuple<bool, object, InstanceKey> GetInstance(Type type, IDictionary<string, object> properties, object parentInstance = null)
             {
                 var key = GetCacheKey(type, properties, parentInstance);
 
@@ -356,47 +451,6 @@ namespace Slapper
                 }
 
                 return Tuple.Create(isNewlyCreatedInstance, instance, key);
-            }
-
-            private static Tuple<int, int, object> GetCacheKey(Type type, IDictionary<string, object> properties, object parentInstance)
-            {
-                var identifierHash = GetIdentifierHash(type, properties);
-
-                var key = Tuple.Create(identifierHash, type.GetHashCode(), parentInstance);
-                return key;
-            }
-
-            private static int GetIdentifierHash(Type type, IDictionary<string, object> properties)
-            {
-                var identifiers = GetIdentifiers(type);
-
-                var identifierHash = 0;
-
-                if (identifiers != null)
-                {
-                    foreach (var identifier in identifiers)
-                    {
-                        if (properties.ContainsKey(identifier))
-                        {
-                            var identifierValue = properties[identifier];
-                            if (identifierValue != null)
-                    {
-                                // Unchecked to avoid arithmetic overflow
-                                unchecked
-                        {
-                                    // Include identifier hashcode to avoid collisions between e.g. multiple int IDs
-                                    identifierHash += identifierValue.GetHashCode() + identifier.GetHashCode();
-                                }
-                        }
-                        }
-                    }
-                }
-                else
-                {
-                    // If the type has no identifiers we must generate a unique hash for it.
-                    identifierHash = Guid.NewGuid().GetHashCode();
-                }
-                return identifierHash;
             }
 
             /// <summary>
@@ -474,8 +528,8 @@ namespace Slapper
                             object nestedInstance = GetMemberValue(member, instance);
 
                             var genericCollectionType = typeof(IEnumerable<>);
-                            var isEnumerableType = memberType.GetTypeInfo().IsGenericType && genericCollectionType.GetTypeInfo().IsAssignableFrom(memberType.GetGenericTypeDefinition())
-                                                   || memberType.GetTypeInfo().GetInterfaces().Any(x => x.GetTypeInfo().IsGenericType && x.GetGenericTypeDefinition() == genericCollectionType);
+                            var isEnumerableType = memberType.GetTypeInfo().IsGenericType && genericCollectionType.IsAssignableFrom(memberType.GetGenericTypeDefinition())
+                                                   || memberType.GetInterfaces().Any(x => x.GetTypeInfo().IsGenericType && x.GetGenericTypeDefinition() == genericCollectionType);
 
                             // If the member is null and is a class or interface (not ienumerable), try to create an instance of the type
                             if (nestedInstance == null && (memberType.GetTypeInfo().IsClass || (memberType.GetTypeInfo().IsInterface && !isEnumerableType)))
@@ -486,7 +540,7 @@ namespace Slapper
                                 }
                                 else
                                 {
-                                    nestedInstance = typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(memberType)
+                                    nestedInstance = typeof(IEnumerable).IsAssignableFrom(memberType)
                                                          ? CreateInstance(memberType)
                                                          : GetInstance(memberType, newDictionary, parentInstance == null ? 0 : parentInstance.GetHashCode()).Item2;
                                 }
@@ -494,7 +548,7 @@ namespace Slapper
 
                             if (isEnumerableType)
                             {
-                                var innerType = memberType.GetTypeInfo().GetGenericArguments().FirstOrDefault() ?? memberType.GetElementType();
+                                var innerType = memberType.GetGenericArguments().FirstOrDefault() ?? memberType.GetElementType();
                                 nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, instance);
                             }
                             else
@@ -532,12 +586,11 @@ namespace Slapper
             internal static object MapCollection(Type type, IDictionary<string, object> dictionary, object instance, object parentInstance = null)
             {
                 Type baseListType = typeof(List<>);
-
-                Type listType = baseListType.MakeGenericType(type);
+                Type collectionType = instance == null ? baseListType.MakeGenericType(type) : instance.GetType();
 
                 if (instance == null)
                 {
-                    instance = CreateInstance(listType);
+                    instance = CreateInstance(collectionType);
                 }
 
                 // If the dictionnary only contains null values, we return an empty instance
@@ -567,14 +620,14 @@ namespace Slapper
                     }
                     else
                     {
-                        MethodInfo addMethod = listType.GetTypeInfo().GetMethod("Add");
+                        MethodInfo addMethod = collectionType.GetMethod("Add");
 
                         addMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
                     }
                 }
                 else
                 {
-                    MethodInfo containsMethod = listType.GetTypeInfo().GetMethod("Contains");
+                    MethodInfo containsMethod = collectionType.GetMethod("Contains");
 
                     var alreadyContainsInstance = (bool)containsMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
 
@@ -588,7 +641,7 @@ namespace Slapper
                         }
                         else
                         {
-                            MethodInfo addMethod = listType.GetTypeInfo().GetMethod("Add");
+                            MethodInfo addMethod = collectionType.GetMethod("Add");
 
                             addMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
                         }

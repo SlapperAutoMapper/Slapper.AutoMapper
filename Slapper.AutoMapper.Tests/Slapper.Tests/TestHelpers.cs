@@ -14,13 +14,13 @@ namespace Slapper.Tests
         {
             var instanceType = instance.GetType();
 
-            var identifiers = AutoMapper.InternalHelpers.GetIdentifiers( instanceType );
+            var identifiers = Slapper.AutoMapper.InternalHelpers.GetIdentifiers( instanceType );
 
             int identifierHash = 0;
 
             if ( identifiers != null )
             {
-                var fieldsAndProperties = AutoMapper.InternalHelpers.GetFieldsAndProperties( instanceType );
+                var fieldsAndProperties = Slapper.AutoMapper.InternalHelpers.GetFieldsAndProperties( instanceType );
 
                 foreach ( var fieldOrProperty in fieldsAndProperties )
                 {

@@ -2610,19 +2610,20 @@
       },
       "Slapper/1.0.0": {
         "type": "project",
-        "framework": ".NETStandard,Version=v1.6",
+        "framework": ".NETStandard,Version=v1.4",
         "dependencies": {
           "Microsoft.Extensions.Caching.Memory": "1.0.0",
           "NETStandard.Library": "1.6.0",
           "System.Collections.NonGeneric": "4.0.1",
           "System.Diagnostics.TraceSource": "4.0.0",
-          "System.Reflection.Primitives": "4.0.1"
+          "System.Reflection.Primitives": "4.0.1",
+          "System.Reflection.TypeExtensions": "4.1.0"
         },
         "compile": {
-          "netstandard1.6/Slapper.dll": {}
+          "netstandard1.4/Slapper.dll": {}
         },
         "runtime": {
-          "netstandard1.6/Slapper.dll": {}
+          "netstandard1.4/Slapper.dll": {}
         }
       }
     }

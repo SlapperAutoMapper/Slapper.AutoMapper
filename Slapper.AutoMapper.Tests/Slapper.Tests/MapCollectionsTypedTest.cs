@@ -87,5 +87,67 @@ namespace Slapper.Tests
             Assert.That(customers.Single().Names[1] == "Name 2");
         }
 
+        public class Merchant
+        {
+            public Merchant()
+            {
+                Addresses = new HashSet<MerchantAddress>();
+            }
+
+            public long Id { set; get; }
+            public string Name { set; get; }
+
+            public ICollection<MerchantAddress> Addresses { set; get; }
+        }
+
+        public class MerchantAddress
+        {
+            public long Id { set; get; }
+            public string AddressLine { set; get; }
+            public long MerchantId { set; get; }
+        }
+
+        [Test]
+        public void I_Can_Map_Any_Typed_ICollection()
+        {
+            // this strings was received from database (or another flat storage)
+            List<Dictionary<string, object>> flat = new List<Dictionary<string, object>>()
+            {
+                new Dictionary<string, object>()
+                {
+                    { "Id", 1 } ,
+                    {"Name", "Merchant name" } ,
+                    { "Addresses_Id", 1} ,
+                    { "Addresses_AddressLine", "Address line 1"} ,
+                    { "Addresses_MerchantId", 1}
+                },
+                new Dictionary<string, object>()
+                {
+                    { "Id", 1 } ,
+                    {"Name", "Merchant name" } ,
+                    { "Addresses_Id", 2} ,
+                    { "Addresses_AddressLine", "Address line 2"} ,
+                    { "Addresses_MerchantId", 1}
+                },
+                new Dictionary<string, object>()
+                {
+                    { "Id", 1 } ,
+                    {"Name", "Merchant name" } ,
+                    { "Addresses_Id", 3} ,
+                    { "Addresses_AddressLine", "Address line 3"} ,
+                    { "Addresses_MerchantId", 1}
+                },
+            };
+            Slapper.AutoMapper.Configuration.AddIdentifiers(typeof(Merchant), new [] { "Id" });
+            Slapper.AutoMapper.Configuration.AddIdentifiers(typeof(MerchantAddress), new[] { "Id" });
+            var result = Slapper.AutoMapper.MapDynamic<Merchant>(flat);
+            Assert.That(result.Count() == 1);
+            var merchant = result.First();
+            Assert.That(merchant.Addresses.Count == 3);
+            Assert.AreEqual("Address line 1", merchant.Addresses.First().AddressLine);
+            Assert.AreEqual("Address line 2", merchant.Addresses.Skip(1).First().AddressLine);
+            Assert.AreEqual("Address line 3", merchant.Addresses.Skip(2).First().AddressLine);
+        }
+
     }
 }
