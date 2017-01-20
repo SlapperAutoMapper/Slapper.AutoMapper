@@ -8,7 +8,7 @@ using System.Text;
 namespace Slapper.Tests
 {
     [TestFixture]
-    class MapUniqueChildsIdTest
+    class MapUniqueChildsIdTest: TestBase
     {
         public class NameValue
         {
@@ -22,12 +22,14 @@ namespace Slapper.Tests
         [Test]
         public void Can_Map_DifferentsRows_to_Same_object()
         {
+            AutoMapper.Configuration.AddIdentifiers(typeof(NameValue), new List<string> { "Id", "Name" });
+
             dynamic dynamicCustomer = new ExpandoObject();
             dynamicCustomer.Id = 1;
             dynamicCustomer.Name = "Clark";
             dynamicCustomer.Phones_Id = 1;
             dynamicCustomer.Phones_Name = "88888";
-            dynamicCustomer.Emails_Id = "1";
+            dynamicCustomer.Emails_Id = 1;
             dynamicCustomer.Emails_Name = "a@b.com";
 
             dynamic dynamicCustomer2 = new ExpandoObject();
@@ -35,7 +37,7 @@ namespace Slapper.Tests
             dynamicCustomer2.Name = "Clark";
             dynamicCustomer2.Phones_Id = 2;
             dynamicCustomer2.Phones_Name = "99999";
-            dynamicCustomer2.Emails_Id = "2";
+            dynamicCustomer2.Emails_Id = 2;
             dynamicCustomer2.Emails_Name = "c@c.com";
 
             var list = new List<dynamic> { dynamicCustomer, dynamicCustomer2 };

@@ -430,15 +430,16 @@ namespace Slapper
             /// <param name="type">Type of instance to get</param>
             /// <param name="properties">List of properties and values</param>
             /// <param name="parentInstance">Parent instance. Can be NULL if this is the root instance.</param>
+            /// <param name="storageKey">Internal and unique storage key</param>
             /// <returns>
             /// Tuple of bool, object, int where bool represents whether this is a newly created instance,
             /// object being an instance of the requested type and int being the instance's identifier hash.
             /// </returns>
-            internal static Tuple<bool, object, InstanceKey> GetInstance(Type type, IDictionary<string, object> properties, object parentInstance = null)
+            internal static Tuple<bool, object, InstanceKey> GetInstance(Type type, IDictionary<string, object> properties, string storageKey, object parentInstance)
             {
                 var key = GetCacheKey(type, properties, parentInstance);
 
-                var instanceCache = Cache.GetInstanceCache();
+                var instanceCache = Cache.GetInstanceCache(storageKey);
 
                 object instance;
 
@@ -463,8 +464,9 @@ namespace Slapper
             /// <param name="dictionary">Dictionary of property names and values</param>
             /// <param name="instance">Instance to populate</param>
             /// <param name="parentInstance">Optional parent instance of the instance being populated</param>
+            /// <param name="storageKey">Internal and unique storage key</param>
             /// <returns>Populated instance</returns>
-            internal static object Map(IDictionary<string, object> dictionary, object instance, object parentInstance = null)
+            internal static object Map(IDictionary<string, object> dictionary, object instance, string storageKey, object parentInstance)
             {
                 if (instance.GetType().GetTypeInfo().IsPrimitive || instance is string)
                 {
@@ -542,14 +544,14 @@ namespace Slapper
                                 {
                                     nestedInstance = typeof(IEnumerable).IsAssignableFrom(memberType)
                                                          ? CreateInstance(memberType)
-                                                         : GetInstance(memberType, newDictionary, parentInstance == null ? 0 : parentInstance.GetHashCode()).Item2;
+                                                         : GetInstance(memberType, newDictionary, storageKey, parentInstance == null ? 0 : parentInstance.GetHashCode()).Item2;
                                 }
                             }
 
                             if (isEnumerableType)
                             {
                                 var innerType = memberType.GetGenericArguments().FirstOrDefault() ?? memberType.GetElementType();
-                                nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, instance);
+                                nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, storageKey, instance);
                             }
                             else
                             {
@@ -559,7 +561,7 @@ namespace Slapper
                                 }
                                 else
                                 {
-                                    nestedInstance = Map(newDictionary, nestedInstance, instance);
+                                    nestedInstance = Map(newDictionary, nestedInstance, storageKey, instance);
                                 }
                             }
 
@@ -582,8 +584,9 @@ namespace Slapper
             /// <param name="dictionary">Dictionary of property names and values</param>
             /// <param name="instance">Instance to populate</param>
             /// <param name="parentInstance">Optional parent instance of the instance being populated</param>
+            /// <param name="storageKey">Internal and unique storage key</param>
             /// <returns>Populated instance</returns>
-            internal static object MapCollection(Type type, IDictionary<string, object> dictionary, object instance, object parentInstance = null)
+            internal static object MapCollection(Type type, IDictionary<string, object> dictionary, object instance, string storageKey, object parentInstance)
             {
                 Type baseListType = typeof(List<>);
                 Type collectionType = instance == null ? baseListType.MakeGenericType(type) : instance.GetType();
@@ -599,7 +602,7 @@ namespace Slapper
                     return instance;
                 }
 
-                var getInstanceResult = GetInstance(type, dictionary, parentInstance);
+                var getInstanceResult = GetInstance(type, dictionary, storageKey, parentInstance);
 
                 // Is this a newly created instance? If false, then this item was retrieved from the instance cache.
                 bool isNewlyCreatedInstance = getInstanceResult.Item1;
@@ -608,7 +611,7 @@ namespace Slapper
 
                 object instanceToAddToCollectionInstance = getInstanceResult.Item2;
 
-                instanceToAddToCollectionInstance = Map(dictionary, instanceToAddToCollectionInstance, parentInstance);
+                instanceToAddToCollectionInstance = Map(dictionary, instanceToAddToCollectionInstance, storageKey, parentInstance);
 
                 if (isNewlyCreatedInstance)
                 {

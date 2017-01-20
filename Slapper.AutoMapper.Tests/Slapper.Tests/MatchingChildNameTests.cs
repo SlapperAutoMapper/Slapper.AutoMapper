@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Slapper.Tests
 {
-    public class MatchingChildNameTests
+    public class MatchingChildNameTests : TestBase
     {
         public class SubMember
         {

@@ -45,6 +45,8 @@ namespace Slapper
         /// </summary>
         public static class Cache
         {
+            private static object sync = new object();
+
             /// <summary>
             /// The name of the instance cache stored in the logical call context.
             /// </summary>
@@ -103,7 +105,19 @@ namespace Slapper
             /// </summary>
             public static void ClearInstanceCache()
             {
-                InternalHelpers.ContextStorage.Remove(InstanceCacheContextStorageKey);
+                lock(sync)
+                {
+                    InternalHelpers.ContextStorage.Remove(InstanceCacheContextStorageKey);
+                }
+            }
+
+            /// <summary>
+            /// Clears the internal instance cache. This cache contains all objects created by Slapper.AutoMapper to unique map.
+            /// </summary>
+            /// <param name="storageCache">Internal and unique storage key</param>
+            public static void ClearInstanceCache(string storageCache)
+            {
+                InternalHelpers.ContextStorage.Remove(storageCache);
             }
 
             /// <summary>
@@ -111,11 +125,11 @@ namespace Slapper
             /// This cache exists for the lifetime of the current thread until manually cleared/purged.
             /// </summary>
             /// <remarks>
-            /// Due to the nature of how the cache is persisted, each new thread will recieve it's own
+            /// Due to the nature of how the cache is persisted, each new thread will receive it's own
             /// unique cache.
             /// </remarks>
             /// <returns>Instance Cache</returns>
-            internal static Dictionary<InternalHelpers.InstanceKey,object> GetInstanceCache()
+            private static Dictionary<InternalHelpers.InstanceKey,object> GetInstanceCache()
             {
                 var instanceCache = InternalHelpers.ContextStorage.Get<Dictionary<InternalHelpers.InstanceKey, object>>(InstanceCacheContextStorageKey);
 
@@ -127,6 +141,38 @@ namespace Slapper
                 }
 
                 return instanceCache;
+            }
+
+            internal static Dictionary<InternalHelpers.InstanceKey, object> GetInstanceCache(string storageKey)
+            {
+                var instanceCache = InternalHelpers.ContextStorage.Get<Dictionary<InternalHelpers.InstanceKey, object>>(storageKey);
+
+                if (instanceCache == null)
+                {
+                    var globalCache = GetInstanceCache();
+
+                    instanceCache = new Dictionary<InternalHelpers.InstanceKey, object>(globalCache);
+                    InternalHelpers.ContextStorage.Store(storageKey, instanceCache);
+                }
+
+
+                return instanceCache;
+            }
+
+            /// <summary>
+            /// Merge unique map cache into Global cache
+            /// </summary>
+            /// <param name="localCache">unique map cache</param>
+            internal static void MergeIntoGlobalCache(Dictionary<InternalHelpers.InstanceKey, object> localCache)
+            {
+                lock(sync)
+                {
+                    var globalCache = GetInstanceCache();
+                    foreach (var local in localCache)
+                    {
+                        globalCache[local.Key] = local.Value;
+                    }
+                }
             }
         }
 

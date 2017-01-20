@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using static Slapper.AutoMapper.InternalHelpers;
 
 namespace Slapper
 {
@@ -64,7 +65,7 @@ namespace Slapper
         /// </summary>
         /// <typeparam name="T">Type to instantiate and automap to</typeparam>
         /// <param name="dynamicObject">Dynamic list of property names and values</param>
-        /// <param name="keepCache">If false, clears instance cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
+        /// <param name="keepCache">If false, local cache is not merge into global cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
         /// <returns>The type <typeparamref name="T"/></returns>
         /// <exception cref="ArgumentException">Exception that is thrown when the <paramref name="dynamicObject"/> cannot be converted to an IDictionary of type string and object.</exception>
         public static T MapDynamic<T>( object dynamicObject, bool keepCache = true)
@@ -80,7 +81,7 @@ namespace Slapper
         /// </summary>
         /// <param name="type">Type to instantiate and automap to</param>
         /// <param name="dynamicObject">Dynamic list of property names and values</param>
-        /// <param name="keepCache">If false, clears instance cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
+        /// <param name="keepCache">If false, local cache is not merge into global cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
         /// <returns>The specified Type</returns>
         /// <exception cref="ArgumentException">Exception that is thrown when the <paramref name="dynamicObject"/> cannot be converted to an IDictionary of type string and object.</exception>
         public static object MapDynamic(Type type, object dynamicObject, bool keepCache = true)
@@ -108,7 +109,7 @@ namespace Slapper
         /// </summary>
         /// <typeparam name="T">Type to instantiate and automap to</typeparam>
         /// <param name="dynamicListOfProperties">Dynamic list of property names and values</param>
-        /// <param name="keepCache">If false, clears instance cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
+        /// <param name="keepCache">If false, local cache is not merge into global cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
         /// <returns>List of type <typeparamref name="T"/></returns>
         /// <exception cref="ArgumentException">Exception that is thrown when the <paramref name="dynamicListOfProperties"/> cannot be converted to an IDictionary of type string and object.</exception>
         public static IEnumerable<T> MapDynamic<T>( IEnumerable<object> dynamicListOfProperties, bool keepCache = true)
@@ -124,7 +125,7 @@ namespace Slapper
         /// </summary>
         /// <param name="type">Type to instantiate and automap to</param>
         /// <param name="dynamicListOfProperties">Dynamic list of property names and values</param>
-        /// <param name="keepCache">If false, clears instance cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
+        /// <param name="keepCache">If false, local cache is not merge into global cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
         /// <returns>List of specified Type</returns>
         /// <exception cref="ArgumentException">Exception that is thrown when the <paramref name="dynamicListOfProperties"/> cannot be converted to an IDictionary of type string and object.</exception>
         public static IEnumerable<object> MapDynamic(Type type, IEnumerable<object> dynamicListOfProperties, bool keepCache = true)
@@ -135,7 +136,7 @@ namespace Slapper
             var dictionary = dynamicListOfProperties.Select(dynamicItem => dynamicItem as IDictionary<string, object>).ToList();
 
             if (dictionary == null)
-                throw new ArgumentException("Object types cannot be converted to an IDictionary<string,object>", "dynamicListOfProperties");
+                throw new ArgumentException("Object types cannot be converted to an IDictionary<string,object>", nameof(dynamicListOfProperties));
 
             if (dictionary.Count == 0 || dictionary[0] == null)
                 return new List<object>();
@@ -151,7 +152,7 @@ namespace Slapper
         /// </summary>
         /// <typeparam name="T">Type to instantiate and automap to</typeparam>
         /// <param name="listOfProperties">List of property names and values</param>
-        /// <param name="keepCache">If false, clears instance cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
+        /// <param name="keepCache">If false, local cache is not merge into global cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
         /// <returns>The type <typeparamref name="T"/></returns>
         public static T Map<T>( IDictionary<string, object> listOfProperties, bool keepCache = true)
         {
@@ -166,7 +167,7 @@ namespace Slapper
         /// </summary>
         /// <param name="type">Type to instantiate and automap to</param>
         /// <param name="listOfProperties">List of property names and values</param>
-        /// <param name="keepCache">If false, clears instance cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
+        /// <param name="keepCache">If false, local cache is not merge into global cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
         /// <returns>The specified Type</returns>
         public static object Map(Type type, IDictionary<string, object> listOfProperties, bool keepCache = true)
         {
@@ -183,7 +184,7 @@ namespace Slapper
         /// </summary>
         /// <typeparam name="T">Type to instantiate and automap to</typeparam>
         /// <param name="listOfProperties">List of property names and values</param>
-        /// <param name="keepCache">If false, clears instance cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
+        /// <param name="keepCache">If false, local cache is not merge into global cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
         /// <returns>List of type <typeparamref name="T"/></returns>
         public static IEnumerable<T> Map<T>( IEnumerable<IDictionary<string, object>> listOfProperties, bool keepCache = true)
         {
@@ -198,34 +199,30 @@ namespace Slapper
         /// </summary>
         /// <param name="type">Type to instantiate and automap to</param>
         /// <param name="listOfProperties">List of property names and values</param>
-        /// <param name="keepCache">If false, clears instance cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
+        /// <param name="keepCache">If false, local cache is not merge into global cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
         /// <returns>List of specified Type</returns>
         public static IEnumerable<object> Map(Type type, IEnumerable<IDictionary<string, object>> listOfProperties, bool keepCache = true)
         {
-            var instanceCache = new Dictionary<object, object>();
+            var storgeKey = Guid.NewGuid().ToString();
 
             foreach (var properties in listOfProperties)
             {
-                var getInstanceResult = InternalHelpers.GetInstance(type, properties);
-
-                object instance = getInstanceResult.Item2;
-
-                var key = getInstanceResult.Item3;
-
-                if (instanceCache.ContainsKey(key) == false)
-                {
-                    instanceCache.Add(key, instance);
-                }
+                var getInstanceResult = GetInstance(type, properties, storgeKey, null);
+                var instance = getInstanceResult.Item2;
 
                 var caseInsensitiveDictionary = new Dictionary<string, object>(properties, StringComparer.OrdinalIgnoreCase);
 
-                InternalHelpers.Map(caseInsensitiveDictionary, instance);
+                InternalHelpers.Map(caseInsensitiveDictionary, instance, storgeKey, null);
             }
 
-            if (!keepCache)
-                Cache.ClearInstanceCache();
+            var localCache = Cache.GetInstanceCache(storgeKey);
+            if (keepCache)
+            {
+                Cache.MergeIntoGlobalCache(localCache);
+            }
 
-            return instanceCache.Select(pair => pair.Value);
+            Cache.ClearInstanceCache(storgeKey);
+            return localCache.Where(pair => pair.Key.ParentInstance == null).Select(pair => pair.Value);
         }
 
         #endregion Mapping

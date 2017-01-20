@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Slapper.Tests
 {
-    public class TypeActivatorTests
+    public class TypeActivatorTests : TestBase
     {
         public interface IClass
         {
