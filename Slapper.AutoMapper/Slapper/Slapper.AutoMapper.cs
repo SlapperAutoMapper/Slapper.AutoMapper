@@ -222,7 +222,7 @@ namespace Slapper
             }
 
             Cache.ClearInstanceCache(storgeKey);
-            return localCache.Where(pair => pair.Key.ParentInstance == null && pair.Value.GetType() == type).Select(pair => pair.Value);
+            return localCache.Where(pair => pair.Key.ParentInstance == null && type.IsInstanceOfType(pair.Value)).Select(pair => pair.Value);
         }
 
         #endregion Mapping

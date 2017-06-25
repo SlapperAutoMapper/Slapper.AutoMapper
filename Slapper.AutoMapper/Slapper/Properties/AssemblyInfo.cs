@@ -18,4 +18,4 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("15bc7f02-a019-42d8-b5fa-27e6b3043099")]
 
-[assembly: InternalsVisibleTo("Slapper.Tests")]
+[assembly: InternalsVisibleTo("Slapper.AutoMapper.Tests")]
