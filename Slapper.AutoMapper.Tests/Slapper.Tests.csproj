@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="ArrayTests.cs" />
     <Compile Include="ComplexMapsParentsAndChlidTest.cs" />
+    <Compile Include="ConvertersTests\GuidConverterTests.cs" />
     <Compile Include="EmptyList.cs" />
     <Compile Include="HashCollisionTests.cs" />
     <Compile Include="MapCollectionsTypedTest.cs" />
