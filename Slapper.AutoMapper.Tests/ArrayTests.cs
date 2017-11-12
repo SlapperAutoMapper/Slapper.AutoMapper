@@ -22,60 +22,60 @@ namespace Slapper.Tests
             public string[] FavoriteFoods { get; set; }
         }
 
-        [Test]
-        public void Can_Map_Null_Values_To_Null_Arrays()
-        {
-            // Arrange
-            const int id = 1;
-            const string firstName = null;
-            const string lastName = "Smith";
-            const string[] favoriteFoods = null;
+		[Test]
+		public void Can_Map_Null_Values_To_Null_Arrays()
+		{
+			// Arrange
+			const int id = 1;
+			const string firstName = null;
+			const string lastName = "Smith";
+			string[] favoriteFoods = null;
 
-            var dictionary = new Dictionary<string, object>
-                {
-                    { "Id", id },
-                    { "FirstName", null },
-                    { "LastName", lastName },
-                    { "FavoriteFoods", favoriteFoods }
-                };
+			var dictionary = new Dictionary<string, object>
+				{
+					{ "Id", id },
+					{ "FirstName", null },
+					{ "LastName", lastName },
+					{ "FavoriteFoods", favoriteFoods }
+				};
 
-            // Act
-            var customer = Slapper.AutoMapper.Map<PersonWithFields>( dictionary );
+			// Act
+			var customer = Slapper.AutoMapper.Map<PersonWithFields>(dictionary);
 
-            // Assert
-            Assert.NotNull( customer );
-            Assert.That( customer.Id == id );
-            Assert.That( customer.FirstName == firstName );
-            Assert.That( customer.LastName == lastName );
-            Assert.Null( customer.FavoriteFoods );
-        }
+			// Assert
+			Assert.NotNull(customer);
+			Assert.That(customer.Id == id);
+			Assert.That(customer.FirstName == firstName);
+			Assert.That(customer.LastName == lastName);
+			Assert.Null(customer.FavoriteFoods);
+		}
 
-        [Test]
-        public void Can_Map_Array_Values_To_Arrays()
-        {
-            // Arrange
-            const int id = 1;
-            const string firstName = null;
-            const string lastName = "Smith";
-            string[] favoriteFoods = new [] { "Ice Cream", "Jello" };
+		[Test]
+		public void Can_Map_Array_Values_To_Arrays()
+		{
+			// Arrange
+			const int id = 1;
+			const string firstName = null;
+			const string lastName = "Smith";
+			string[] favoriteFoods = new[] { "Ice Cream", "Jello" };
 
-            var dictionary = new Dictionary<string, object>
-                {
-                    { "Id", id },
-                    { "FirstName", null },
-                    { "LastName", lastName },
-                    { "FavoriteFoods", favoriteFoods }
-                };
+			var dictionary = new Dictionary<string, object>
+					{
+						{ "Id", id },
+						{ "FirstName", null },
+						{ "LastName", lastName },
+						{ "FavoriteFoods", favoriteFoods }
+					};
 
-            // Act
-            var customer = Slapper.AutoMapper.Map<PersonWithFields>( dictionary );
+			// Act
+			var customer = Slapper.AutoMapper.Map<PersonWithFields>(dictionary);
 
-            // Assert
-            Assert.NotNull( customer );
-            Assert.That( customer.Id == id );
-            Assert.That( customer.FirstName == firstName );
-            Assert.That( customer.LastName == lastName );
-            Assert.That( customer.FavoriteFoods == favoriteFoods );
-        }
-    }
+			// Assert
+			Assert.NotNull(customer);
+			Assert.That(customer.Id == id);
+			Assert.That(customer.FirstName == firstName);
+			Assert.That(customer.LastName == lastName);
+			Assert.That(customer.FavoriteFoods == favoriteFoods);
+		}
+	}
 }
