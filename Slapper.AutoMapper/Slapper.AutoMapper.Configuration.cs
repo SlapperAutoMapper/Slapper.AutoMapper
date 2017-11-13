@@ -193,8 +193,9 @@ namespace Slapper
                 /// <returns>Boolean response.</returns>
                 public bool CanConvert(object value, Type type)
                 {
-                    return type == typeof(Guid);
-                }
+					var conversionType = Nullable.GetUnderlyingType(type) ?? type;
+	                return conversionType == typeof(Guid);
+				}
 
                 /// <summary>
                 /// Order to execute an <see cref="ITypeConverter"/> in.
