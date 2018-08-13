@@ -33,6 +33,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Messaging;
@@ -49,6 +50,8 @@ namespace Slapper
         /// </summary>
         internal static class InternalHelpers
         {
+
+            private static CultureInfo cultureInfo = CultureInfo.InvariantCulture;
             /// <summary>
             /// Combine several hashcodes into a single new one. This implementation was grabbed from http://stackoverflow.com/a/34229665 where it is introduced 
             /// as MS implementation of GetHashCode() for strings.
@@ -202,7 +205,7 @@ namespace Slapper
                         {
                             identifiers.Add(memberName);
                         }
-                        else if (conventionIdentifiers.Exists(x => x.ToLower() == memberName.ToLower()))
+                        else if (conventionIdentifiers.Exists(x => x.ToLower(cultureInfo) == memberName.ToLower(cultureInfo)))
                         {
                             identifiers.Add(memberName);
                         }
@@ -217,7 +220,7 @@ namespace Slapper
                             {
                                 identifiers.Add(memberName);
                             }
-                            else if (conventionIdentifiers.Exists(x => x.ToLower() == memberName.ToLower()))
+                            else if (conventionIdentifiers.Exists(x => x.ToLower(cultureInfo) == memberName.ToLower(cultureInfo)))
                             {
                                 identifiers.Add(memberName);
                             }
@@ -486,7 +489,7 @@ namespace Slapper
 
                 foreach (var fieldOrProperty in fieldsAndProperties)
                 {
-                    var memberName = fieldOrProperty.Key.ToLower();
+                    var memberName = fieldOrProperty.Key.ToLower(cultureInfo);
 
                     var member = fieldOrProperty.Value;
 
@@ -505,7 +508,7 @@ namespace Slapper
                         if (memberType.IsClass || memberType.IsInterface)
                         {
                             // Try to find any keys that start with the current member name
-                            var nestedDictionary = dictionary.Where(x => x.Key.ToLower().StartsWith(memberName + "_")).ToList();
+                            var nestedDictionary = dictionary.Where(x => x.Key.ToLower(cultureInfo).StartsWith(memberName + "_")).ToList();
 
                             // If there weren't any keys
                             if (!nestedDictionary.Any())
@@ -524,7 +527,7 @@ namespace Slapper
                                 continue;
                             }
                             var regex = new Regex(Regex.Escape(memberName + "_"));
-                            var newDictionary = nestedDictionary.ToDictionary(pair => regex.Replace(pair.Key.ToLower(), string.Empty, 1),
+                            var newDictionary = nestedDictionary.ToDictionary(pair => regex.Replace(pair.Key.ToLower(cultureInfo), string.Empty, 1),
                                 pair => pair.Value, StringComparer.OrdinalIgnoreCase);
 
                             // Try to get the value of the complex member. If the member
