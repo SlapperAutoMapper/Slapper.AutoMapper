@@ -46,9 +46,22 @@ namespace Slapper
         /// <summary>
         /// Attribute for specifying that a field or property is an identifier.
         /// </summary>
-        [AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false )]
+        [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
         public class Id : Attribute
         {
+        }
+
+        /// <summary>
+        /// Attribute for specifying that a field or property is an identifier.
+        /// </summary>
+        [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+        public class ColumnName : Attribute
+        {
+            public string Name { get; private set; }
+            public ColumnName(string name)
+            {
+                Name = name;
+            }
         }
 
         #endregion Attributes
@@ -66,7 +79,7 @@ namespace Slapper
         /// <param name="keepCache">If false, clears instance cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
         /// <returns>The type <typeparamref name="T"/></returns>
         /// <exception cref="ArgumentException">Exception that is thrown when the <paramref name="dynamicObject"/> cannot be converted to an IDictionary of type string and object.</exception>
-        public static T MapDynamic<T>( object dynamicObject, bool keepCache = true)
+        public static T MapDynamic<T>(object dynamicObject, bool keepCache = true)
         {
             return (T)MapDynamic(typeof(T), dynamicObject, keepCache);
         }
@@ -110,7 +123,7 @@ namespace Slapper
         /// <param name="keepCache">If false, clears instance cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
         /// <returns>List of type <typeparamref name="T"/></returns>
         /// <exception cref="ArgumentException">Exception that is thrown when the <paramref name="dynamicListOfProperties"/> cannot be converted to an IDictionary of type string and object.</exception>
-        public static IEnumerable<T> MapDynamic<T>( IEnumerable<object> dynamicListOfProperties, bool keepCache = true)
+        public static IEnumerable<T> MapDynamic<T>(IEnumerable<object> dynamicListOfProperties, bool keepCache = true)
         {
             return MapDynamic(typeof(T), dynamicListOfProperties, keepCache).Cast<T>();
         }
@@ -152,7 +165,7 @@ namespace Slapper
         /// <param name="listOfProperties">List of property names and values</param>
         /// <param name="keepCache">If false, clears instance cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
         /// <returns>The type <typeparamref name="T"/></returns>
-        public static T Map<T>( IDictionary<string, object> listOfProperties, bool keepCache = true)
+        public static T Map<T>(IDictionary<string, object> listOfProperties, bool keepCache = true)
         {
             return (T)Map(typeof(T), listOfProperties, keepCache);
         }
@@ -184,7 +197,7 @@ namespace Slapper
         /// <param name="listOfProperties">List of property names and values</param>
         /// <param name="keepCache">If false, clears instance cache after mapping is completed. Defaults to true, meaning instances are kept between calls.</param>
         /// <returns>List of type <typeparamref name="T"/></returns>
-        public static IEnumerable<T> Map<T>( IEnumerable<IDictionary<string, object>> listOfProperties, bool keepCache = true)
+        public static IEnumerable<T> Map<T>(IEnumerable<IDictionary<string, object>> listOfProperties, bool keepCache = true)
         {
             return Map(typeof(T), listOfProperties, keepCache).Cast<T>();
         }

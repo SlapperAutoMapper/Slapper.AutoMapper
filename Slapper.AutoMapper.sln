@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2016
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slapper", "Slapper.AutoMapper\Slapper.csproj", "{A3A6ABBF-8C42-4945-BB8B-804123E45B2D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slapper.Tests", "Slapper.AutoMapper.Tests\Slapper.Tests.csproj", "{DB57364B-6EE2-46C0-837E-B43F53CEEFA5}"
@@ -22,5 +24,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4714146F-EB06-4313-BBE1-730EC2F49A71}
 	EndGlobalSection
 EndGlobal

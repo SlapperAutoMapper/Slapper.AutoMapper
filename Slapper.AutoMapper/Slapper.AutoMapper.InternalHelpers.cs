@@ -243,7 +243,16 @@ namespace Slapper
 
                 foreach (var propertyInfo in properties)
                 {
-                    dictionary.Add(propertyInfo.Name, propertyInfo);
+                    if(propertyInfo.GetCustomAttributes(typeof(ColumnName), false).Length > 0)
+                    {
+                        var propertyName = ((ColumnName)propertyInfo.GetCustomAttributes(typeof(ColumnName), false).First()).Name;
+                        dictionary.Add(propertyName, propertyInfo);
+                    }
+                    else
+                    {
+                        dictionary.Add(propertyInfo.Name, propertyInfo);
+                    }
+                    
                 }
 
                 var fields = type.GetFields();
