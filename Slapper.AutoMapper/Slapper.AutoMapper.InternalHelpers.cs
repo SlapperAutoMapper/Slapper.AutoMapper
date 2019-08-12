@@ -468,7 +468,7 @@ namespace Slapper
             /// <returns>Populated instance</returns>
             internal static object Map(IDictionary<string, object> dictionary, object instance, string storageKey, object parentInstance)
             {
-                if (instance.GetType().GetTypeInfo().IsPrimitive || instance is string)
+                if (instance.GetType().GetTypeInfo().IsPrimitive || instance is string || instance is Guid)
                 {
                     object value;
                     if (!dictionary.TryGetValue("$", out value))
