@@ -35,9 +35,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Remoting.Messaging;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
+[assembly: InternalsVisibleTo("Slapper.Tests")]
 namespace Slapper
 {
     public static partial class AutoMapper
@@ -705,7 +706,7 @@ namespace Slapper
                     {
                         if (ReflectionHelper.HttpContext.GetCurrentHttpContext() == null)
                         {
-                            return (T)CallContext.LogicalGetData(key);
+                            return (T)CallContext.GetData(key);
                         }
 
                         return ReflectionHelper.HttpContext.GetItemFromHttpContext<T>(key);
@@ -727,7 +728,7 @@ namespace Slapper
                 {
                     if (ReflectionHelper.HttpContext.GetCurrentHttpContext() == null)
                     {
-                        CallContext.LogicalSetData(key, obj);
+                        CallContext.SetData(key, obj);
                     }
                     else
                     {
