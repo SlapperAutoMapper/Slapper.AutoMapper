@@ -2,6 +2,12 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageId>SlapperAutomapper.Core</PackageId>
+        <Authors>Slapper; TakinosaJi</Authors>
+        <PackageProjectUrl>https://github.com/takinosaji/Slapper.AutoMapper</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/takinosaji/Slapper.AutoMapper/blob/master/README.md</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/takinosaji/Slapper.AutoMapper</RepositoryUrl>
     </PropertyGroup>
 
 </Project>
