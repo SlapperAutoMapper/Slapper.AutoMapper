@@ -3,11 +3,20 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageId>SlapperAutomapper.Core</PackageId>
-        <Authors>Slapper; TakinosaJi</Authors>
-        <PackageProjectUrl>https://github.com/takinosaji/Slapper.AutoMapper</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/takinosaji/Slapper.AutoMapper/blob/master/README.md</PackageLicenseUrl>
-        <RepositoryUrl>https://github.com/takinosaji/Slapper.AutoMapper</RepositoryUrl>
+        <PackageId>Slapper.AutoMapper</PackageId>
+        <Authors>Randy Burden &amp; contributors</Authors>
+        <PackageProjectUrl>https://github.com/SlapperAutoMapper/Slapper.AutoMapper</PackageProjectUrl>
+        <PackageLicenseUrl></PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/SlapperAutoMapper/Slapper.AutoMapper</RepositoryUrl>
+        <Version>2.0.0</Version>
+        <Product>Slapper.AutoMapper.Core</Product>
+        <Copyright>2016</Copyright>
+        <Description>Slapper.AutoMapper is a mapping library that can convert dynamic data into static types and populate complex nested child objects.</Description>
+        <PackageTags>Slapper.AutoMapper slapper automapper mapper map dynamic</PackageTags>
+        <PackageReleaseNotes>Version 2.0.0.0 release.
+- Compatible with NET Standard 2.1 &amp;&amp; NET Core 3.1 compatibility</PackageReleaseNotes>
+        <PackageLicenseExpression></PackageLicenseExpression>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     </PropertyGroup>
 
 </Project>
