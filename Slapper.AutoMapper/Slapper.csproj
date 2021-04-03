@@ -8,13 +8,13 @@
         <PackageProjectUrl>https://github.com/SlapperAutoMapper/Slapper.AutoMapper</PackageProjectUrl>
         <PackageLicenseUrl></PackageLicenseUrl>
         <RepositoryUrl>https://github.com/SlapperAutoMapper/Slapper.AutoMapper</RepositoryUrl>
-        <Version>2.0.0</Version>
+        <Version>2.0.2</Version>
         <Product>Slapper.AutoMapper.Core</Product>
         <Copyright>2016</Copyright>
         <Description>Slapper.AutoMapper is a mapping library that can convert dynamic data into static types and populate complex nested child objects.</Description>
         <PackageTags>Slapper.AutoMapper slapper automapper mapper map dynamic</PackageTags>
-        <PackageReleaseNotes>Version 2.0.0.0 release.
-- Compatible with NET Standard 2.1 &amp;&amp; NET Core 3.1 compatibility</PackageReleaseNotes>
+        <PackageReleaseNotes>Version 2.0.2 release
+- Add support for nullable guids</PackageReleaseNotes>
         <PackageLicenseExpression></PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     </PropertyGroup>
