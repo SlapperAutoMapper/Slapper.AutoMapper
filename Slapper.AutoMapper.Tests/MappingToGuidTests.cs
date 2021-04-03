@@ -186,5 +186,34 @@ namespace Slapper.Tests
             Assert.That( Equals( customer.UniqueId, uniqueId ) );
             Assert.That( customer.ANullableUniqueId == aNullableUniqueId ); // This is what we are testing
         }
+
+        [Test]
+        public void Can_Map_Values_To_Guid_Nullable_Properties()
+        {
+	        // Arrange
+	        const int id = 1;
+	        const string firstName = "Bob";
+	        const string lastName = "Smith";
+	        Guid uniqueId = Guid.NewGuid();
+	        Guid? aNullableUniqueId = Guid.NewGuid();
+
+	        dynamic dynamicPerson = new ExpandoObject();
+	        dynamicPerson.Id = id;
+	        dynamicPerson.FirstName = firstName;
+	        dynamicPerson.LastName = lastName;
+	        dynamicPerson.UniqueId = uniqueId.ToString();
+	        dynamicPerson.ANullableUniqueId = aNullableUniqueId; // This is what we are testing
+
+	        // Act
+	        PersonWithProperties customer = Slapper.AutoMapper.MapDynamic<PersonWithProperties>( dynamicPerson );
+
+	        // Assert
+	        Assert.NotNull( customer );
+	        Assert.That( customer.Id == id );
+	        Assert.That( customer.FirstName == firstName );
+	        Assert.That( customer.LastName == lastName );
+	        Assert.That( Equals( customer.UniqueId, uniqueId ) );
+	        Assert.That( customer.ANullableUniqueId == aNullableUniqueId ); // This is what we are testing
+        }
     }
 }

@@ -180,6 +180,10 @@ namespace Slapper
                     {
                         convertedValue = new Guid(value as byte[]);
                     }
+                    if (value is Guid)
+                    {
+	                    convertedValue = (Guid) value;
+                    }
 
                     return convertedValue;
                 }
