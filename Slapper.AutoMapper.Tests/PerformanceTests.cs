@@ -197,6 +197,7 @@ namespace Slapper.Tests
         ///     v2.0.3: Mapped 120000 objects in 13046 ms.
         /// </remarks>
         [Test]
+        [Explicit]
         public void Complex_Performance_Test()
         {
             // Arrange

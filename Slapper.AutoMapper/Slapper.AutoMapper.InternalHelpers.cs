@@ -574,7 +574,10 @@ namespace Slapper
                     return ListType.MakeGenericType(type);
                 }) : instance.GetType();
 
-                instance ??= CreateInstance(collectionType);
+                if (instance == null)
+                {
+                    instance = CreateInstance(collectionType);
+                }
 
                 // If the dictionary only contains null values, we return an empty instance
                 if (dictionary.Values.FirstOrDefault(v => v != null) == null)
