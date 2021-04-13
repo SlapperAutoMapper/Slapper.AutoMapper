@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slapper", "Slapper.AutoMapper\Slapper.csproj", "{A3A6ABBF-8C42-4945-BB8B-804123E45B2D}"
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31005.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Slapper", "Slapper.AutoMapper\Slapper.csproj", "{A3A6ABBF-8C42-4945-BB8B-804123E45B2D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slapper.Tests", "Slapper.AutoMapper.Tests\Slapper.Tests.csproj", "{DB57364B-6EE2-46C0-837E-B43F53CEEFA5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Slapper.Tests", "Slapper.AutoMapper.Tests\Slapper.Tests.csproj", "{DB57364B-6EE2-46C0-837E-B43F53CEEFA5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slapper.Tests47", "Slapper.AutoMapper.Tests47\Slapper.Tests47.csproj", "{DE044332-9D9D-48BA-B63D-72BB64E5DEE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,8 +23,15 @@ Global
 		{DB57364B-6EE2-46C0-837E-B43F53CEEFA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB57364B-6EE2-46C0-837E-B43F53CEEFA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB57364B-6EE2-46C0-837E-B43F53CEEFA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE044332-9D9D-48BA-B63D-72BB64E5DEE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE044332-9D9D-48BA-B63D-72BB64E5DEE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE044332-9D9D-48BA-B63D-72BB64E5DEE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE044332-9D9D-48BA-B63D-72BB64E5DEE6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {788C0E0D-1CE3-400B-B65A-068DC8DF00EA}
 	EndGlobalSection
 EndGlobal

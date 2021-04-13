@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 [assembly: InternalsVisibleTo("Slapper.Tests")]
+[assembly: InternalsVisibleTo("Slapper.Tests47")]
 namespace Slapper
 {
     public static partial class AutoMapper
@@ -574,7 +575,8 @@ namespace Slapper
                     return ListType.MakeGenericType(type);
                 }) : instance.GetType();
 
-                instance ??= CreateInstance(collectionType);
+                // ReSharper disable once ConvertToNullCoalescingCompoundAssignment
+                instance = instance ?? CreateInstance(collectionType);
 
                 // If the dictionary only contains null values, we return an empty instance
                 if (dictionary.Values.FirstOrDefault(v => v != null) == null)
