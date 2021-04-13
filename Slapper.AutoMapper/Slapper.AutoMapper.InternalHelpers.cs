@@ -1,37 +1,6 @@
-﻿/*  Slapper.AutoMapper v1.0.0.6 ( https://github.com/SlapperAutoMapper/Slapper.AutoMapper )
-
-    MIT License:
-   
-    Copyright (c) 2016, Randy Burden ( http://randyburden.com ) and contributors. All rights reserved.
-    All rights reserved.
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
-    associated documentation files (the "Software"), to deal in the Software without restriction, including 
-    without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-    copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the 
-    following conditions:
-
-    The above copyright notice and this permission notice shall be included in all copies or substantial 
-    portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT 
-    LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN 
-    NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
-    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
-    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-    Description:
-    
-    Slapper.AutoMapper maps dynamic data to static types. Slap your data into submission!
-    
-    Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a single file mapping library that can convert 
-    dynamic data into static types and populate complex nested child objects.
-    It primarily converts C# dynamics and IDictionary<string, object> to strongly typed objects and supports
-    populating an entire object graph by using underscore notation to underscore into nested objects.
-*/
-
-using System;
+﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -43,8 +12,15 @@ namespace Slapper
 {
     public static partial class AutoMapper
     {
-        #region Internal Helpers
-
+        private static readonly Type ListType = typeof(List<>);
+        private static readonly Type GenericIEnumerableType = typeof(IEnumerable<>);
+        private static readonly Type EnumerableType = typeof(IEnumerable);
+        private static readonly ConcurrentDictionary<Type, Type> GenericIEnumerableTypeCache = new ConcurrentDictionary<Type, Type>();
+        private static readonly ConcurrentDictionary<Type, bool> IsEnumerableTypeCache = new ConcurrentDictionary<Type, bool>();
+        private static readonly ConcurrentDictionary<Type, Type> InnerTypeCache = new ConcurrentDictionary<Type, Type>();
+        private static readonly ConcurrentDictionary<Type, MethodInfo> AddMethodInfoCache = new ConcurrentDictionary<Type, MethodInfo>();
+        private static readonly ConcurrentDictionary<Type, MethodInfo> ContainsMethodInfoCache = new ConcurrentDictionary<Type, MethodInfo>();
+        
         /// <summary>
         /// Contains the methods and members responsible for this libraries internal concerns.
         /// </summary>
@@ -54,8 +30,8 @@ namespace Slapper
             /// Combine several hashcodes into a single new one. This implementation was grabbed from http://stackoverflow.com/a/34229665 where it is introduced 
             /// as MS implementation of GetHashCode() for strings.
             /// </summary>
-            /// <param name="hashCodes">Hascodes to be combined.</param>
-            /// <returns>A new Hascode value combining those passed as parameters.</returns>
+            /// <param name="hashCodes">Hashcodes to be combined.</param>
+            /// <returns>A new Hashcode value combining those passed as parameters.</returns>
             private static int CombineHashCodes(params int[] hashCodes)
             {
                 int hash1 = (5381 << 16) + 5381;
@@ -81,16 +57,17 @@ namespace Slapper
             /// </summary>
             public struct InstanceKey : IEquatable<InstanceKey>
             {
-                public bool Equals(InstanceKey other) {
-                    return Equals(Type, other.Type) 
-                        && Equals(ParentInstance, other.ParentInstance) 
+                public bool Equals(InstanceKey other)
+                {
+                    return Equals(Type, other.Type)
+                        && Equals(ParentInstance, other.ParentInstance)
                         && StructuralComparisons.StructuralEqualityComparer.Equals(IdentifierValues, other.IdentifierValues);
                 }
 
                 public override bool Equals(object obj)
                 {
                     if (ReferenceEquals(null, obj)) return false;
-                    return obj is InstanceKey && Equals((InstanceKey) obj);
+                    return obj is InstanceKey && Equals((InstanceKey)obj);
                 }
 
                 public override int GetHashCode()
@@ -112,9 +89,9 @@ namespace Slapper
                     ParentInstance = parentInstance;
                 }
 
-                public  Type Type { get; }
+                public Type Type { get; }
                 public object[] IdentifierValues { get; }
-                public object ParentInstance { get;  }
+                public object ParentInstance { get; }
             }
 
             /// <summary>
@@ -130,7 +107,11 @@ namespace Slapper
             /// <returns>Identifier</returns>
             public static IEnumerable<string> GetIdentifiers(Type type)
             {
-                var typeMap = Cache.TypeMapCache.GetOrAdd(type, CreateTypeMap(type));
+                var typeMap = Cache.TypeMapCache.GetOrAdd(type, (t) =>
+                {
+                    // ReSharper disable once ConvertClosureToMethodGroup
+                    return InternalHelpers.CreateTypeMap(t);
+                });
 
                 return typeMap.Identifiers.Any() ? typeMap.Identifiers : null;
             }
@@ -143,7 +124,11 @@ namespace Slapper
             /// <returns>Dictionary of a type's property names and their corresponding PropertyInfo</returns>
             public static Dictionary<string, object> GetFieldsAndProperties(Type type)
             {
-                var typeMap = Cache.TypeMapCache.GetOrAdd(type, CreateTypeMap(type));
+                var typeMap = Cache.TypeMapCache.GetOrAdd(type, (t) =>
+                {
+                    // ReSharper disable once ConvertClosureToMethodGroup
+                    return InternalHelpers.CreateTypeMap(t);
+                });
 
                 return typeMap.PropertiesAndFieldsInfo;
             }
@@ -305,9 +290,7 @@ namespace Slapper
                     }
                     catch (Exception e)
                     {
-                        string errorMessage =
-                            string.Format("{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
-                                           e.Message, value, value.GetType(), fieldInfo.Name, fieldInfo.FieldType, fieldInfo.DeclaringType);
+                        string errorMessage =  $"{e.Message}: An error occurred while mapping the value '{value}' of type {value.GetType()} to the member name '{fieldInfo.Name}' of type {fieldInfo.FieldType} on the {fieldInfo.DeclaringType} class.";
 
                         throw new Exception(errorMessage, e);
                     }
@@ -326,9 +309,7 @@ namespace Slapper
                         }
                         catch (Exception e)
                         {
-                            string errorMessage =
-                                string.Format("{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
-                                               e.Message, value, value.GetType(), propertyInfo.Name, propertyInfo.PropertyType, propertyInfo.DeclaringType);
+                            string errorMessage =  $"{e.Message}: An error occurred while mapping the value '{value}' of type {value.GetType()} to the member name '{propertyInfo.Name}' of type {propertyInfo.PropertyType} on the {propertyInfo.DeclaringType} class.";
 
                             throw new Exception(errorMessage, e);
                         }
@@ -342,7 +323,7 @@ namespace Slapper
             /// <param name="value">Object value.</param>
             /// <param name="memberName">Member name.</param>
             /// <param name="memberType">Member type.</param>
-            /// <param name="classType">Declarying class type.</param>
+            /// <param name="classType">Declaring class type.</param>
             /// <returns>Value converted to the same type as the member type.</returns>
             private static object ConvertValuesTypeToMembersType(object value, string memberName, Type memberType, Type classType)
             {
@@ -368,8 +349,7 @@ namespace Slapper
                 }
                 catch (Exception e)
                 {
-                    string errorMessage = string.Format("{0}: An error occurred while mapping the value '{1}' of type {2} to the member name '{3}' of type {4} on the {5} class.",
-                                                         e.Message, value, valueType, memberName, memberType, classType);
+                    string errorMessage =  $"{e.Message}: An error occurred while mapping the value '{value}' of type {valueType} to the member name '{memberName}' of type {memberType} on the {classType} class.";
 
                     throw new Exception(errorMessage, e);
                 }
@@ -445,9 +425,7 @@ namespace Slapper
 
                 var instanceCache = Cache.GetInstanceCache();
 
-                object instance;
-
-                var isNewlyCreatedInstance = !instanceCache.TryGetValue(key, out instance);
+                var isNewlyCreatedInstance = !instanceCache.TryGetValue(key, out var instance);
 
                 if (isNewlyCreatedInstance)
                 {
@@ -471,10 +449,11 @@ namespace Slapper
             /// <returns>Populated instance</returns>
             internal static object Map(IDictionary<string, object> dictionary, object instance, object parentInstance = null)
             {
-                if (instance.GetType().IsPrimitive || instance is string)
+                var instanceType = instance.GetType();
+
+                if (instanceType.IsPrimitive || instance is string)
                 {
-                    object value;
-                    if (!dictionary.TryGetValue("$", out value))
+                    if (!dictionary.TryGetValue("$", out var value))
                     {
                         throw new InvalidCastException("For lists of primitive types, include $ as the name of the property");
                     }
@@ -483,7 +462,7 @@ namespace Slapper
                     return instance;
                 }
 
-                var fieldsAndProperties = GetFieldsAndProperties(instance.GetType());
+                var fieldsAndProperties = GetFieldsAndProperties(instanceType);
 
                 foreach (var fieldOrProperty in fieldsAndProperties)
                 {
@@ -491,10 +470,8 @@ namespace Slapper
 
                     var member = fieldOrProperty.Value;
 
-                    object value;
-
                     // Handle populating simple members on the current type
-                    if (dictionary.TryGetValue(memberName, out value))
+                    if (dictionary.TryGetValue(memberName, out var value))
                     {
                         SetMemberValue(member, instance, value);
                     }
@@ -532,40 +509,41 @@ namespace Slapper
                             // hasn't been initialized, then this will return null.
                             object nestedInstance = GetMemberValue(member, instance);
 
-                            var genericCollectionType = typeof(IEnumerable<>);
-                            var isEnumerableType = memberType.IsGenericType && genericCollectionType.IsAssignableFrom(memberType.GetGenericTypeDefinition())
-                                                   || memberType.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericCollectionType);
+                            var isEnumerableType = IsEnumerableTypeCache.GetOrAdd(memberType, (t) =>
+                            {
+                                return t.IsGenericType && GenericIEnumerableType.IsAssignableFrom(t.GetGenericTypeDefinition())
+                                    || t.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == GenericIEnumerableType);
+                            });
 
-                            // If the member is null and is a class or interface (not ienumerable), try to create an instance of the type
+                            // If the member is null and is a class or interface (not IEnumerable), try to create an instance of the type
                             if (nestedInstance == null && (memberType.IsClass || (memberType.IsInterface && !isEnumerableType)))
                             {
                                 if (memberType.IsArray)
                                 {
+                                    // ReSharper disable once AssignNullToNotNullAttribute
                                     nestedInstance = new ArrayList().ToArray(memberType.GetElementType());
                                 }
                                 else
                                 {
-                                    nestedInstance = typeof(IEnumerable).IsAssignableFrom(memberType)
+                                    nestedInstance = EnumerableType.IsAssignableFrom(memberType)
                                                          ? CreateInstance(memberType)
-                                                         : GetInstance(memberType, newDictionary, parentInstance == null ? 0 : parentInstance.GetHashCode()).Item2;
+                                                         : GetInstance(memberType, newDictionary, parentInstance?.GetHashCode() ?? 0).Item2;
                                 }
                             }
 
                             if (isEnumerableType)
                             {
-                                var innerType = memberType.GetGenericArguments().FirstOrDefault() ?? memberType.GetElementType();
+                                var innerType = InnerTypeCache.GetOrAdd(memberType, (t) =>
+                                {
+                                    // ReSharper disable once ConvertToLambdaExpression
+                                    return memberType.GetGenericArguments().FirstOrDefault() ?? memberType.GetElementType();
+                                });
+
                                 nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, instance);
                             }
                             else
                             {
-                                if (newDictionary.Values.All(v => v == null))
-                                {
-                                    nestedInstance = null;
-                                }
-                                else
-                                {
-                                    nestedInstance = Map(newDictionary, nestedInstance, instance);
-                                }
+                                nestedInstance = newDictionary.Values.All(v => v == null) ? null : Map(newDictionary, nestedInstance, instance);
                             }
 
                             SetMemberValue(member, instance, nestedInstance);
@@ -590,15 +568,15 @@ namespace Slapper
             /// <returns>Populated instance</returns>
             internal static object MapCollection(Type type, IDictionary<string, object> dictionary, object instance, object parentInstance = null)
             {
-                Type baseListType = typeof(List<>);
-                Type collectionType = instance == null ? baseListType.MakeGenericType(type) : instance.GetType();
-
-                if (instance == null)
+                Type collectionType = instance == null ? GenericIEnumerableTypeCache.GetOrAdd(type, (t) =>
                 {
-                    instance = CreateInstance(collectionType);
-                }
+                    // ReSharper disable once ConvertToLambdaExpression
+                    return ListType.MakeGenericType(type);
+                }) : instance.GetType();
 
-                // If the dictionnary only contains null values, we return an empty instance
+                instance ??= CreateInstance(collectionType);
+
+                // If the dictionary only contains null values, we return an empty instance
                 if (dictionary.Values.FirstOrDefault(v => v != null) == null)
                 {
                     return instance;
@@ -625,14 +603,22 @@ namespace Slapper
                     }
                     else
                     {
-                        MethodInfo addMethod = collectionType.GetMethod("Add");
+                        MethodInfo addMethod = AddMethodInfoCache.GetOrAdd(collectionType, (t) =>
+                        {
+                            // ReSharper disable once ConvertToLambdaExpression
+                            return t.GetMethod("Add");
+                        });
 
                         addMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
                     }
                 }
                 else
                 {
-                    MethodInfo containsMethod = collectionType.GetMethod("Contains");
+                    MethodInfo containsMethod = ContainsMethodInfoCache.GetOrAdd(collectionType, (t) =>
+                    {
+                        // ReSharper disable once ConvertToLambdaExpression
+                        return t.GetMethod("Contains");
+                    });
 
                     var alreadyContainsInstance = (bool)containsMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
 
@@ -646,7 +632,11 @@ namespace Slapper
                         }
                         else
                         {
-                            MethodInfo addMethod = collectionType.GetMethod("Add");
+                            MethodInfo addMethod = AddMethodInfoCache.GetOrAdd(collectionType, (t) =>
+                            {
+                                // ReSharper disable once ConvertToLambdaExpression
+                                return t.GetMethod("Add");
+                            });
 
                             addMethod.Invoke(instance, new[] { instanceToAddToCollectionInstance });
                         }
@@ -848,21 +838,25 @@ namespace Slapper
                     /// <summary>
                     /// System.Web assembly reference.
                     /// </summary>
+                    // ReSharper disable once MemberCanBePrivate.Local
                     public static readonly Assembly SystemDotWeb;
 
                     /// <summary>
                     /// System.Web.HttpContext type reference.
                     /// </summary>
+                    // ReSharper disable once MemberCanBePrivate.Local
                     public static readonly Type SystemDotWebDotHttpContext;
 
                     /// <summary>
                     /// System.Web.HttpContext.Current PropertyInfo reference.
                     /// </summary>
+                    // ReSharper disable once MemberCanBePrivate.Local
                     public static readonly PropertyInfo CurrentHttpContextPropertyInfo;
 
                     /// <summary>
                     /// System.Web.HttpContext.Current.Items PropertyInfo reference.
                     /// </summary>
+                    // ReSharper disable once MemberCanBePrivate.Local
                     public static readonly PropertyInfo ItemsPropertyInfo;
 
                     /// <summary>
@@ -885,9 +879,7 @@ namespace Slapper
 
                             if (currentHttpContext != null)
                             {
-                                var items = ItemsPropertyInfo.GetValue(currentHttpContext, null) as IDictionary;
-
-                                if (items != null)
+                                if (ItemsPropertyInfo.GetValue(currentHttpContext, null) is IDictionary items)
                                 {
                                     object value = items[key];
 
@@ -913,9 +905,7 @@ namespace Slapper
 
                         if (currentHttpContext != null)
                         {
-                            var items = ItemsPropertyInfo.GetValue(currentHttpContext, null) as IDictionary;
-
-                            if (items != null)
+                            if (ItemsPropertyInfo.GetValue(currentHttpContext, null) is IDictionary items)
                             {
                                 items.Add(key, value);
                             }
@@ -932,9 +922,7 @@ namespace Slapper
 
                         if (currentHttpContext != null)
                         {
-                            var items = ItemsPropertyInfo.GetValue(currentHttpContext, null) as IDictionary;
-
-                            if (items != null)
+                            if (ItemsPropertyInfo.GetValue(currentHttpContext, null) is IDictionary items)
                             {
                                 items.Remove(key);
                             }
@@ -961,7 +949,5 @@ namespace Slapper
                 }
             }
         }
-
-        #endregion Internal Helpers
     }
 }

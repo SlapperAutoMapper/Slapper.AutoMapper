@@ -8,13 +8,15 @@
         <PackageProjectUrl>https://github.com/SlapperAutoMapper/Slapper.AutoMapper</PackageProjectUrl>
         <PackageLicenseUrl></PackageLicenseUrl>
         <RepositoryUrl>https://github.com/SlapperAutoMapper/Slapper.AutoMapper</RepositoryUrl>
-        <Version>2.0.2</Version>
+        <Version>2.0.3</Version>
         <Product>Slapper.AutoMapper.Core</Product>
         <Copyright>Copyright (c) 2016, Randy Burden and contributors. All rights reserved.</Copyright>
         <Description>Slapper.AutoMapper is a mapping library that can convert dynamic data into static types and populate complex nested child objects.</Description>
         <PackageTags>Slapper.AutoMapper slapper automapper mapper map dynamic</PackageTags>
-        <PackageReleaseNotes>Version 2.0.2 release
-- Add support for nullable guids</PackageReleaseNotes>
+        <PackageReleaseNotes>Version 2.0.3 release
+- Caching bug fix and performance improvements yielded 57% mapping speed improvement
+   - v2.0.2: Mapped 120,000 deeply nested complex objects in 30333 ms.
+   - v2.0.3: Mapped 120,000 deeply nested complex objects in 13046 ms.</PackageReleaseNotes>
         <PackageLicenseExpression></PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>

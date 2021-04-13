@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 
 namespace Slapper
@@ -10,7 +9,7 @@ namespace Slapper
     /// </summary>
     internal static class CallContext
     {
-        static ConcurrentDictionary<string, AsyncLocal<object>> _state = new ConcurrentDictionary<string, AsyncLocal<object>>();
+        static readonly ConcurrentDictionary<string, AsyncLocal<object>> State = new ConcurrentDictionary<string, AsyncLocal<object>>();
 
         /// <summary>
         /// Stores a given object and associates it with the specified name.
@@ -18,7 +17,7 @@ namespace Slapper
         /// <param name="name">The name with which to associate the new item in the call context.</param>
         /// <param name="data">The object to store in the call context.</param>
         public static void SetData(string name, object data) =>
-            _state.GetOrAdd(name, _ => new AsyncLocal<object>()).Value = data;
+            State.GetOrAdd(name, _ => new AsyncLocal<object>()).Value = data;
 
         /// <summary>
         /// Retrieves an object with the specified name from the <see cref="CallContext"/>.
@@ -26,8 +25,8 @@ namespace Slapper
         /// <param name="name">The name of the item in the call context.</param>
         /// <returns>The object in the call context associated with the specified name, or <see langword="null"/> if not found.</returns>
         public static object GetData(string name) =>
-            _state.TryGetValue(name, out AsyncLocal<object> data) ? data.Value : null;
+            State.TryGetValue(name, out AsyncLocal<object> data) ? data.Value : null;
 
-        public static bool FreeNamedDataSlot(string key) => _state.TryRemove(key, out AsyncLocal<object> value);
+        public static bool FreeNamedDataSlot(string key) => State.TryRemove(key, out _);
     }
 }

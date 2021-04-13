@@ -1,44 +1,10 @@
-﻿/*  Slapper.AutoMapper v1.0.0.6 ( https://github.com/SlapperAutoMapper/Slapper.AutoMapper )
-
-    MIT License:
-   
-    Copyright (c) 2016, Randy Burden ( http://randyburden.com ) and contributors. All rights reserved.
-    All rights reserved.
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and 
-    associated documentation files (the "Software"), to deal in the Software without restriction, including 
-    without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-    copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the 
-    following conditions:
-
-    The above copyright notice and this permission notice shall be included in all copies or substantial 
-    portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT 
-    LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN 
-    NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
-    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
-    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-    Description:
-    
-    Slapper.AutoMapper maps dynamic data to static types. Slap your data into submission!
-    
-    Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a single file mapping library that can convert 
-    dynamic data into static types and populate complex nested child objects.
-    It primarily converts C# dynamics and IDictionary<string, object> to strongly typed objects and supports
-    populating an entire object graph by using underscore notation to underscore into nested objects.
-*/
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Slapper
 {
     public static partial class AutoMapper
     {
-        #region Configuration
-
         /// <summary>
         /// Contains the methods and members responsible for this libraries configuration concerns.
         /// </summary>
@@ -55,7 +21,8 @@ namespace Slapper
             /// <summary>
             /// Current version of Slapper.AutoMapper.
             /// </summary>
-            public static readonly Version Version = new Version("1.0.0.6");
+            [Obsolete("Will remove in a future version")]
+            public static readonly Version Version = new Version("2.0.3.0");
 
             /// <summary>
             /// The attribute Type specifying that a field or property is an identifier.
@@ -123,7 +90,11 @@ namespace Slapper
             /// <param name="identifiers">Identifiers</param>
             public static void AddIdentifiers(Type type, IEnumerable<string> identifiers)
             {
-                var typeMap = Cache.TypeMapCache.GetOrAdd(type, InternalHelpers.CreateTypeMap(type));
+                var typeMap = Cache.TypeMapCache.GetOrAdd(type, (t) =>
+                {
+                    // ReSharper disable once ConvertClosureToMethodGroup
+                    return InternalHelpers.CreateTypeMap(t);
+                });
 
                 typeMap.Identifiers = identifiers;
             }
@@ -172,17 +143,17 @@ namespace Slapper
                 {
                     object convertedValue = null;
 
-                    if (value is string)
+                    if (value is string str)
                     {
-                        convertedValue = new Guid(value as string);
+                        convertedValue = new Guid(str);
                     }
-                    if (value is byte[])
+                    if (value is byte[] bytes)
                     {
-                        convertedValue = new Guid(value as byte[]);
+                        convertedValue = new Guid(bytes);
                     }
-                    if (value is Guid)
+                    if (value is Guid guid)
                     {
-	                    convertedValue = (Guid) value;
+	                    convertedValue = guid;
                     }
 
                     return convertedValue;
@@ -203,7 +174,7 @@ namespace Slapper
                 /// <summary>
                 /// Order to execute an <see cref="ITypeConverter"/> in.
                 /// </summary>
-                public int Order { get { return 100; } }
+                public int Order => 100;
 
                 #endregion
             }
@@ -246,7 +217,7 @@ namespace Slapper
                 /// <summary>
                 /// Order to execute an <see cref="ITypeConverter"/> in.
                 /// </summary>
-                public int Order { get { return 100; } }
+                public int Order => 100;
 
                 #endregion
             }
@@ -288,7 +259,7 @@ namespace Slapper
                 /// <summary>
                 /// Order to execute an <see cref="ITypeConverter"/> in.
                 /// </summary>
-                public int Order { get { return 1000; } }
+                public int Order => 1000;
 
                 #endregion
             }
@@ -318,7 +289,5 @@ namespace Slapper
                 int Order { get; }
             }
         }
-
-        #endregion Configuration
     }
 }
