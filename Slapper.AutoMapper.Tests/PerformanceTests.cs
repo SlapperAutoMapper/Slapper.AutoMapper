@@ -46,6 +46,10 @@ namespace Slapper.Tests
         ///     v1.0.0.6: Mapped 50000 objects in 1642 ms.
         ///     v2.0.2  : Mapped 50000 objects in 1171 ms.
         ///     v2.0.3  : Mapped 50000 objects in 472 ms.
+        ///     v2.0.5  : Mapped 50000 objects in 467 ms on Net 47.
+        ///     v2.0.5  : Mapped 50000 objects in 220 ms on Net 5.0.
+        ///     v2.0.5  : Mapped 50000 objects in 307 ms on NetCore 2.1.
+        ///     v2.0.5  : Mapped 50000 objects in 253 ms on NetCore 3.1.
         /// </remarks>
         [Test]
         public void Simple_Performance_Test()
@@ -94,6 +98,10 @@ namespace Slapper.Tests
         ///     v1.0.0.8: Mapped 50000 objects in 4185 ms.
         ///     v2.0.2  : Mapped 50000 objects in 5348 ms.
         ///     v2.0.3  : Mapped 50000 objects in 3527 ms.
+        ///     v2.0.5  : Mapped 50000 objects in 3527 ms on Net 47.
+        ///     v2.0.5  : Mapped 50000 objects in 1600 ms on Net 5.0.
+        ///     v2.0.5  : Mapped 50000 objects in 2300 ms on NetCore 2.1.
+        ///     v2.0.5  : Mapped 50000 objects in 2000 ms on NetCore 3.1.
         /// </remarks>
         [Test]
         public void Complex_Performance_Test()
@@ -195,6 +203,10 @@ namespace Slapper.Tests
         /// Historical Test Results
         ///     v2.0.2: Mapped 120000 objects in 30333 ms.
         ///     v2.0.3: Mapped 120000 objects in 13046 ms.
+        ///     v2.0.5: Mapped 120000 objects in 14900 ms on Net 47.
+        ///     v2.0.5: Mapped 120000 objects in  7000 ms on Net 5.0.
+        ///     v2.0.5: Mapped 120000 objects in 10500 ms on NetCore 2.1.
+        ///     v2.0.5: Mapped 120000 objects in  8300 ms on NetCore 3.1.
         /// </remarks>
         [Test]
         public void Complex_Performance_Test()
