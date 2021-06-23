@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageId>Slapper.AutoMapper</PackageId>
         <Authors>Randy Burden &amp; contributors</Authors>
@@ -9,7 +8,7 @@
         <PackageLicenseUrl></PackageLicenseUrl>
         <RepositoryUrl>https://github.com/SlapperAutoMapper/Slapper.AutoMapper</RepositoryUrl>
         <Version>2.0.4</Version>
-        <TargetFrameworks>netstandard2.1;net47</TargetFrameworks>
+		<TargetFrameworks>netstandard2.1;net47;net5.0;netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
         <Product>Slapper.AutoMapper.Core</Product>
         <Copyright>Copyright (c) 2016, Randy Burden and contributors. All rights reserved.</Copyright>
         <Description>Slapper.AutoMapper is a mapping library that can convert dynamic data into static types and populate complex nested child objects.</Description>
