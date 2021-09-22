@@ -69,7 +69,12 @@ namespace Slapper
             /// </summary>
             public static void ClearInstanceCache()
             {
-                InternalHelpers.ContextStorage.Remove(InstanceCacheContextStorageKey);
+                var instanceCache = InternalHelpers.ContextStorage.Get<Dictionary<InternalHelpers.InstanceKey, object>>(InstanceCacheContextStorageKey);
+                if (instanceCache != null)
+                {
+                    instanceCache.Clear();
+                    InternalHelpers.ContextStorage.Remove(InstanceCacheContextStorageKey);
+                }
             }
 
             /// <summary>

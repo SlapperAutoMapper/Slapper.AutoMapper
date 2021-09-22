@@ -8,14 +8,14 @@
         <PackageProjectUrl>https://github.com/SlapperAutoMapper/Slapper.AutoMapper</PackageProjectUrl>
         <PackageLicenseUrl></PackageLicenseUrl>
         <RepositoryUrl>https://github.com/SlapperAutoMapper/Slapper.AutoMapper</RepositoryUrl>
-        <Version>2.0.4</Version>
+        <Version>2.0.5</Version>
         <TargetFrameworks>netstandard2.1;net47</TargetFrameworks>
         <Product>Slapper.AutoMapper.Core</Product>
         <Copyright>Copyright (c) 2016, Randy Burden and contributors. All rights reserved.</Copyright>
         <Description>Slapper.AutoMapper is a mapping library that can convert dynamic data into static types and populate complex nested child objects.</Description>
         <PackageTags>Slapper.AutoMapper slapper automapper mapper map dynamic</PackageTags>
-        <PackageReleaseNotes>Version 2.0.4 release
--Build to NET Standard 2.1 and NET 4.7</PackageReleaseNotes>
+        <PackageReleaseNotes>Version 2.0.5 release
+-Memory improvement (See Issue #83 - Thanks wegnerb)</PackageReleaseNotes>
         <PackageLicenseExpression></PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
