@@ -339,13 +339,14 @@ namespace Slapper
                     {
                         foreach (var typeConverter in Configuration.TypeConverters.OrderBy(x => x.Order))
                         {
-                            if (typeConverter.CanConvert(value, memberType))
+                            if (typeConverter.CanConvert(value, memberType, $"{classType.FullName}.{memberName}"))
                             {
                                 var convertedValue = typeConverter.Convert(value, memberType);
 
                                 return convertedValue;
                             }
                         }
+
                     }
                 }
                 catch (Exception e)

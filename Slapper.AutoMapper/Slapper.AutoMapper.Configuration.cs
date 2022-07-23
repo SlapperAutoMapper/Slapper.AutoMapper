@@ -51,6 +51,11 @@ namespace Slapper
             /// </summary>
             public static readonly List<ITypeActivator> TypeActivators = new List<ITypeActivator>();
 
+            public static void AddTypeConverter(ITypeConverter typeConverter)
+            {
+                TypeConverters.Add(typeConverter);
+            }
+
             /// <summary>
             /// Applies default conventions for finding identifiers.
             /// </summary>
@@ -118,7 +123,7 @@ namespace Slapper
                 /// <param name="value">Value to convert.</param>
                 /// <param name="type">Type the value needs to be converted to.</param>
                 /// <returns>Boolean response.</returns>
-                bool CanConvert(object value, Type type);
+                bool CanConvert(object value, Type type, string memberName);
 
                 /// <summary>
                 /// Order to execute an <see cref="ITypeConverter"/> in.
@@ -165,7 +170,7 @@ namespace Slapper
                 /// <param name="value">Value to convert.</param>
                 /// <param name="type">Type the value needs to be converted to.</param>
                 /// <returns>Boolean response.</returns>
-                public bool CanConvert(object value, Type type)
+                public bool CanConvert(object value, Type type, string memberName)
                 {
                     var conversionType = Nullable.GetUnderlyingType(type) ?? type;
                     return conversionType == typeof(Guid);
@@ -208,7 +213,7 @@ namespace Slapper
                 /// <param name="value">Value to convert.</param>
                 /// <param name="type">Type the value needs to be converted to.</param>
                 /// <returns>Boolean response.</returns>
-                public bool CanConvert(object value, Type type)
+                public bool CanConvert(object value, Type type, string memberName)
                 {
                     var conversionType = Nullable.GetUnderlyingType(type) ?? type;
                     return conversionType.IsEnum;
@@ -251,7 +256,7 @@ namespace Slapper
                 /// <param name="value">Value to convert.</param>
                 /// <param name="type">Type the value needs to be converted to.</param>
                 /// <returns>Boolean response.</returns>
-                public bool CanConvert(object value, Type type)
+                public bool CanConvert(object value, Type type, string memberName)
                 {
                     return type.IsValueType && !type.IsEnum && type != typeof(Guid);
                 }
