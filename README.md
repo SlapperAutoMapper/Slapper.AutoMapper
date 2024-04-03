@@ -9,13 +9,13 @@ Slapper.AutoMapper maps dynamic data to static types.
 
 ### What is it? ###
 
-Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a mapping library that can convert dynamic data into 
+Slapper.AutoMapper ( Pronounced Slap-er dot aw-toe-map-er ) is a mapping library that can convert dynamic data into 
 static types and populate complex nested child objects.
 
 It primarily converts C# dynamics and `IDictionary<string, object>` to strongly typed objects and supports
 populating an entire object graph by using underscore notation to underscore into nested objects.
 
-Why use an IDictionary? Because a C# dynamic ( well really an ExpandoObject ) can easily be cast to one allowing 
+Why use an IDictionary? Because a C# dynamic ( well really an ExpandoObject ) can easily be cast to an `IDictionary<string, object>` allowing 
 this library to be used in a variety of ways not only with dictionaries of property names and values but with dynamics as well.
 
 Okay, so what... doesn't other ORMs do this?
@@ -26,16 +26,16 @@ a Customer and it's list of Orders and it's list of OrderDetails.
 
 ### Is this an ORM? ###
 
-No, this is not an ORM in itself but can easily be extended to create one. This library can be thought of as a building 
+No, this is not an ORM but can be easily extended to create one. This library can be thought of as a building 
 block of an ORM or used as an extension to an existing ORM or Micro-ORM.
 
-ORMs typically query the database and then map the data into objects. Slapper just handles the mapping part and essentially
+ORMs typically query the database and then map the data into objects. Slapper handles the mapping part and essentially
 only has one input: a dictionary of property names and values.
 
 ### What problems does this solve? ###
 
 Simply put, it allows you to convert dynamic data into strongly typed objects with ease and populating complex nested child 
-objects in your object hierarchy comes free out of the box --something severely lacking in almost every Micro-ORM solution!
+objects in your object hierarchy comes for free out of the box --something severely lacking in almost every Micro-ORM solution!
 
 ### Auto mapping? ###
 
@@ -67,10 +67,9 @@ you are wishing to populate. Slapper.AutoMapper does not handle data type conver
 data into the library.
 
 And that's it, feel free to explore the examples below and the unit tests and hack away. This library is licensed with the MIT license
-so feel free to re-use the code in your own projects any way you please. I only ask that you keep the license comment at the top of the
-file or any file that uses significant portions of this projects code for proper attribution.
+so feel free to re-use the code in your own projects any way you please as long as you provide proper attribution.
 
-Slapper.AutoMapper is also available on NuGet as a compiled dll if you prefer that. Check it out at: http://www.nuget.org/packages/Slapper.AutoMapper/
+Slapper.AutoMapper is also available on NuGet available here: http://www.nuget.org/packages/Slapper.AutoMapper/
 
 Now let the slapping commence! :)
 
@@ -85,9 +84,9 @@ The following simple example maps a dictionary of property names and values to a
 ```csharp
 public class Person
 {
-	public int Id;
-	public string FirstName;
-	public string LastName;
+    public int Id;
+    public string FirstName;
+    public string LastName;
 }
 		
 [Test]
@@ -95,11 +94,11 @@ public void Can_Map_Matching_Field_Names_With_Ease()
 {
     // Arrange
     var dictionary = new Dictionary<string, object>
-                            {
-                                { "Id", 1 },
-                                { "FirstName", "Clark" },
-                                { "LastName", "Kent" }
-                            };
+    {
+        { "Id", 1 },
+        { "FirstName", "Clark" },
+        { "LastName", "Kent" }
+    };
 
     // Act
     var person = Slapper.AutoMapper.Map<Person>( dictionary );
@@ -121,9 +120,9 @@ When mapping dynamics use the `MapDynamic<T>()` method instead of the `Map<T>()`
 ```csharp
 public class Person
 {
-	public int Id;
-	public string FirstName;
-	public string LastName;
+    public int Id;
+    public string FirstName;
+    public string LastName;
 }
 		
 [Test]
@@ -149,7 +148,7 @@ public void Can_Map_Matching_Field_Names_Using_Dynamic()
 ### Mapping Nested Types Using a Dictionary ###
 
 The following example maps a list of dictionaries of property names and values to a Customer class and using underscore notation ("_"), 
-Slapper.AutoMapper properly populates the nested child types. This is really what I would consider this libraries secret sauce.
+Slapper.AutoMapper properly populates the nested child types. This is really what I would consider this library's secret sauce.
 You can just as easily use a list of dynamics which is demonstrated below too which is what is typically returned back from Micro ORMs.
 
 As an example, the following SQL would return similar results to what is in the dictionaries in the example below ( Note the use of SQL aliases ).
@@ -159,90 +158,90 @@ SQL and the mapping to C# objects at the same time by use of SQL aliases.*
 
 ```sql
 SELECT	c.CustomerId,
-		c.FirstName,
-		c.LastName,
-		o.OrderId AS Orders_OrderId,
-		o.OrderTotal AS Orders_OrderTotal,
-		od.OrderDetailId AS Orders_OrderDetails_OrderId,
-		od.OrderDetailId AS Orders_OrderDetails_OrderDetailId,
-		od.OrderDetailTotal AS Orders_OrderDetails_OrderDetailTotal
+        c.FirstName,
+        c.LastName,
+        o.OrderId AS Orders_OrderId,
+        o.OrderTotal AS Orders_OrderTotal,
+        od.OrderDetailId AS Orders_OrderDetails_OrderId,
+        od.OrderDetailId AS Orders_OrderDetails_OrderDetailId,
+        od.OrderDetailTotal AS Orders_OrderDetails_OrderDetailTotal
 FROM	Customer c
-		JOIN Order o ON c.CustomerId = o.CustomerId
-		JOIN OrderDetail od ON o.OrderId = od.OrderId
+        JOIN Order o ON c.CustomerId = o.CustomerId
+        JOIN OrderDetail od ON o.OrderId = od.OrderId
 ```
 
 This example is indicative of the results you would commonly encounter when querying a database and joining on an Orders
 and OrderDetails table --you would get back duplicate results in some fields. Notice how the CustomerId in both dictionaries
 are the same. Because of Slapper.AutoMapper's default conventions, it will identify the CustomerId field as being the 
 identifier ( or primary key so to speak ). This means that when it attempts to convert the second dictionary to a Customer 
-object, it will see that it has already created a Customer object with an CustomerId of 1 and will simply re-use the previous 
+object, it will see that it has already created a Customer object with a CustomerId of 1 and will simply re-use the previous 
 instance resulting in only one Customer object being returned back. This is how Slapper.AutoMapper effectively groups results
-together and is the key to this libraries awesomeness.
+together and is the key to this library's awesomeness.
 
 
 ```csharp
 public class Customer
 {
-	public int CustomerId;
-	public string FirstName;
-	public string LastName;
-	public IList<Order> Orders;
+    public int CustomerId;
+    public string FirstName;
+    public string LastName;
+    public IList<Order> Orders;
 }
 
 public class Order
 {
-	public int OrderId;
-	public decimal OrderTotal;
-	public IList<OrderDetail> OrderDetails;
+    public int OrderId;
+    public decimal OrderTotal;
+    public IList<OrderDetail> OrderDetails;
 }
 
 public class OrderDetail
 {
-	public int OrderDetailId;
-	public decimal OrderDetailTotal;
+    public int OrderDetailId;
+    public decimal OrderDetailTotal;
 }
 		
 [Test]
 public void I_Can_Map_Nested_Types_And_Resolve_Duplicate_Entries_Properly()
 {
-	// Arrange
-	var dictionary = new Dictionary<string, object>
-						 {
-							 { "CustomerId", 1 },
-							 { "FirstName", "Bob" },
-							 { "LastName", "Smith" },
-							 { "Orders_OrderId", 1 },
-							 { "Orders_OrderTotal", 50.50m },
-							 { "Orders_OrderDetails_OrderDetailId", 1 },
-							 { "Orders_OrderDetails_OrderDetailTotal", 25.00m }
-						 };
+    // Arrange
+    var dictionary = new Dictionary<string, object>
+    {
+        { "CustomerId", 1 },
+        { "FirstName", "Bob" },
+        { "LastName", "Smith" },
+        { "Orders_OrderId", 1 },
+        { "Orders_OrderTotal", 50.50m },
+        { "Orders_OrderDetails_OrderDetailId", 1 },
+        { "Orders_OrderDetails_OrderDetailTotal", 25.00m }
+    };
 
-	var dictionary2 = new Dictionary<string, object>
-						 {
-							 { "CustomerId", 1 },
-							 { "FirstName", "Bob" },
-							 { "LastName", "Smith" },
-							 { "Orders_OrderId", 1 },
-							 { "Orders_OrderTotal", 50.50m },
-							 { "Orders_OrderDetails_OrderDetailId", 2 },
-							 { "Orders_OrderDetails_OrderDetailTotal", 25.50m }
-						 };
+    var dictionary2 = new Dictionary<string, object>
+    {
+        { "CustomerId", 1 },
+        { "FirstName", "Bob" },
+        { "LastName", "Smith" },
+        { "Orders_OrderId", 1 },
+        { "Orders_OrderTotal", 50.50m },
+        { "Orders_OrderDetails_OrderDetailId", 2 },
+        { "Orders_OrderDetails_OrderDetailTotal", 25.50m }
+    };
 
-	var list = new List<IDictionary<string, object>> { dictionary, dictionary2 };
+    var list = new List<IDictionary<string, object>> { dictionary, dictionary2 };
 
-	// Act
-	var customers = Slapper.AutoMapper.Map<Customer>( list );
+    // Act
+    var customers = Slapper.AutoMapper.Map<Customer>( list );
 
-	// Assert
+    // Assert
 	
-	// There should only be a single customer
-	Assert.That( customers.Count() == 1 );
+    // There should only be a single customer
+    Assert.That( customers.Count() == 1 );
 
-	// There should only be a single Order
-	Assert.That( customers.FirstOrDefault().Orders.Count == 1 );
+    // There should only be a single Order
+    Assert.That( customers.FirstOrDefault().Orders.Count == 1 );
 
-	// There should be two OrderDetails
-	Assert.That( customers.FirstOrDefault().Orders.FirstOrDefault().OrderDetails.Count == 2 );
+    // There should be two OrderDetails
+    Assert.That( customers.FirstOrDefault().Orders.FirstOrDefault().OrderDetails.Count == 2 );
 }
 
 [Test]
@@ -294,10 +293,10 @@ Auto mapping allows Slapper to figure out how to effectively group objects toget
 duplicate results. Now internally, no actual grouping is happening but this is the easiest way to conceptualize
 how it works.
 
-*For the curious, the actual implementation relies upon an instance cache implemented as a Dictionary where the key is the all of
-the identifier's hashes summed together and the value being the instance.*
+*For the curious, the actual implementation relies upon an instance cache implemented as a Dictionary where the key is all of
+the identifier's hashes summed together and the value is the instance.*
 
-A classes identifier(s) play an important role in the ability of the mapper to effectively group objects together. If no
+A class' identifier(s) play an important role in the ability of the mapper to effectively group objects together. If no
 identifiers are found, the mapper will still map the results to the requested type but there will be duplicates in the results.
 
 
@@ -331,13 +330,13 @@ The following example specifies two identifiers for the Customer object by using
 ```csharp
 public class Customer
 {
-	public int CustomerId;
+    public int CustomerId;
 
-	public string CustomerType;
+    public string CustomerType;
 
-	public string FirstName;
+    public string FirstName;
 
-	public string LastName;
+    public string LastName;
 }
 
 Slapper.AutoMapper.Configuration.AddIdentifiers( typeof( Customer ), new List<string> { "CustomerId", "CustomerType" } );
@@ -347,7 +346,7 @@ Slapper.AutoMapper.Configuration.AddIdentifiers( typeof( Customer ), new List<st
 
 Slapper.AutoMapper also supports attribute-based identifiers.
 
-By default, the library uses it's own Id attribute that allows you to simply decorate the identifiers on your class with
+By default, the library uses its own Id attribute that allows you to simply decorate the identifiers on your class with
 a `[Slapper.AutoMapper.Id]` attribute.
 
 If you wish to use your own attribute instead of the default one, just set the Type to use on the following field:
@@ -361,15 +360,15 @@ The following example specifies two identifiers for the Customer object:
 ```csharp
 public class Customer
 {
-	[Slapper.AutoMapper.Id]
-	public int CustomerId;
+    [Slapper.AutoMapper.Id]
+    public int CustomerId;
 
-	[Slapper.AutoMapper.Id]
-	public string CustomerType;
+    [Slapper.AutoMapper.Id]
+    public string CustomerType;
 
-	public string FirstName;
+    public string FirstName;
 
-	public string LastName;
+    public string LastName;
 }
 ````
 
@@ -379,20 +378,20 @@ Usage - Caching
 #### Caching Explained ####
 
 Slapper.AutoMapper internally maintains a cache of every object it creates, referred to as the instance cache.
-This cache plays an important role in Slapper's ability to easily lookup existing objects and ultimately assists
+This cache plays an important role in Slapper's ability to easily look up existing objects and ultimately assists
 in the ability for Slapper.AutoMapper to populate complex nested types.
 
 Slapper.AutoMapper itself never removes an instance from this cache, so if you tell it to create 50,000 objects, 
-then there are going to be 50,000 objects in the cache for the lifetime of the current thread or Http context. 
+then there are going to be 50,000 objects in the cache for the lifetime of the current thread or HttpContext. 
 
 The instance cache exists for the lifetime of the current thread and each of your application's threads will
-get it's own unique cache making use of this library thread safe.
+get its own unique cache making use of this library thread safe.
 
 #### Cache Backing Store ####
 
-The instance cache backing store will either make use of the HttpContext if one exists or the CallContext of the
-executing thread. The library makes use of reflection in order to persist the cache in the HttpContext when
-neccessary so that the library does not require a dependency on the System.Web library.
+The instance cache backing store will either use the HttpContext if one exists or the CallContext of the
+executing thread. The library uses reflection to persist the cache in the HttpContext when
+necessary so that the library does not require a dependency on the System.Web library.
 
 #### Clearing the Cache ###
 
