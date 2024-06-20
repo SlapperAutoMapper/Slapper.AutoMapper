@@ -46,6 +46,8 @@ namespace Slapper
         /// <exception cref="ArgumentException">Exception that is thrown when the <paramref name="dynamicObject"/> cannot be converted to an IDictionary of type string and object.</exception>
         public static object MapDynamic(Type type, object dynamicObject, bool keepCache = true)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+
             if (dynamicObject == null)
             {
                 return type.IsValueType ? Activator.CreateInstance(type) : null;
@@ -90,6 +92,8 @@ namespace Slapper
         /// <exception cref="ArgumentException">Exception that is thrown when the <paramref name="dynamicListOfProperties"/> cannot be converted to an IDictionary of type string and object.</exception>
         public static IEnumerable<object> MapDynamic(Type type, IEnumerable<object> dynamicListOfProperties, bool keepCache = true)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+
             if (dynamicListOfProperties == null)
                 return new List<object>();
 
@@ -131,6 +135,8 @@ namespace Slapper
         /// <returns>The specified Type</returns>
         public static object Map(Type type, IDictionary<string, object> listOfProperties, bool keepCache = true)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+
             var propertiesList = new List<IDictionary<string, object>> { listOfProperties };
 
             return Map(type, propertiesList, keepCache).FirstOrDefault();
@@ -163,6 +169,8 @@ namespace Slapper
         /// <returns>List of specified Type</returns>
         public static IEnumerable<object> Map(Type type, IEnumerable<IDictionary<string, object>> listOfProperties, bool keepCache = true)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+
             var instanceCache = new Dictionary<object, object>();
 
             foreach (var properties in listOfProperties)
