@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -11,11 +11,6 @@ namespace Slapper
         /// </summary>
         public static class Cache
         {
-            /// <summary>
-            /// The name of the instance cache stored in the logical call context.
-            /// </summary>
-            internal const string InstanceCacheContextStorageKey = "Slapper.AutoMapper.InstanceCache";
-
             /// <summary>
             /// Cache of TypeMaps containing the types identifiers and PropertyInfo/FieldInfo objects.
             /// </summary>
@@ -56,48 +51,20 @@ namespace Slapper
             }
 
             /// <summary>
+            /// <summary>
             /// Clears all internal caches.
             /// </summary>
             public static void ClearAllCaches()
             {
                 TypeMapCache.Clear();
-                ClearInstanceCache();
             }
 
             /// <summary>
-            /// Clears the instance cache. This cache contains all objects created by Slapper.AutoMapper.
+            /// Obsolete. Instance caches are now scoped to each mapping call (or to an explicit <see cref="InstanceCache"/>), so there is nothing to clear.
             /// </summary>
+            [Obsolete("Instance caches are scoped per mapping call. Use InstanceCache.Clear() on an explicit InstanceCache instead.")]
             public static void ClearInstanceCache()
             {
-                var instanceCache = InternalHelpers.ContextStorage.Get<Dictionary<InternalHelpers.InstanceKey, object>>(InstanceCacheContextStorageKey);
-                if (instanceCache != null)
-                {
-                    instanceCache.Clear();
-                    InternalHelpers.ContextStorage.Remove(InstanceCacheContextStorageKey);
-                }
-            }
-
-            /// <summary>
-            /// Gets the instance cache containing all objects created by Slapper.AutoMapper.
-            /// This cache exists for the lifetime of the current thread until manually cleared/purged.
-            /// </summary>
-            /// <remarks>
-            /// Due to the nature of how the cache is persisted, each new thread will receive it's own
-            /// unique cache.
-            /// </remarks>
-            /// <returns>Instance Cache</returns>
-            internal static Dictionary<InternalHelpers.InstanceKey,object> GetInstanceCache()
-            {
-                var instanceCache = InternalHelpers.ContextStorage.Get<Dictionary<InternalHelpers.InstanceKey, object>>(InstanceCacheContextStorageKey);
-
-                if (instanceCache == null)
-                {
-                    instanceCache = new Dictionary<InternalHelpers.InstanceKey, object>();
-
-                    InternalHelpers.ContextStorage.Store(InstanceCacheContextStorageKey, instanceCache);
-                }
-
-                return instanceCache;
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using NUnit.Framework;
 
 // ReSharper disable InconsistentNaming
@@ -55,42 +55,50 @@ namespace Slapper.Tests
         }
 
         [Test]
-        public void Previously_Instantiated_Objects_Will_Be_Returned_Until_The_Cache_Is_Cleared()
+        public void Previously_Instantiated_Objects_Will_Be_Returned_Only_When_The_Same_InstanceCache_Is_Used()
         {
-            // Arrange
-            var dictionary = new Dictionary<string, object>
-                             {
-                                 { "CustomerId", 1 },
-                                 { "FirstName", "Bob" },
-                                 { "LastName", "Smith" }
-                             };
+            var cache = new Slapper.AutoMapper.InstanceCache();
+            var first = Slapper.AutoMapper.Map<Customer>(new[] { new Dictionary<string, object> { { "CustomerId", 1 }, { "FirstName", "Bob" } } }, cache).Single();
+            var second = Slapper.AutoMapper.Map<Customer>(new[] { new Dictionary<string, object> { { "CustomerId", 1 } } }, cache).Single();
+            Assert.AreSame(first, second);
+            Assert.AreEqual("Bob", second.FirstName);
 
-            // Act
-            var customer = Slapper.AutoMapper.Map<Customer>(dictionary);
+            cache.Clear();
+            var third = Slapper.AutoMapper.Map<Customer>(new[] { new Dictionary<string, object> { { "CustomerId", 1 } } }, cache).Single();
+            Assert.AreNotSame(first, third);
+            Assert.Null(third.FirstName);
+        }
 
-            // Assert
+        [Test]
+        public void Separate_Calls_Do_Not_Share_Instances()
+        {
+            var customer = Slapper.AutoMapper.Map<Customer>(new Dictionary<string, object> { { "CustomerId", 1 }, { "FirstName", "Bob" } });
+            var customer2 = Slapper.AutoMapper.Map<Customer>(new Dictionary<string, object> { { "CustomerId", 1 } });
+
+            Assert.AreNotSame(customer, customer2);
             Assert.AreEqual("Bob", customer.FirstName);
+            Assert.Null(customer2.FirstName);
+        }
 
-            // Arrange
-            var dictionary2 = new Dictionary<string, object> { { "CustomerId", 1 } };
-
-            // Act
-            var customer2 = Slapper.AutoMapper.Map<Customer>(dictionary2);
-
-            // Assert that this will be "Bob" because the identifier of the Customer object was the same, 
-            // so we recieved back the cached instance of the Customer object.
-            Assert.AreEqual("Bob", customer2.FirstName);
-
-            // Arrange
-            var dictionary3 = new Dictionary<string, object> { { "CustomerId", 1 } };
-
-            Slapper.AutoMapper.Cache.ClearInstanceCache();
-
-            // Act
-            var customer3 = Slapper.AutoMapper.Map<Customer>(dictionary3);
-
-            // Assert
-            Assert.Null(customer3.FirstName);
+        [Test]
+        public void Concurrent_Mappings_Produce_Correct_Results()
+        {
+            var bad = 0;
+            for (var i = 0; i < 50; i++)
+            {
+                var results = new Order[16][];
+                System.Threading.Tasks.Parallel.For(0, 16, k =>
+                {
+                    var rows = new List<IDictionary<string, object>>();
+                    for (var p = 1; p <= 50; p++)
+                        for (var c = 1; c <= 3; c++)
+                            rows.Add(new Dictionary<string, object> { { "Id", p }, { "OrderItems_Id", p * 1000 + c } });
+                    try { results[k] = Slapper.AutoMapper.Map<Order>(rows).ToArray(); }
+                    catch { results[k] = null; }
+                });
+                bad += results.Count(r => r == null || r.Length != 50 || r.Any(o => o.OrderItems?.Count != 3));
+            }
+            Assert.AreEqual(0, bad);
         }
 
         [Test]

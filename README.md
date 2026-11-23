@@ -4,6 +4,8 @@ Slapper.AutoMapper
 
 Slapper.AutoMapper maps dynamic data to static types.
 
+Supported targets: .NET Standard 2.0 / 2.1, .NET Framework 4.7 / 4.8, and .NET 6, 8, 9 and 10 (tests also run on .NET Core 3.1 and .NET Framework 4.7.2).
+
 <a href="https://www.nuget.org/packages/Slapper.AutoMapper"><img src="https://img.shields.io/nuget/v/Slapper.AutoMapper.svg" alt="NuGet Version" /></a> 
 <a href="https://www.nuget.org/packages/Slapper.AutoMapper"><img src="https://img.shields.io/nuget/dt/Slapper.AutoMapper.svg" alt="NuGet Download Count" /></a>
 
@@ -377,32 +379,41 @@ Usage - Caching
 
 #### Caching Explained ####
 
-Slapper.AutoMapper internally maintains a cache of every object it creates, referred to as the instance cache.
-This cache plays an important role in Slapper's ability to easily look up existing objects and ultimately assists
-in the ability for Slapper.AutoMapper to populate complex nested types.
+Slapper.AutoMapper uses an instance cache while mapping: a lookup of every object created, keyed by type and identifier values.
+This is what lets Slapper merge one-to-many rows into a single parent with its children, and populate complex nested types.
 
-Slapper.AutoMapper itself never removes an instance from this cache, so if you tell it to create 50,000 objects, 
-then there are going to be 50,000 objects in the cache for the lifetime of the current thread or HttpContext. 
+Since version 3.0.0 the instance cache is **scoped to each mapping call**. Every call to `Map` / `MapDynamic` starts with a fresh cache
+that is discarded when the call returns, so:
 
-The instance cache exists for the lifetime of the current thread and each of your application's threads will
-get its own unique cache making use of this library thread safe.
+- Separate calls never return or modify each other's instances.
+- Concurrent mappings (threads, tasks, `Parallel.For`) cannot corrupt each other's results.
+- Nothing is kept alive between calls, so there is no memory growth to clean up.
 
-#### Cache Backing Store ####
+The reusable type metadata (identifiers, properties and fields) is cached separately and thread-safely in the background.
 
-The instance cache backing store will either use the HttpContext if one exists or the CallContext of the
-executing thread. The library uses reflection to persist the cache in the HttpContext when
-necessary so that the library does not require a dependency on the System.Web library.
+#### Merging Instances Across Calls ####
 
-#### Clearing the Cache ###
-
-Slapper never clears the cache because we feel that it should be the consumer of this library that should have that 
-responsibility.
-
-If you would like to clear this cache, you can do so at any time like so:
+If you intentionally want several calls to share instances (for example, when your rows arrive in batches), create an `InstanceCache`
+and pass it to each call:
 
 ```csharp
-Slapper.AutoMapper.Cache.ClearInstanceCache();
-````
+var cache = new Slapper.AutoMapper.InstanceCache();
+
+var first = Slapper.AutoMapper.MapDynamic<Customer>(firstBatch, cache);
+var second = Slapper.AutoMapper.MapDynamic<Customer>(secondBatch, cache); // same Customer ids resolve to the same instances
+
+cache.Clear(); // release the instances when you are done
+```
+
+An `InstanceCache` is not thread-safe: do not share one instance between concurrent mapping calls.
+
+#### Upgrading from 2.x ####
+
+- The `keepCache` parameter is still accepted for source compatibility but is now ignored. Previously, `keepCache = true` (the default) kept instances between calls on the same thread or HttpContext; that no longer happens. Use an explicit `InstanceCache` if you relied on it.
+- `Slapper.AutoMapper.Cache.ClearInstanceCache()` is obsolete and does nothing. `Cache.ClearAllCaches()` now only clears the type metadata cache.
+- The HttpContext / CallContext backing store is no longer used for instance caching.
+
+See issues #81, #83 and #90 for background.
 
 
 ### License ###
@@ -429,7 +440,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Description:
 
-Slapper.AutoMapper maps dynamic data to static types. Slap your data into submission!
+Slapper.AutoMapper maps dynamic data to static types.
+
+Supported targets: .NET Standard 2.0 / 2.1, .NET Framework 4.7 / 4.8, and .NET 6, 8, 9 and 10 (tests also run on .NET Core 3.1 and .NET Framework 4.7.2). Slap your data into submission!
 
 Slapper.AutoMapper ( Pronounced Slapper-Dot-Automapper ) is a mapping library that can convert 
 dynamic data into static types and populate complex nested child objects.

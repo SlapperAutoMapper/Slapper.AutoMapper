@@ -420,11 +420,9 @@ namespace Slapper
             /// Tuple of bool, object, int where bool represents whether this is a newly created instance,
             /// object being an instance of the requested type and int being the instance's identifier hash.
             /// </returns>
-            internal static Tuple<bool, object, InstanceKey> GetInstance(Type type, IDictionary<string, object> properties, object parentInstance = null)
+            internal static Tuple<bool, object, InstanceKey> GetInstance(Type type, IDictionary<string, object> properties, Dictionary<InstanceKey, object> instanceCache, object parentInstance = null)
             {
                 var key = GetCacheKey(type, properties, parentInstance);
-
-                var instanceCache = Cache.GetInstanceCache();
 
                 var isNewlyCreatedInstance = !instanceCache.TryGetValue(key, out var instance);
 
@@ -448,7 +446,7 @@ namespace Slapper
             /// <param name="instance">Instance to populate</param>
             /// <param name="parentInstance">Optional parent instance of the instance being populated</param>
             /// <returns>Populated instance</returns>
-            internal static object Map(IDictionary<string, object> dictionary, object instance, object parentInstance = null)
+            internal static object Map(IDictionary<string, object> dictionary, object instance, Dictionary<InstanceKey, object> instanceCache, object parentInstance = null)
             {
                 var instanceType = instance.GetType();
 
@@ -528,7 +526,7 @@ namespace Slapper
                                 {
                                     nestedInstance = EnumerableType.IsAssignableFrom(memberType)
                                                          ? CreateInstance(memberType)
-                                                         : GetInstance(memberType, newDictionary, parentInstance?.GetHashCode() ?? 0).Item2;
+                                                         : GetInstance(memberType, newDictionary, instanceCache, parentInstance?.GetHashCode() ?? 0).Item2;
                                 }
                             }
 
@@ -540,11 +538,11 @@ namespace Slapper
                                     return memberType.GetGenericArguments().FirstOrDefault() ?? memberType.GetElementType();
                                 });
 
-                                nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, instance);
+                                nestedInstance = MapCollection(innerType, newDictionary, nestedInstance, instanceCache, instance);
                             }
                             else
                             {
-                                nestedInstance = newDictionary.Values.All(v => v == null) ? null : Map(newDictionary, nestedInstance, instance);
+                                nestedInstance = newDictionary.Values.All(v => v == null) ? null : Map(newDictionary, nestedInstance, instanceCache, instance);
                             }
 
                             SetMemberValue(member, instance, nestedInstance);
@@ -567,7 +565,7 @@ namespace Slapper
             /// <param name="instance">Instance to populate</param>
             /// <param name="parentInstance">Optional parent instance of the instance being populated</param>
             /// <returns>Populated instance</returns>
-            internal static object MapCollection(Type type, IDictionary<string, object> dictionary, object instance, object parentInstance = null)
+            internal static object MapCollection(Type type, IDictionary<string, object> dictionary, object instance, Dictionary<InstanceKey, object> instanceCache, object parentInstance = null)
             {
                 Type collectionType = instance == null ? GenericIEnumerableTypeCache.GetOrAdd(type, (t) =>
                 {
@@ -584,7 +582,7 @@ namespace Slapper
                     return instance;
                 }
 
-                var getInstanceResult = GetInstance(type, dictionary, parentInstance);
+                var getInstanceResult = GetInstance(type, dictionary, instanceCache, parentInstance);
 
                 // Is this a newly created instance? If false, then this item was retrieved from the instance cache.
                 bool isNewlyCreatedInstance = getInstanceResult.Item1;
@@ -593,7 +591,7 @@ namespace Slapper
 
                 object instanceToAddToCollectionInstance = getInstanceResult.Item2;
 
-                instanceToAddToCollectionInstance = Map(dictionary, instanceToAddToCollectionInstance, parentInstance);
+                instanceToAddToCollectionInstance = Map(dictionary, instanceToAddToCollectionInstance, instanceCache, parentInstance);
 
                 if (isNewlyCreatedInstance)
                 {
