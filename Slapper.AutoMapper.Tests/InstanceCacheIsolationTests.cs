@@ -75,7 +75,7 @@ namespace Slapper.Tests
             {
                 if (parentFlowHasCache)
                 {
-                    Slapper.AutoMapper.MapDynamic<Order>(DynamicOrderRows(1, 1), keepCache).ToList();
+                    Slapper.AutoMapper.MapDynamic<Order>(DynamicOrderRows(1, 1), true).ToList();
                 }
 
                 var results = new Order[16][];
